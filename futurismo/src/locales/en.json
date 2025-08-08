@@ -115,10 +115,7 @@
     "enRoute": "En route",
     "atStop": "At stop",
     "starting": "Starting",
-    "viewLiveMonitoring": "View live monitoring →",
-    "importantReminder": "Important Reminder",
-    "holidayMessage": "Tomorrow is a national holiday. Remember to confirm special schedules with guides and notify clients about possible itinerary changes.",
-    "viewHolidayCalendar": "View holiday calendar"
+    "viewLiveMonitoring": "View live monitoring →"
   },
   "reservations": {
     "reservations": "Reservations",

@@ -16,7 +16,6 @@ import WorkingHoursModal from '../calendar/Input/WorkingHoursModal';
 import QuickEditModal from '../calendar/Input/QuickEditModal';
 import useIndependentAgendaStore from '../../stores/independentAgendaStore';
 import useAuthStore from '../../stores/authStore';
-import useKeyboardShortcuts from '../../hooks/useKeyboardShortcuts';
 
 const FreelancePersonalAgenda = () => {
   const { user } = useAuthStore();
@@ -122,18 +121,6 @@ const FreelancePersonalAgenda = () => {
     setSelectedDate(currentDate);
   };
 
-  // Configurar atajos de teclado
-  useKeyboardShortcuts({
-    onAddEvent: () => handleAddEvent(),
-    onMarkOccupied: () => handleMarkOccupied(),
-    onSetDayView: () => setCurrentView('day'),
-    onSetWeekView: () => setCurrentView('week'),
-    onSetMonthView: () => setCurrentView('month'),
-    onGoToToday: navigateToToday,
-    onNavigatePrevious: navigatePrevious,
-    onNavigateNext: navigateNext,
-    onEscape: handleCloseModal
-  });
 
   const renderCurrentView = () => {
     const commonProps = {

@@ -115,10 +115,7 @@
     "enRoute": "En ruta",
     "atStop": "En parada",
     "starting": "Iniciando",
-    "viewLiveMonitoring": "Ver monitoreo en tiempo real →",
-    "importantReminder": "Recordatorio Importante",
-    "holidayMessage": "Mañana es feriado nacional. Recuerda confirmar los horarios especiales con los guías y notificar a los clientes sobre posibles cambios en los itinerarios.",
-    "viewHolidayCalendar": "Ver calendario de feriados"
+    "viewLiveMonitoring": "Ver monitoreo en tiempo real →"
   },
   "reservations": {
     "reservations": "Reservas",

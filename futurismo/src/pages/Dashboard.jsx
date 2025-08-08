@@ -3,8 +3,6 @@ import { ArrowTrendingUpIcon, CalendarIcon, CheckCircleIcon, ClockIcon, UserGrou
 import { useTranslation } from 'react-i18next';
 import StatsCard from '../components/dashboard/StatsCard';
 import ServiceChart from '../components/dashboard/ServiceChart';
-import RecentActivity from '../components/dashboard/RecentActivity';
-import QuickActions from '../components/dashboard/QuickActions';
 import ExportPanel from '../components/dashboard/ExportPanel';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import { useAuthStore } from '../stores/authStore';
@@ -364,29 +362,11 @@ const Dashboard = () => {
 
         {/* Right Column - ChartBarIcon & Quick Actions */}
         <div className="space-y-6">
-          <RecentActivity />
-          {user?.role !== 'guide' && <QuickActions />}
           {(user?.role === 'agency' || user?.role === 'admin') && <ExportPanel />}
         </div>
       </div>
 
       {/* Bottom Section - Alerts or Announcements */}
-      <div className="mt-8 bg-gradient-to-r from-primary-500 to-primary-600 rounded-lg shadow-lg p-6 text-white">
-        <div className="flex items-start gap-4">
-          <div className="p-3 bg-white bg-opacity-20 rounded-lg">
-            <ExclamationTriangleIcon className="w-6 h-6" />
-          </div>
-          <div className="flex-1">
-            <h3 className="text-lg font-semibold mb-2">{t('dashboard.importantReminder')}</h3>
-            <p className="text-primary-100 mb-3">
-              {t('dashboard.holidayMessage')}
-            </p>
-            <button className="bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-              {t('dashboard.viewHolidayCalendar')}
-            </button>
-          </div>
-        </div>
-      </div>
     </div>
   );
 };

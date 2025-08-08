@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { MapIcon, UserGroupIcon, ChartBarIcon, FunnelIcon } from '@heroicons/react/24/outline';
 import { useTranslation } from 'react-i18next';
-import LiveMap from '../components/monitoring/LiveMapCDN';
+import LiveMapResponsive from '../components/monitoring/LiveMapResponsive';
 import GuideTracker from '../components/monitoring/GuideTracker';
 import TourProgress from '../components/monitoring/TourProgress';
 import { useAuthStore } from '../stores/authStore';
@@ -72,7 +72,7 @@ const Monitoring = () => {
 
       {/* Contenido principal */}
       <div className="flex-1 min-h-0">
-        {activeView === 'map' && <LiveMap />}
+        {activeView === 'map' && <LiveMapResponsive />}
         
         {activeView === 'guides' && !isGuide && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full">

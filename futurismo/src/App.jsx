@@ -6,8 +6,11 @@ import { Toaster } from 'react-hot-toast';
 import useAuthStore from './stores/authStore';
 import useNotificationsStore from './stores/notificationsStore';
 
+// Contexts
+import { LayoutProvider } from './contexts/LayoutContext';
+
 // Componentes
-import Layout from './components/common/Layout';
+import AppLayout from './components/layout/AppLayout';
 import LoadingSpinner from './components/common/LoadingSpinner';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 
@@ -104,7 +107,9 @@ function App() {
             path="/"
             element={
               <ProtectedRoute>
-                <Layout />
+                <LayoutProvider>
+                  <AppLayout />
+                </LayoutProvider>
               </ProtectedRoute>
             }
           >

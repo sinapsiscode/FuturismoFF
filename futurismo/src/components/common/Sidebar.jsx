@@ -4,7 +4,7 @@ import { HomeIcon, MapIcon, CalendarIcon, ClockIcon, ChatBubbleLeftRightIcon, Us
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../../stores/authStore';
 
-const Sidebar = ({ isOpen, toggleSidebar }) => {
+const Sidebar = ({ isOpen, toggleSidebar, isMobile }) => {
   const { user } = useAuthStore();
   const { t } = useTranslation();
   
@@ -72,7 +72,12 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
   const menuItems = getMenuItems();
 
   return (
-    <aside className={`${isOpen ? 'w-64' : 'w-20'} bg-white shadow-lg transition-all duration-300 flex flex-col`}>
+    <aside className={`
+      ${isOpen ? 'w-64' : 'w-20'} 
+      ${isMobile ? 'fixed inset-y-0 left-0 z-50' : 'relative'}
+      ${isMobile && !isOpen ? '-translate-x-full' : 'translate-x-0'}
+      bg-white shadow-lg transition-all duration-300 flex flex-col
+    `}>
       {/* Logo */}
       <div className="p-6 border-b border-gray-200">
         <div className="flex items-center justify-between">
@@ -84,7 +89,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
           </div>
           <button
             onClick={toggleSidebar}
-            className="p-1 rounded-lg hover:bg-gray-100 transition-colors lg:block hidden"
+            className={`p-1 rounded-lg hover:bg-gray-100 transition-colors ${isMobile ? 'hidden' : 'block'}`}
           >
             {isOpen ? (
               <ChevronLeftIcon className="w-5 h-5 text-gray-500" />
@@ -144,7 +149,8 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
 
 Sidebar.propTypes = {
   isOpen: PropTypes.bool.isRequired,
-  toggleSidebar: PropTypes.func.isRequired
+  toggleSidebar: PropTypes.func.isRequired,
+  isMobile: PropTypes.bool
 };
 
 export default Sidebar;
