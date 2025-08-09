@@ -1,79 +1,23 @@
-import React, { useState, useEffect } from 'react';
-import { CalendarIcon, ClockIcon, UserIcon, CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline';
-import { getMockData } from '../../data/mockData';
-import { useGuidesStore } from '../../stores/guidesStore';
+import React from 'react';
+import PropTypes from 'prop-types';
+import { useTranslation } from 'react-i18next';
+import { CalendarIcon, CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline';
+import useGuideAvailability from '../../hooks/useGuideAvailability';
+import DateNavigation from './DateNavigation';
+import TimeSlotList from './TimeSlotList';
 
 const GuideAvailability = ({ guideId, viewMode = 'edit', onAvailabilityChange }) => {
-  const [selectedDate, setSelectedDate] = useState(new Date());
-  const [availability, setAvailability] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  
-  const { getGuideAgenda, updateGuideAgenda } = useGuidesStore();
-
-  useEffect(() => {
-    loadAvailability();
-  }, [guideId, selectedDate]);
-
-  const loadAvailability = () => {
-    setIsLoading(true);
-    const agenda = getGuideAgenda(guideId, selectedDate);
-    setAvailability(agenda);
-    setIsLoading(false);
-  };
-
-  const updateAvailability = (newAvailability) => {
-    setAvailability(newAvailability);
-    updateGuideAgenda(guideId, selectedDate, newAvailability);
-    if (onAvailabilityChange) {
-      onAvailabilityChange(selectedDate, newAvailability);
-    }
-  };
-
-  const addTimeSlot = () => {
-    const newSlot = prompt('Ingresa el horario (ej: 09:00-13:00):');
-    if (newSlot && /^\d{2}:\d{2}-\d{2}:\d{2}$/.test(newSlot)) {
-      const updatedAvailability = {
-        ...availability,
-        disponible: true,
-        horarios: [...(availability?.horarios || []), newSlot]
-      };
-      updateAvailability(updatedAvailability);
-    }
-  };
-
-  const removeTimeSlot = (index) => {
-    const updatedAvailability = {
-      ...availability,
-      horarios: availability.horarios.filter((_, i) => i !== index)
-    };
-    if (updatedAvailability.horarios.length === 0) {
-      updatedAvailability.disponible = false;
-    }
-    updateAvailability(updatedAvailability);
-  };
-
-  const toggleAvailability = () => {
-    const updatedAvailability = {
-      disponible: !availability?.disponible,
-      horarios: availability?.disponible ? [] : ['09:00-17:00']
-    };
-    updateAvailability(updatedAvailability);
-  };
-
-  const formatDate = (date) => {
-    return date.toLocaleDateString('es-PE', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  };
-
-  const changeDate = (days) => {
-    const newDate = new Date(selectedDate);
-    newDate.setDate(newDate.getDate() + days);
-    setSelectedDate(newDate);
-  };
+  const { t } = useTranslation();
+  const {
+    selectedDate,
+    setSelectedDate,
+    availability,
+    isLoading,
+    addTimeSlot,
+    removeTimeSlot,
+    toggleAvailability,
+    changeDate
+  } = useGuideAvailability(guideId, onAvailabilityChange);
 
   if (isLoading) {
     return (
@@ -88,7 +32,7 @@ const GuideAvailability = ({ guideId, viewMode = 'edit', onAvailabilityChange })
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-lg font-semibold text-gray-900 flex items-center">
           <CalendarIcon className="h-5 w-5 mr-2 text-blue-600" />
-          Agenda de Disponibilidad
+          {t('guides.availability.title')}
         </h3>
         {viewMode === 'edit' && (
           <button
@@ -99,37 +43,19 @@ const GuideAvailability = ({ guideId, viewMode = 'edit', onAvailabilityChange })
                 : 'bg-green-100 text-green-700 hover:bg-green-200'
             }`}
           >
-            {availability?.disponible ? 'Marcar No Disponible' : 'Marcar Disponible'}
+            {availability?.disponible 
+              ? t('guides.availability.markUnavailable') 
+              : t('guides.availability.markAvailable')
+            }
           </button>
         )}
       </div>
 
-      {/* Navegación de fecha */}
-      <div className="flex items-center justify-between mb-6">
-        <button
-          onClick={() => changeDate(-1)}
-          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-        >
-          ←
-        </button>
-        <div className="text-center">
-          <h4 className="text-lg font-medium text-gray-900">
-            {formatDate(selectedDate)}
-          </h4>
-          <input
-            type="date"
-            value={selectedDate.toISOString().split('T')[0]}
-            onChange={(e) => setSelectedDate(new Date(e.target.value))}
-            className="mt-1 text-sm text-gray-600 border-none bg-transparent text-center"
-          />
-        </div>
-        <button
-          onClick={() => changeDate(1)}
-          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-        >
-          →
-        </button>
-      </div>
+      <DateNavigation
+        selectedDate={selectedDate}
+        onDateChange={setSelectedDate}
+        onNavigate={changeDate}
+      />
 
       {/* Estado de disponibilidad */}
       <div className="mb-6">
@@ -141,12 +67,16 @@ const GuideAvailability = ({ guideId, viewMode = 'edit', onAvailabilityChange })
           {availability?.disponible ? (
             <>
               <CheckCircleIcon className="h-5 w-5 text-green-600 mr-2" />
-              <span className="text-green-800 font-medium">Disponible</span>
+              <span className="text-green-800 font-medium">
+                {t('guides.availability.available')}
+              </span>
             </>
           ) : (
             <>
               <XCircleIcon className="h-5 w-5 text-red-600 mr-2" />
-              <span className="text-red-800 font-medium">No Disponible</span>
+              <span className="text-red-800 font-medium">
+                {t('guides.availability.notAvailable')}
+              </span>
             </>
           )}
         </div>
@@ -154,183 +84,21 @@ const GuideAvailability = ({ guideId, viewMode = 'edit', onAvailabilityChange })
 
       {/* Horarios disponibles */}
       {availability?.disponible && (
-        <div>
-          <div className="flex items-center justify-between mb-4">
-            <h5 className="text-md font-medium text-gray-900 flex items-center">
-              <ClockIcon className="h-4 w-4 mr-2 text-gray-600" />
-              Horarios Disponibles
-            </h5>
-            {viewMode === 'edit' && (
-              <button
-                onClick={addTimeSlot}
-                className="px-3 py-1 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                + Agregar Horario
-              </button>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            {availability.horarios?.length > 0 ? (
-              availability.horarios.map((horario, index) => (
-                <div
-                  key={index}
-                  className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border"
-                >
-                  <span className="text-gray-700 font-medium">{horario}</span>
-                  {viewMode === 'edit' && (
-                    <button
-                      onClick={() => removeTimeSlot(index)}
-                      className="text-red-600 hover:text-red-800 text-sm"
-                    >
-                      Eliminar
-                    </button>
-                  )}
-                </div>
-              ))
-            ) : (
-              <p className="text-gray-500 text-sm italic">
-                No hay horarios específicos definidos
-              </p>
-            )}
-          </div>
-        </div>
+        <TimeSlotList
+          timeSlots={availability.horarios}
+          viewMode={viewMode}
+          onAddSlot={addTimeSlot}
+          onRemoveSlot={removeTimeSlot}
+        />
       )}
     </div>
   );
 };
 
-// Componente para ver la disponibilidad de múltiples guías freelance
-export const FreelanceAvailabilityView = () => {
-  const [selectedDate, setSelectedDate] = useState(new Date());
-  const [freelanceGuides, setFreelanceGuides] = useState([]);
-  
-  const { getGuides, getGuideAgenda } = useGuidesStore();
-
-  useEffect(() => {
-    const guides = getGuides({ tipo: 'freelance' });
-    setFreelanceGuides(guides);
-  }, [getGuides]);
-
-  const formatDate = (date) => {
-    return date.toLocaleDateString('es-PE', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  };
-
-  const changeDate = (days) => {
-    const newDate = new Date(selectedDate);
-    newDate.setDate(newDate.getDate() + days);
-    setSelectedDate(newDate);
-  };
-
-  return (
-    <div className="space-y-6">
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-6 flex items-center">
-          <UserIcon className="h-5 w-5 mr-2 text-blue-600" />
-          Disponibilidad de Guías Freelance
-        </h3>
-
-        {/* Navegación de fecha */}
-        <div className="flex items-center justify-between mb-6">
-          <button
-            onClick={() => changeDate(-1)}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            ←
-          </button>
-          <div className="text-center">
-            <h4 className="text-lg font-medium text-gray-900">
-              {formatDate(selectedDate)}
-            </h4>
-            <input
-              type="date"
-              value={selectedDate.toISOString().split('T')[0]}
-              onChange={(e) => setSelectedDate(new Date(e.target.value))}
-              className="mt-1 text-sm text-gray-600 border-none bg-transparent text-center"
-            />
-          </div>
-          <button
-            onClick={() => changeDate(1)}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            →
-          </button>
-        </div>
-
-        {/* Lista de guías freelance */}
-        <div className="space-y-4">
-          {freelanceGuides.map((guide) => {
-            const agenda = getGuideAgenda(guide.id, selectedDate);
-            
-            // Crear especialidades de manera segura
-            const languages = guide.specializations?.languages?.map(lang => lang.code.toUpperCase()) || [];
-            const museums = guide.specializations?.museums?.map(museum => museum.name) || [];
-            const specialties = [...languages, ...museums.slice(0, 2)]; // Limitar a 2 museos
-            
-            // Verificar disponibilidad
-            const availableSlots = agenda?.slots?.filter(slot => slot.status === 'available') || [];
-            const isAvailable = availableSlots.length > 0;
-            const busySlots = agenda?.slots?.filter(slot => slot.status === 'busy') || [];
-            
-            return (
-              <div
-                key={guide.id}
-                className="flex items-center justify-between p-4 border border-gray-200 rounded-lg"
-              >
-                <div className="flex items-center space-x-3">
-                  <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-                    <span className="text-sm font-medium text-blue-800">
-                      {guide.fullName?.split(' ').map(n => n[0]).join('').slice(0, 2) || 'GU'}
-                    </span>
-                  </div>
-                  <div>
-                    <h4 className="font-medium text-gray-900">{guide.fullName}</h4>
-                    <p className="text-sm text-gray-600">
-                      {specialties.length > 0 ? specialties.join(', ') : 'Guía turístico'}
-                    </p>
-                    <div className="flex items-center text-xs text-gray-500 mt-1">
-                      <span className="bg-gray-100 px-2 py-1 rounded text-xs">
-                        ⭐ {guide.stats?.rating || 'N/A'} ({guide.stats?.toursCompleted || 0} tours)
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="text-right">
-                  {isAvailable ? (
-                    <div>
-                      <div className="flex items-center text-green-600 mb-1">
-                        <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
-                        <span className="text-sm font-medium">Disponible</span>
-                      </div>
-                      <div className="text-xs text-gray-600">
-                        {availableSlots.length} horarios libres
-                      </div>
-                    </div>
-                  ) : (
-                    <div>
-                      <div className="flex items-center text-red-600 mb-1">
-                        <span className="w-2 h-2 bg-red-500 rounded-full mr-2"></span>
-                        <span className="text-sm font-medium">Ocupado</span>
-                      </div>
-                      <div className="text-xs text-gray-600">
-                        {busySlots[0]?.tour || 'No disponible'}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    </div>
-  );
+GuideAvailability.propTypes = {
+  guideId: PropTypes.string.isRequired,
+  viewMode: PropTypes.oneOf(['edit', 'view']),
+  onAvailabilityChange: PropTypes.func
 };
 
 export default GuideAvailability;

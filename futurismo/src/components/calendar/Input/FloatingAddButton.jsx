@@ -1,19 +1,22 @@
-import React from 'react';
+import React, { Fragment } from 'react';
+import PropTypes from 'prop-types';
+import { useTranslation } from 'react-i18next';
 import { PlusIcon, EyeSlashIcon, CalendarDaysIcon } from '@heroicons/react/24/outline';
 import { Menu, Transition } from '@headlessui/react';
-import { Fragment } from 'react';
 
 const FloatingAddButton = ({ onAddEvent, onMarkOccupied, className = '' }) => {
+  const { t } = useTranslation();
+
   const menuItems = [
     {
-      label: 'Agregar evento personal',
+      label: t('calendar.addPersonalEvent'),
       icon: CalendarDaysIcon,
       color: 'text-blue-600',
       bgColor: 'hover:bg-blue-50',
       onClick: () => onAddEvent()
     },
     {
-      label: 'Marcar tiempo ocupado',
+      label: t('calendar.markTimeOccupied'),
       icon: EyeSlashIcon,
       color: 'text-gray-600',
       bgColor: 'hover:bg-gray-50',
@@ -33,6 +36,7 @@ const FloatingAddButton = ({ onAddEvent, onMarkOccupied, className = '' }) => {
                 focus:outline-none focus:ring-4 focus:ring-blue-500 focus:ring-opacity-30
                 ${open ? 'rotate-45 scale-110' : 'hover:scale-105'}
               `}
+              aria-label={t('calendar.addEventButton')}
             >
               <PlusIcon className="w-6 h-6" />
             </Menu.Button>
@@ -72,7 +76,7 @@ const FloatingAddButton = ({ onAddEvent, onMarkOccupied, className = '' }) => {
                 
                 <div className="p-1">
                   <div className="px-3 py-2 text-xs text-gray-500">
-                    Atajos: Ctrl+N para evento, Ctrl+Shift+N para ocupado
+                    {t('calendar.shortcuts')}
                   </div>
                 </div>
               </Menu.Items>
@@ -82,6 +86,12 @@ const FloatingAddButton = ({ onAddEvent, onMarkOccupied, className = '' }) => {
       </Menu>
     </div>
   );
+};
+
+FloatingAddButton.propTypes = {
+  onAddEvent: PropTypes.func.isRequired,
+  onMarkOccupied: PropTypes.func.isRequired,
+  className: PropTypes.string
 };
 
 export default FloatingAddButton;

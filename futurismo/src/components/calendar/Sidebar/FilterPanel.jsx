@@ -1,38 +1,94 @@
-import React, { useState } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
+import { useTranslation } from 'react-i18next';
 import { Switch } from '@headlessui/react';
+import useCalendarFilters from '../../../hooks/useCalendarFilters';
+
+const FilterToggle = ({ label, checked, onChange, colorClass = 'bg-blue-500' }) => (
+  <div className="flex items-center justify-between">
+    <span className="text-sm text-gray-700">{label}</span>
+    <Switch
+      checked={checked}
+      onChange={onChange}
+      className={`${
+        checked ? colorClass : 'bg-gray-200'
+      } relative inline-flex h-4 w-7 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-${colorClass.split('-')[1]}-500 focus:ring-offset-2`}
+    >
+      <span
+        className={`${
+          checked ? 'translate-x-4' : 'translate-x-1'
+        } inline-block h-2 w-2 transform rounded-full bg-white transition-transform`}
+      />
+    </Switch>
+  </div>
+);
+
+FilterToggle.propTypes = {
+  label: PropTypes.string.isRequired,
+  checked: PropTypes.bool.isRequired,
+  onChange: PropTypes.func.isRequired,
+  colorClass: PropTypes.string
+};
 
 const FilterPanel = () => {
-  const [filters, setFilters] = useState({
-    showWeekends: true,
-    showPersonalEvents: true,
-    showCompanyTours: true,
-    showOccupiedTime: true,
-    workingHoursOnly: false,
-    showPastEvents: false
-  });
-
-  const [timeFilter, setTimeFilter] = useState('all'); // all, today, thisWeek, thisMonth
-
-  const toggleFilter = (filterKey) => {
-    setFilters(prev => ({
-      ...prev,
-      [filterKey]: !prev[filterKey]
-    }));
-  };
+  const { t } = useTranslation();
+  const {
+    filters,
+    timeFilter,
+    setTimeFilter,
+    toggleFilter,
+    resetFilters
+  } = useCalendarFilters();
 
   const timeFilterOptions = [
-    { value: 'all', label: 'Todos' },
-    { value: 'today', label: 'Hoy' },
-    { value: 'thisWeek', label: 'Esta semana' },
-    { value: 'thisMonth', label: 'Este mes' }
+    { value: 'all', label: t('calendar.filters.all') },
+    { value: 'today', label: t('calendar.filters.today') },
+    { value: 'thisWeek', label: t('calendar.filters.thisWeek') },
+    { value: 'thisMonth', label: t('calendar.filters.thisMonth') }
+  ];
+
+  const filterOptions = [
+    {
+      key: 'showWeekends',
+      label: t('calendar.filters.weekends'),
+      colorClass: 'bg-blue-500'
+    },
+    {
+      key: 'showPersonalEvents',
+      label: t('calendar.filters.personalEvents'),
+      colorClass: 'bg-blue-500'
+    },
+    {
+      key: 'showCompanyTours',
+      label: t('calendar.filters.companyTours'),
+      colorClass: 'bg-green-500'
+    },
+    {
+      key: 'showOccupiedTime',
+      label: t('calendar.filters.occupiedTime'),
+      colorClass: 'bg-red-500'
+    }
+  ];
+
+  const optionFilters = [
+    {
+      key: 'workingHoursOnly',
+      label: t('calendar.filters.workingHoursOnly'),
+      colorClass: 'bg-purple-500'
+    },
+    {
+      key: 'showPastEvents',
+      label: t('calendar.filters.pastEvents'),
+      colorClass: 'bg-gray-500'
+    }
   ];
 
   return (
     <div className="px-4 space-y-4">
-      {/* Filtros de tiempo */}
+      {/* Time filters */}
       <div>
         <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-          Período
+          {t('calendar.filters.period')}
         </h4>
         <div className="space-y-1">
           {timeFilterOptions.map((option) => (
@@ -51,141 +107,49 @@ const FilterPanel = () => {
         </div>
       </div>
 
-      {/* Filtros de visibilidad */}
+      {/* Visibility filters */}
       <div>
         <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-          Mostrar
+          {t('calendar.filters.show')}
         </h4>
         <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-700">Fines de semana</span>
-            <Switch
-              checked={filters.showWeekends}
-              onChange={() => toggleFilter('showWeekends')}
-              className={`${
-                filters.showWeekends ? 'bg-blue-500' : 'bg-gray-200'
-              } relative inline-flex h-4 w-7 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2`}
-            >
-              <span
-                className={`${
-                  filters.showWeekends ? 'translate-x-4' : 'translate-x-1'
-                } inline-block h-2 w-2 transform rounded-full bg-white transition-transform`}
-              />
-            </Switch>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-700">Eventos personales</span>
-            <Switch
-              checked={filters.showPersonalEvents}
-              onChange={() => toggleFilter('showPersonalEvents')}
-              className={`${
-                filters.showPersonalEvents ? 'bg-blue-500' : 'bg-gray-200'
-              } relative inline-flex h-4 w-7 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2`}
-            >
-              <span
-                className={`${
-                  filters.showPersonalEvents ? 'translate-x-4' : 'translate-x-1'
-                } inline-block h-2 w-2 transform rounded-full bg-white transition-transform`}
-              />
-            </Switch>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-700">Tours empresa</span>
-            <Switch
-              checked={filters.showCompanyTours}
-              onChange={() => toggleFilter('showCompanyTours')}
-              className={`${
-                filters.showCompanyTours ? 'bg-green-500' : 'bg-gray-200'
-              } relative inline-flex h-4 w-7 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2`}
-            >
-              <span
-                className={`${
-                  filters.showCompanyTours ? 'translate-x-4' : 'translate-x-1'
-                } inline-block h-2 w-2 transform rounded-full bg-white transition-transform`}
-              />
-            </Switch>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-700">Tiempo ocupado</span>
-            <Switch
-              checked={filters.showOccupiedTime}
-              onChange={() => toggleFilter('showOccupiedTime')}
-              className={`${
-                filters.showOccupiedTime ? 'bg-red-500' : 'bg-gray-200'
-              } relative inline-flex h-4 w-7 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2`}
-            >
-              <span
-                className={`${
-                  filters.showOccupiedTime ? 'translate-x-4' : 'translate-x-1'
-                } inline-block h-2 w-2 transform rounded-full bg-white transition-transform`}
-              />
-            </Switch>
-          </div>
+          {filterOptions.map((filter) => (
+            <FilterToggle
+              key={filter.key}
+              label={filter.label}
+              checked={filters[filter.key]}
+              onChange={() => toggleFilter(filter.key)}
+              colorClass={filter.colorClass}
+            />
+          ))}
         </div>
       </div>
 
-      {/* Opciones adicionales */}
+      {/* Additional options */}
       <div>
         <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-          Opciones
+          {t('calendar.filters.options')}
         </h4>
         <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-700">Solo horario laboral</span>
-            <Switch
-              checked={filters.workingHoursOnly}
-              onChange={() => toggleFilter('workingHoursOnly')}
-              className={`${
-                filters.workingHoursOnly ? 'bg-purple-500' : 'bg-gray-200'
-              } relative inline-flex h-4 w-7 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2`}
-            >
-              <span
-                className={`${
-                  filters.workingHoursOnly ? 'translate-x-4' : 'translate-x-1'
-                } inline-block h-2 w-2 transform rounded-full bg-white transition-transform`}
-              />
-            </Switch>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-700">Eventos pasados</span>
-            <Switch
-              checked={filters.showPastEvents}
-              onChange={() => toggleFilter('showPastEvents')}
-              className={`${
-                filters.showPastEvents ? 'bg-gray-500' : 'bg-gray-200'
-              } relative inline-flex h-4 w-7 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2`}
-            >
-              <span
-                className={`${
-                  filters.showPastEvents ? 'translate-x-4' : 'translate-x-1'
-                } inline-block h-2 w-2 transform rounded-full bg-white transition-transform`}
-              />
-            </Switch>
-          </div>
+          {optionFilters.map((filter) => (
+            <FilterToggle
+              key={filter.key}
+              label={filter.label}
+              checked={filters[filter.key]}
+              onChange={() => toggleFilter(filter.key)}
+              colorClass={filter.colorClass}
+            />
+          ))}
         </div>
       </div>
 
-      {/* Botón para limpiar filtros */}
+      {/* Clear filters button */}
       <div className="pt-2 border-t border-gray-100">
         <button
-          onClick={() => {
-            setFilters({
-              showWeekends: true,
-              showPersonalEvents: true,
-              showCompanyTours: true,
-              showOccupiedTime: true,
-              workingHoursOnly: false,
-              showPastEvents: false
-            });
-            setTimeFilter('all');
-          }}
+          onClick={resetFilters}
           className="w-full text-xs text-gray-500 hover:text-gray-700 py-2 hover:bg-gray-50 rounded transition-colors"
         >
-          Limpiar filtros
+          {t('calendar.filters.clearFilters')}
         </button>
       </div>
     </div>

@@ -1,3 +1,6 @@
+import React from 'react';
+import PropTypes from 'prop-types';
+import { useTranslation } from 'react-i18next';
 import { 
   CalendarDaysIcon, 
   LockClosedIcon, 
@@ -6,99 +9,101 @@ import {
   MapPinIcon
 } from '@heroicons/react/24/outline';
 import { VISIBILITY_LEVELS, EVENT_TYPES } from '../../../stores/independentAgendaStore';
+import { getEventTypeStyle, getEventDisplayContent } from '../../../utils/eventHelpers';
 
-const AllDayEvent = ({ event, onClick, isAdmin = false }) => {
+const AllDayEvent = ({ 
+  event, 
+  onClick, 
+  onDoubleClick,
+  isAdmin = false,
+  isSelected = false 
+}) => {
+  const { t } = useTranslation();
+  
   if (!event) return null;
 
-  const getEventStyles = () => {
-    switch (event.type) {
-      case EVENT_TYPES.PERSONAL:
-        return {
-          bg: 'bg-blue-500',
-          text: 'text-white',
-          hoverBg: 'hover:bg-blue-600',
-          icon: UserIcon
-        };
-      case EVENT_TYPES.COMPANY_TOUR:
-        return {
-          bg: 'bg-green-500',
-          text: 'text-white',
-          hoverBg: 'hover:bg-green-600',
-          icon: BuildingOfficeIcon
-        };
-      case EVENT_TYPES.OCCUPIED:
-        return {
-          bg: 'bg-gray-500',
-          text: 'text-white',
-          hoverBg: 'hover:bg-gray-600',
-          icon: LockClosedIcon
-        };
-      default:
-        return {
-          bg: 'bg-purple-500',
-          text: 'text-white',
-          hoverBg: 'hover:bg-purple-600',
-          icon: CalendarDaysIcon
-        };
-    }
-  };
-
-  const styles = getEventStyles();
-  const IconComponent = styles.icon;
-
-  // Determinar qué mostrar según visibilidad y usuario
-  const getDisplayContent = () => {
-    if (isAdmin && event.visibility === VISIBILITY_LEVELS.PRIVATE) {
-      return null; // Admin no debe ver eventos privados
-    }
-
-    if (isAdmin && event.visibility === VISIBILITY_LEVELS.OCCUPIED) {
-      return {
-        title: 'Día ocupado',
-        showDetails: false,
-        subtitle: 'No disponible'
-      };
-    }
-
-    return {
-      title: event.title || 'Evento sin título',
-      showDetails: true,
-      subtitle: getEventSubtitle(event)
-    };
-  };
-
-  const displayContent = getDisplayContent();
+  const styles = getEventTypeStyle(event.type);
+  const displayContent = getEventDisplayContent(event, isAdmin, t);
+  
   if (!displayContent) return null;
+
+  const iconMap = {
+    [EVENT_TYPES.PERSONAL]: UserIcon,
+    [EVENT_TYPES.COMPANY_TOUR]: BuildingOfficeIcon,
+    [EVENT_TYPES.OCCUPIED]: LockClosedIcon
+  };
+  
+  const IconComponent = iconMap[event.type] || CalendarDaysIcon;
+
+  const getEventSubtitle = () => {
+    const parts = [];
+
+    // Add client info for tours
+    if (event.type === EVENT_TYPES.COMPANY_TOUR && event.client) {
+      parts.push(`${t('calendar.client')}: ${event.client}`);
+    }
+
+    // Add category if exists
+    if (event.category) {
+      parts.push(t(`calendar.categories.${event.category}`));
+    }
+
+    // Add brief description if no other info
+    if (parts.length === 0 && event.description) {
+      parts.push(event.description.slice(0, 50) + (event.description.length > 50 ? '...' : ''));
+    }
+
+    // Add status if relevant
+    if (event.status && event.status !== 'confirmed') {
+      parts.push(`(${t(`calendar.status.${event.status}`)})`);
+    }
+
+    return parts.join(' • ');
+  };
+
+  const subtitle = displayContent.showDetails ? getEventSubtitle() : t('calendar.notAvailable');
+
+  const handleClick = (e) => {
+    e.stopPropagation();
+    onClick?.(event);
+  };
+
+  const handleDoubleClick = (e) => {
+    e.stopPropagation();
+    onDoubleClick?.(event);
+  };
 
   return (
     <div
-      onClick={() => onClick?.(event)}
+      onClick={handleClick}
+      onDoubleClick={handleDoubleClick}
       className={`
-        ${styles.bg} ${styles.text} ${styles.hoverBg}
+        ${styles.bgSolid} ${styles.textWhite} ${styles.hover}
         rounded-lg px-3 py-2 cursor-pointer transition-all duration-200
         hover:shadow-md hover:scale-[1.02] active:scale-[0.98]
         flex items-center space-x-3 min-h-[40px]
+        ${isSelected ? 'ring-2 ring-white ring-opacity-50 shadow-md' : ''}
       `}
     >
-      {/* Icono del tipo de evento */}
+      {/* Event type icon */}
       <IconComponent className="w-4 h-4 flex-shrink-0" />
       
-      {/* Contenido del evento */}
+      {/* Event content */}
       <div className="flex-1 min-w-0">
         <h4 className="font-medium text-sm truncate">
           {displayContent.title}
         </h4>
         
-        {displayContent.subtitle && (
+        {subtitle && (
           <p className="text-xs opacity-75 truncate">
-            {displayContent.subtitle}
+            {subtitle}
           </p>
         )}
       </div>
 
-      {/* Indicadores */}
+      {/* Indicators */}
       <div className="flex items-center space-x-2 flex-shrink-0">
-        {/* Ubicación */}
+        {/* Location */}
         {displayContent.showDetails && event.location && (
           <div className="flex items-center space-x-1">
             <MapPinIcon className="w-3 h-3 opacity-75" />
@@ -108,26 +113,26 @@ const AllDayEvent = ({ event, onClick, isAdmin = false }) => {
           </div>
         )}
 
-        {/* Tipo de evento */}
+        {/* Event type indicators */}
         <div className="flex space-x-1">
           {event.visibility === VISIBILITY_LEVELS.PRIVATE && (
             <div 
               className="w-2 h-2 bg-white bg-opacity-50 rounded-full" 
-              title="Evento privado" 
+              title={t('calendar.eventPrivate')}
             />
           )}
           
           {event.visibility === VISIBILITY_LEVELS.OCCUPIED && (
             <div 
               className="w-2 h-2 bg-white bg-opacity-50 rounded-full" 
-              title="Día ocupado" 
+              title={t('calendar.dayOccupied')}
             />
           )}
           
           {event.type === EVENT_TYPES.COMPANY_TOUR && (
             <div 
               className="w-2 h-2 bg-white bg-opacity-50 rounded-full" 
-              title="Tour de empresa" 
+              title={t('calendar.companyTour')}
             />
           )}
         </div>
@@ -136,31 +141,22 @@ const AllDayEvent = ({ event, onClick, isAdmin = false }) => {
   );
 };
 
-// Utilidad para generar subtítulo del evento
-function getEventSubtitle(event) {
-  const parts = [];
-
-  // Agregar información del cliente para tours
-  if (event.type === EVENT_TYPES.COMPANY_TOUR && event.client) {
-    parts.push(`Cliente: ${event.client}`);
-  }
-
-  // Agregar categoría si existe
-  if (event.category) {
-    parts.push(event.category);
-  }
-
-  // Agregar descripción breve si no hay otra información
-  if (parts.length === 0 && event.description) {
-    parts.push(event.description.slice(0, 50) + (event.description.length > 50 ? '...' : ''));
-  }
-
-  // Agregar estado si es relevante
-  if (event.status && event.status !== 'confirmed') {
-    parts.push(`(${event.status})`);
-  }
-
-  return parts.join(' • ');
-}
+AllDayEvent.propTypes = {
+  event: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    title: PropTypes.string,
+    type: PropTypes.string,
+    visibility: PropTypes.string,
+    location: PropTypes.string,
+    description: PropTypes.string,
+    client: PropTypes.string,
+    category: PropTypes.string,
+    status: PropTypes.string
+  }).isRequired,
+  onClick: PropTypes.func,
+  onDoubleClick: PropTypes.func,
+  isAdmin: PropTypes.bool,
+  isSelected: PropTypes.bool
+};
 
 export default AllDayEvent;

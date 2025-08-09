@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 import { 
   format, 
@@ -17,6 +18,7 @@ import { es } from 'date-fns/locale';
 import useIndependentAgendaStore from '../../../stores/independentAgendaStore';
 
 const MiniCalendar = () => {
+  const { t, i18n } = useTranslation();
   const { 
     selectedDate, 
     actions: { setSelectedDate } 
@@ -26,7 +28,7 @@ const MiniCalendar = () => {
 
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(monthStart);
-  const startDate = startOfWeek(monthStart, { weekStartsOn: 1 }); // Lunes como primer día
+  const startDate = startOfWeek(monthStart, { weekStartsOn: 1 }); // Monday as first day
   const endDate = endOfWeek(monthEnd, { weekStartsOn: 1 });
 
   const navigateMonth = (direction) => {
@@ -67,6 +69,7 @@ const MiniCalendar = () => {
               : ''
             }
           `}
+          aria-label={format(currentDate, 'EEEE, d MMMM yyyy', { locale: i18n.language === 'es' ? es : undefined })}
         >
           {formattedDate}
         </button>
@@ -78,32 +81,34 @@ const MiniCalendar = () => {
     return days;
   };
 
-  const weekDays = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
+  const weekDays = t('calendar.miniCalendar.weekDays', { returnObjects: true });
 
   return (
     <div className="select-none">
-      {/* Header del mini calendario */}
+      {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <button
           onClick={() => navigateMonth('prev')}
           className="p-1 rounded hover:bg-gray-100 transition-colors"
+          aria-label={t('calendar.miniCalendar.previousMonth')}
         >
           <ChevronLeftIcon className="w-4 h-4 text-gray-500" />
         </button>
         
         <h3 className="text-sm font-semibold text-gray-800 capitalize">
-          {format(currentMonth, 'MMMM yyyy', { locale: es })}
+          {format(currentMonth, 'MMMM yyyy', { locale: i18n.language === 'es' ? es : undefined })}
         </h3>
         
         <button
           onClick={() => navigateMonth('next')}
           className="p-1 rounded hover:bg-gray-100 transition-colors"
+          aria-label={t('calendar.miniCalendar.nextMonth')}
         >
           <ChevronRightIcon className="w-4 h-4 text-gray-500" />
         </button>
       </div>
 
-      {/* Días de la semana */}
+      {/* Week days */}
       <div className="grid grid-cols-7 gap-1 mb-2">
         {weekDays.map((day) => (
           <div key={day} className="text-xs font-medium text-gray-500 text-center py-1">
@@ -112,21 +117,21 @@ const MiniCalendar = () => {
         ))}
       </div>
 
-      {/* Días del mes */}
+      {/* Calendar days */}
       <div className="grid grid-cols-7 gap-1">
         {renderCalendarDays()}
       </div>
 
-      {/* Indicadores de eventos (opcional) */}
+      {/* Event indicators */}
       <div className="mt-3 pt-3 border-t border-gray-100">
         <div className="flex items-center space-x-2 text-xs">
           <div className="flex items-center space-x-1">
             <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-            <span className="text-gray-600">Personal</span>
+            <span className="text-gray-600">{t('calendar.miniCalendar.personal')}</span>
           </div>
           <div className="flex items-center space-x-1">
             <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-            <span className="text-gray-600">Tours</span>
+            <span className="text-gray-600">{t('calendar.miniCalendar.tours')}</span>
           </div>
         </div>
       </div>

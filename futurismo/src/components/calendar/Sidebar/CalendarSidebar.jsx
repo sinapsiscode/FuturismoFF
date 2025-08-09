@@ -1,88 +1,26 @@
-import { useState } from 'react';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { 
-  CalendarIcon, 
-  UserIcon, 
-  BuildingOfficeIcon,
-  EyeIcon,
-  EyeSlashIcon,
-  PlusIcon,
+  UserGroupIcon,
   AdjustmentsHorizontalIcon
 } from '@heroicons/react/24/outline';
-import { 
-  CalendarDaysIcon,
-  UserGroupIcon
-} from '@heroicons/react/24/solid';
 import MiniCalendar from './MiniCalendar';
 import FilterPanel from './FilterPanel';
-import useAuthStore from '../../../stores/authStore';
-import useIndependentAgendaStore from '../../../stores/independentAgendaStore';
+import CalendarSection from './CalendarSection';
+import useCalendarSidebar from '../../../hooks/useCalendarSidebar';
 
 const CalendarSidebar = () => {
-  const { user } = useAuthStore();
-  const { currentGuide, actions: { setCurrentGuide } } = useIndependentAgendaStore();
-  
-  const [expandedSections, setExpandedSections] = useState({
-    calendars: true,
-    guides: true,
-    filters: false
-  });
-
-  const [visibleCalendars, setVisibleCalendars] = useState({
-    personal: true,
-    company: true,
-    reservations: true
-  });
-
-  const toggleSection = (section) => {
-    setExpandedSections(prev => ({
-      ...prev,
-      [section]: !prev[section]
-    }));
-  };
-
-  const toggleCalendarVisibility = (calendarType) => {
-    setVisibleCalendars(prev => ({
-      ...prev,
-      [calendarType]: !prev[calendarType]
-    }));
-  };
-
-  const calendars = [
-    {
-      id: 'personal',
-      name: 'Mi Agenda',
-      icon: UserIcon,
-      color: 'bg-blue-500',
-      visible: visibleCalendars.personal,
-      description: 'Eventos personales'
-    },
-    {
-      id: 'company',
-      name: 'Tours Asignados',
-      icon: BuildingOfficeIcon,
-      color: 'bg-green-500',
-      visible: visibleCalendars.company,
-      description: 'Tours de la empresa'
-    },
-    {
-      id: 'reservations',
-      name: 'Reservas',
-      icon: CalendarDaysIcon,
-      color: 'bg-purple-500',
-      visible: visibleCalendars.reservations,
-      description: 'Calendario de reservas'
-    }
-  ];
-
-  // Guías data - sincronizado con mock data del store
-  const guides = [
-    { id: '1', name: 'Carlos Mendoza', online: true, role: 'freelance' },
-    { id: '2', name: 'Ana García', online: false, role: 'freelance' },
-    { id: '3', name: 'Luis Rivera', online: true, role: 'freelance' },
-    { id: 'user123', name: 'María Torres', online: true, role: 'freelance' }
-  ];
-
-  const isAdmin = user?.role === 'admin';
+  const { t } = useTranslation();
+  const {
+    expandedSections,
+    visibleCalendars,
+    currentGuide,
+    guides,
+    isAdmin,
+    toggleSection,
+    toggleCalendarVisibility,
+    setCurrentGuide
+  } = useCalendarSidebar();
 
   return (
     <div className="flex flex-col h-full">
@@ -91,62 +29,15 @@ const CalendarSidebar = () => {
         <MiniCalendar />
       </div>
 
-      {/* Calendarios */}
-      <div className="border-b border-gray-100">
-        <button
-          onClick={() => toggleSection('calendars')}
-          className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors"
-        >
-          <div className="flex items-center space-x-2">
-            <CalendarIcon className="w-4 h-4 text-gray-500" />
-            <span className="text-sm font-medium text-gray-700">Calendarios</span>
-          </div>
-          <div className={`transform transition-transform ${expandedSections.calendars ? 'rotate-90' : ''}`}>
-            <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </div>
-        </button>
+      {/* Calendars Section */}
+      <CalendarSection
+        expanded={expandedSections.calendars}
+        visibleCalendars={visibleCalendars}
+        onToggle={() => toggleSection('calendars')}
+        onToggleVisibility={toggleCalendarVisibility}
+      />
 
-        {expandedSections.calendars && (
-          <div className="pb-2">
-            {calendars.map((calendar) => (
-              <div key={calendar.id} className="px-4 py-2 flex items-center justify-between hover:bg-gray-50 group">
-                <div className="flex items-center space-x-3 flex-1">
-                  <button
-                    onClick={() => toggleCalendarVisibility(calendar.id)}
-                    className="p-1 rounded hover:bg-gray-100"
-                  >
-                    {calendar.visible ? (
-                      <EyeIcon className="w-4 h-4 text-gray-500" />
-                    ) : (
-                      <EyeSlashIcon className="w-4 h-4 text-gray-400" />
-                    )}
-                  </button>
-                  
-                  <div className="flex items-center space-x-2 flex-1">
-                    <div className={`w-3 h-3 rounded-full ${calendar.color} ${!calendar.visible ? 'opacity-50' : ''}`} />
-                    <div className="flex-1">
-                      <p className={`text-sm font-medium ${calendar.visible ? 'text-gray-700' : 'text-gray-400'}`}>
-                        {calendar.name}
-                      </p>
-                      <p className="text-xs text-gray-500">{calendar.description}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-
-            {/* Agregar calendario */}
-            <button className="w-full px-4 py-2 flex items-center space-x-3 hover:bg-gray-50 text-gray-500 hover:text-gray-700 transition-colors">
-              <PlusIcon className="w-4 h-4" />
-              <span className="text-sm">Agregar calendario</span>
-            </button>
-          </div>
-        )}
-      </div>
-
-      {/* Guías (solo para admin) */}
+      {/* Guides Section (admin only) */}
       {isAdmin && (
         <div className="border-b border-gray-100">
           <button
@@ -155,7 +46,7 @@ const CalendarSidebar = () => {
           >
             <div className="flex items-center space-x-2">
               <UserGroupIcon className="w-4 h-4 text-gray-500" />
-              <span className="text-sm font-medium text-gray-700">Guías</span>
+              <span className="text-sm font-medium text-gray-700">{t('calendar.sidebar.guides')}</span>
             </div>
             <div className={`transform transition-transform ${expandedSections.guides ? 'rotate-90' : ''}`}>
               <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -181,7 +72,10 @@ const CalendarSidebar = () => {
                       </span>
                     </div>
                     {guide.online && (
-                      <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-400 border-2 border-white rounded-full" />
+                      <div 
+                        className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-400 border-2 border-white rounded-full" 
+                        aria-label={t('calendar.sidebar.online')}
+                      />
                     )}
                   </div>
                   
@@ -198,7 +92,7 @@ const CalendarSidebar = () => {
         </div>
       )}
 
-      {/* Filtros */}
+      {/* Filters Section */}
       <div className="border-b border-gray-100">
         <button
           onClick={() => toggleSection('filters')}
@@ -206,7 +100,7 @@ const CalendarSidebar = () => {
         >
           <div className="flex items-center space-x-2">
             <AdjustmentsHorizontalIcon className="w-4 h-4 text-gray-500" />
-            <span className="text-sm font-medium text-gray-700">Filtros</span>
+            <span className="text-sm font-medium text-gray-700">{t('calendar.sidebar.filters')}</span>
           </div>
           <div className={`transform transition-transform ${expandedSections.filters ? 'rotate-90' : ''}`}>
             <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -222,16 +116,16 @@ const CalendarSidebar = () => {
         )}
       </div>
 
-      {/* Espacio flexible */}
+      {/* Flexible space */}
       <div className="flex-1" />
 
-      {/* Footer con información */}
+      {/* Footer info */}
       <div className="p-4 border-t border-gray-100">
         <div className="text-xs text-gray-500 space-y-1">
-          <p>Sincronizado hace 2 min</p>
-          <p>3 eventos próximos</p>
+          <p>{t('calendar.sidebar.syncedAgo', { time: '2 min' })}</p>
+          <p>{t('calendar.sidebar.upcomingEvents', { count: 3 })}</p>
           <button className="text-blue-500 hover:text-blue-600">
-            Sincronizar ahora
+            {t('calendar.sidebar.syncNow')}
           </button>
         </div>
       </div>

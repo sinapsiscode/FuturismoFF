@@ -1,11 +1,11 @@
-import React from 'react';
+import React, { Fragment } from 'react';
+import PropTypes from 'prop-types';
+import { useTranslation } from 'react-i18next';
 import { Popover, Transition } from '@headlessui/react';
-import { Fragment } from 'react';
 import { 
   ClockIcon, 
   MapPinIcon, 
   UserIcon,
-  PhoneIcon,
   PencilIcon,
   TrashIcon,
   EyeIcon
@@ -13,6 +13,7 @@ import {
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { VISIBILITY_LEVELS, EVENT_TYPES } from '../../../stores/independentAgendaStore';
+import { calculateDuration, shouldShowEventDetails } from '../../../utils/eventHelpers';
 
 const EventTooltip = ({ 
   event, 
@@ -23,74 +24,35 @@ const EventTooltip = ({
   onView,
   position = 'top' 
 }) => {
+  const { t } = useTranslation();
+  
   if (!event) return children;
 
-  const getEventTypeLabel = (type) => {
-    switch (type) {
-      case EVENT_TYPES.PERSONAL:
-        return 'Evento Personal';
-      case EVENT_TYPES.COMPANY_TOUR:
-        return 'Tour de Empresa';
-      case EVENT_TYPES.OCCUPIED:
-        return 'Tiempo Ocupado';
-      default:
-        return 'Evento';
-    }
-  };
-
-  const getVisibilityLabel = (visibility) => {
-    switch (visibility) {
-      case VISIBILITY_LEVELS.PRIVATE:
-        return 'Privado';
-      case VISIBILITY_LEVELS.OCCUPIED:
-        return 'Solo Admin ve "Ocupado"';
-      case VISIBILITY_LEVELS.COMPANY:
-        return 'Visible para empresa';
-      case VISIBILITY_LEVELS.PUBLIC:
-        return 'Público';
-      default:
-        return 'Sin definir';
-    }
-  };
+  const showDetails = shouldShowEventDetails(event, isAdmin);
+  const duration = calculateDuration(event.startTime, event.endTime);
 
   const formatEventTime = () => {
     if (event.allDay) {
-      return 'Todo el día';
+      return t('calendar.allDay');
     }
     if (event.startTime && event.endTime) {
       return `${event.startTime} - ${event.endTime}`;
     }
-    return 'Horario no definido';
+    return t('calendar.timeNotDefined');
   };
 
-  const calculateDuration = () => {
-    if (!event.startTime || !event.endTime) return null;
-    
-    const [startHour, startMin] = event.startTime.split(':').map(Number);
-    const [endHour, endMin] = event.endTime.split(':').map(Number);
-    
-    const startMinutes = startHour * 60 + startMin;
-    const endMinutes = endHour * 60 + endMin;
-    const diffMinutes = endMinutes - startMinutes;
-    
-    if (diffMinutes >= 60) {
-      const hours = Math.floor(diffMinutes / 60);
-      const minutes = diffMinutes % 60;
-      return minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
+  const getEventTypeBadgeColor = () => {
+    switch (event.type) {
+      case EVENT_TYPES.PERSONAL:
+        return 'bg-blue-400';
+      case EVENT_TYPES.COMPANY_TOUR:
+        return 'bg-green-400';
+      case EVENT_TYPES.OCCUPIED:
+        return 'bg-gray-400';
+      default:
+        return 'bg-purple-400';
     }
-    
-    return `${diffMinutes}m`;
   };
-
-  const shouldShowDetails = () => {
-    if (isAdmin && event.visibility === VISIBILITY_LEVELS.PRIVATE) {
-      return false;
-    }
-    return true;
-  };
-
-  const showDetails = shouldShowDetails();
-  const duration = calculateDuration();
 
   return (
     <Popover className="relative inline-block">
@@ -120,23 +82,21 @@ const EventTooltip = ({
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex-1">
                       <h3 className="text-sm font-semibold text-gray-900 line-clamp-2">
-                        {showDetails ? event.title : 'Ocupado'}
+                        {showDetails ? event.title : t('calendar.occupied')}
                       </h3>
                       <p className="text-xs text-gray-500 mt-1">
-                        {getEventTypeLabel(event.type)}
+                        {t(`calendar.eventTypes.${event.type}`)}
                       </p>
                     </div>
                     
-                    {/* Indicador de estado */}
+                    {/* Status indicator */}
                     <div className={`
                       flex-shrink-0 w-3 h-3 rounded-full ml-2 mt-1
-                      ${event.type === EVENT_TYPES.PERSONAL ? 'bg-blue-400' : ''}
-                      ${event.type === EVENT_TYPES.COMPANY_TOUR ? 'bg-green-400' : ''}
-                      ${event.type === EVENT_TYPES.OCCUPIED ? 'bg-gray-400' : ''}
+                      ${getEventTypeBadgeColor()}
                     `} />
                   </div>
 
-                  {/* Detalles de tiempo */}
+                  {/* Time details */}
                   <div className="space-y-2 mb-4">
                     <div className="flex items-center space-x-2 text-sm text-gray-600">
                       <ClockIcon className="w-4 h-4" />
@@ -149,18 +109,18 @@ const EventTooltip = ({
                       )}
                     </div>
 
-                    {/* Fecha */}
+                    {/* Date */}
                     <div className="flex items-center space-x-2 text-sm text-gray-600">
                       <span>📅</span>
                       <span>
                         {event.date && !isNaN(new Date(event.date)) 
                           ? format(new Date(event.date), 'EEEE, d \'de\' MMMM \'de\' yyyy', { locale: es })
-                          : 'Fecha no disponible'
+                          : t('calendar.dateNotAvailable')
                         }
                       </span>
                     </div>
 
-                    {/* Ubicación */}
+                    {/* Location */}
                     {showDetails && event.location && (
                       <div className="flex items-center space-x-2 text-sm text-gray-600">
                         <MapPinIcon className="w-4 h-4" />
@@ -168,7 +128,7 @@ const EventTooltip = ({
                       </div>
                     )}
 
-                    {/* Cliente (para tours) */}
+                    {/* Client (for tours) */}
                     {showDetails && event.type === EVENT_TYPES.COMPANY_TOUR && event.client && (
                       <div className="flex items-center space-x-2 text-sm text-gray-600">
                         <UserIcon className="w-4 h-4" />
@@ -176,7 +136,7 @@ const EventTooltip = ({
                       </div>
                     )}
 
-                    {/* Precio (para tours) */}
+                    {/* Price (for tours) */}
                     {showDetails && event.type === EVENT_TYPES.COMPANY_TOUR && event.price && (
                       <div className="flex items-center space-x-2 text-sm text-gray-600">
                         <span>💰</span>
@@ -185,7 +145,7 @@ const EventTooltip = ({
                     )}
                   </div>
 
-                  {/* Descripción */}
+                  {/* Description */}
                   {showDetails && event.description && (
                     <div className="mb-4">
                       <p className="text-sm text-gray-600 line-clamp-3">
@@ -194,13 +154,13 @@ const EventTooltip = ({
                     </div>
                   )}
 
-                  {/* Información de privacidad */}
+                  {/* Privacy info */}
                   <div className="flex items-center space-x-2 text-xs text-gray-500 mb-4">
                     <EyeIcon className="w-3 h-3" />
-                    <span>{getVisibilityLabel(event.visibility)}</span>
+                    <span>{t(`calendar.visibility.${event.visibility}`)}</span>
                   </div>
 
-                  {/* Acciones */}
+                  {/* Actions */}
                   <div className="flex justify-end space-x-2 pt-3 border-t border-gray-100">
                     {onView && (
                       <button
@@ -208,7 +168,7 @@ const EventTooltip = ({
                         className="inline-flex items-center px-2 py-1 text-xs font-medium text-gray-600 bg-gray-100 rounded hover:bg-gray-200 transition-colors"
                       >
                         <EyeIcon className="w-3 h-3 mr-1" />
-                        Ver
+                        {t('common.view')}
                       </button>
                     )}
                     
@@ -218,7 +178,7 @@ const EventTooltip = ({
                         className="inline-flex items-center px-2 py-1 text-xs font-medium text-blue-600 bg-blue-100 rounded hover:bg-blue-200 transition-colors"
                       >
                         <PencilIcon className="w-3 h-3 mr-1" />
-                        Editar
+                        {t('common.edit')}
                       </button>
                     )}
                     
@@ -228,21 +188,21 @@ const EventTooltip = ({
                         className="inline-flex items-center px-2 py-1 text-xs font-medium text-red-600 bg-red-100 rounded hover:bg-red-200 transition-colors"
                       >
                         <TrashIcon className="w-3 h-3 mr-1" />
-                        Eliminar
+                        {t('common.delete')}
                       </button>
                     )}
                   </div>
 
-                  {/* Metadata adicional */}
+                  {/* Metadata */}
                   {showDetails && (
                     <div className="mt-3 pt-3 border-t border-gray-100">
                       <div className="flex justify-between text-xs text-gray-400">
                         <span>ID: {event.id}</span>
                         {event.createdAt && (
                           <span>
-                            Creado: {event.createdAt && !isNaN(new Date(event.createdAt)) 
+                            {t('calendar.created')}: {event.createdAt && !isNaN(new Date(event.createdAt)) 
                               ? format(new Date(event.createdAt), 'dd/MM/yyyy')
-                              : 'Fecha no disponible'
+                              : t('calendar.dateNotAvailable')
                             }
                           </span>
                         )}
@@ -257,6 +217,30 @@ const EventTooltip = ({
       )}
     </Popover>
   );
+};
+
+EventTooltip.propTypes = {
+  event: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    title: PropTypes.string,
+    type: PropTypes.string,
+    visibility: PropTypes.string,
+    startTime: PropTypes.string,
+    endTime: PropTypes.string,
+    date: PropTypes.string,
+    location: PropTypes.string,
+    description: PropTypes.string,
+    client: PropTypes.string,
+    price: PropTypes.number,
+    allDay: PropTypes.bool,
+    createdAt: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)])
+  }).isRequired,
+  isAdmin: PropTypes.bool,
+  children: PropTypes.node.isRequired,
+  onEdit: PropTypes.func,
+  onDelete: PropTypes.func,
+  onView: PropTypes.func,
+  position: PropTypes.oneOf(['top', 'bottom'])
 };
 
 export default EventTooltip;

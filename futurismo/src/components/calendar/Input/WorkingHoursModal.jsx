@@ -1,72 +1,43 @@
-import React, { useState, useEffect } from 'react';
+import React, { Fragment } from 'react';
+import PropTypes from 'prop-types';
+import { useTranslation } from 'react-i18next';
 import { Dialog, Transition } from '@headlessui/react';
-import { Fragment } from 'react';
 import { 
   XMarkIcon, 
   ClockIcon,
   Cog6ToothIcon
 } from '@heroicons/react/24/outline';
-import useIndependentAgendaStore from '../../../stores/independentAgendaStore';
-import useAuthStore from '../../../stores/authStore';
+import useWorkingHours from '../../../hooks/useWorkingHours';
 
 const WorkingHoursModal = ({ isOpen, onClose }) => {
-  const { user } = useAuthStore();
-  const { 
-    workingHours,
-    actions: { setWorkingHours }
-  } = useIndependentAgendaStore();
+  const { t } = useTranslation();
+  const {
+    workingHoursForm,
+    updateDaySchedule,
+    handleSave,
+    resetForm
+  } = useWorkingHours(isOpen);
 
-  const [workingHoursForm, setWorkingHoursForm] = useState({
-    lunes: { enabled: true, start: '09:00', end: '17:00' },
-    martes: { enabled: true, start: '09:00', end: '17:00' },
-    miercoles: { enabled: true, start: '09:00', end: '17:00' },
-    jueves: { enabled: true, start: '09:00', end: '17:00' },
-    viernes: { enabled: true, start: '09:00', end: '17:00' },
-    sabado: { enabled: false, start: '10:00', end: '14:00' },
-    domingo: { enabled: false, start: '10:00', end: '14:00' }
-  });
+  const daysOfWeek = [
+    { key: 'monday', label: t('calendar.days.monday') },
+    { key: 'tuesday', label: t('calendar.days.tuesday') },
+    { key: 'wednesday', label: t('calendar.days.wednesday') },
+    { key: 'thursday', label: t('calendar.days.thursday') },
+    { key: 'friday', label: t('calendar.days.friday') },
+    { key: 'saturday', label: t('calendar.days.saturday') },
+    { key: 'sunday', label: t('calendar.days.sunday') }
+  ];
 
-  // Cargar horarios actuales del usuario
-  useEffect(() => {
-    if (user?.id && workingHours[user.id]) {
-      setWorkingHoursForm(workingHours[user.id]);
-    }
-  }, [user?.id, workingHours, isOpen]);
-
-  const handleSave = () => {
-    if (user?.id) {
-      setWorkingHours(user.id, workingHoursForm);
+  const handleSubmit = () => {
+    if (handleSave()) {
       onClose();
     }
   };
 
   const handleClose = () => {
-    // Restaurar datos originales al cerrar sin guardar
-    if (user?.id && workingHours[user.id]) {
-      setWorkingHoursForm(workingHours[user.id]);
-    }
+    resetForm();
     onClose();
   };
-
-  const updateDaySchedule = (day, field, value) => {
-    setWorkingHoursForm(prev => ({
-      ...prev,
-      [day]: {
-        ...prev[day],
-        [field]: value
-      }
-    }));
-  };
-
-  const daysOfWeek = [
-    { key: 'lunes', label: 'Lunes' },
-    { key: 'martes', label: 'Martes' },
-    { key: 'miercoles', label: 'Miércoles' },
-    { key: 'jueves', label: 'Jueves' },
-    { key: 'viernes', label: 'Viernes' },
-    { key: 'sabado', label: 'Sábado' },
-    { key: 'domingo', label: 'Domingo' }
-  ];
 
   return (
     <Transition appear show={isOpen} as={Fragment}>
@@ -100,22 +71,23 @@ const WorkingHoursModal = ({ isOpen, onClose }) => {
                   <Dialog.Title as="h3" className="text-lg font-semibold leading-6 text-gray-900">
                     <div className="flex items-center space-x-2">
                       <Cog6ToothIcon className="w-5 h-5 text-purple-500" />
-                      <span>Configurar Horarios</span>
+                      <span>{t('calendar.configureWorkingHours')}</span>
                     </div>
                   </Dialog.Title>
                   
                   <button
                     onClick={handleClose}
                     className="p-1 rounded-full hover:bg-gray-100 transition-colors"
+                    aria-label={t('common.close')}
                   >
                     <XMarkIcon className="w-5 h-5 text-gray-500" />
                   </button>
                 </div>
 
-                {/* Contenido */}
+                {/* Content */}
                 <div className="px-6 py-4 max-h-96 overflow-y-auto">
                   <p className="text-sm text-gray-600 mb-4">
-                    Define tus horarios de trabajo semanales. Esto ayudará a mostrar tu disponibilidad.
+                    {t('calendar.workingHoursDescription')}
                   </p>
                   
                   <div className="space-y-4">
@@ -131,19 +103,29 @@ const WorkingHoursModal = ({ isOpen, onClose }) => {
                               checked={workingHoursForm[day.key].enabled}
                               onChange={(e) => updateDaySchedule(day.key, 'enabled', e.target.checked)}
                               className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                              id={`${day.key}-enabled`}
                             />
-                            <span className="ml-2 text-sm text-gray-500">Activo</span>
+                            <label 
+                              htmlFor={`${day.key}-enabled`}
+                              className="ml-2 text-sm text-gray-500"
+                            >
+                              {t('calendar.active')}
+                            </label>
                           </div>
                         </div>
                         
                         {workingHoursForm[day.key].enabled && (
                           <div className="grid grid-cols-2 gap-3">
                             <div>
-                              <label className="block text-xs font-medium text-gray-600 mb-1">
+                              <label 
+                                htmlFor={`${day.key}-start`}
+                                className="block text-xs font-medium text-gray-600 mb-1"
+                              >
                                 <ClockIcon className="w-3 h-3 inline mr-1" />
-                                Inicio
+                                {t('calendar.startTime')}
                               </label>
                               <input
+                                id={`${day.key}-start`}
                                 type="time"
                                 value={workingHoursForm[day.key].start}
                                 onChange={(e) => updateDaySchedule(day.key, 'start', e.target.value)}
@@ -151,10 +133,14 @@ const WorkingHoursModal = ({ isOpen, onClose }) => {
                               />
                             </div>
                             <div>
-                              <label className="block text-xs font-medium text-gray-600 mb-1">
-                                Fin
+                              <label 
+                                htmlFor={`${day.key}-end`}
+                                className="block text-xs font-medium text-gray-600 mb-1"
+                              >
+                                {t('calendar.endTime')}
                               </label>
                               <input
+                                id={`${day.key}-end`}
                                 type="time"
                                 value={workingHoursForm[day.key].end}
                                 onChange={(e) => updateDaySchedule(day.key, 'end', e.target.value)}
@@ -175,14 +161,14 @@ const WorkingHoursModal = ({ isOpen, onClose }) => {
                     className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
                     onClick={handleClose}
                   >
-                    Cancelar
+                    {t('common.cancel')}
                   </button>
                   <button
                     type="button"
                     className="px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-colors"
-                    onClick={handleSave}
+                    onClick={handleSubmit}
                   >
-                    Guardar Horarios
+                    {t('calendar.saveWorkingHours')}
                   </button>
                 </div>
               </Dialog.Panel>
@@ -192,6 +178,11 @@ const WorkingHoursModal = ({ isOpen, onClose }) => {
       </Dialog>
     </Transition>
   );
+};
+
+WorkingHoursModal.propTypes = {
+  isOpen: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired
 };
 
 export default WorkingHoursModal;
