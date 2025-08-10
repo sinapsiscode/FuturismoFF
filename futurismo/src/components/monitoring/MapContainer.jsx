@@ -1,9 +1,15 @@
 import { useEffect, useRef } from 'react';
+import PropTypes from 'prop-types';
 import L from 'leaflet';
+import { useTranslation } from 'react-i18next';
+import { ArrowsPointingOutIcon, ArrowsPointingInIcon } from '@heroicons/react/24/outline';
 import useLeafletMap from '../../hooks/useLeafletMap';
+import { MAP_CONFIG } from '../../data/mockMonitoringData';
+import { MAP_MOBILE_HEIGHT } from '../../constants/monitoringConstants';
 import styles from '../../styles/layout.module.css';
 
 const MapContainer = ({ onMapReady }) => {
+  const { t } = useTranslation();
   const mapRef = useRef(null);
   const mapInstanceRef = useRef(null);
   
@@ -12,7 +18,7 @@ const MapContainer = ({ onMapReady }) => {
     mapInstanceRef.current,
     {
       maintainView: true,
-      mobileHeight: 'calc(100vh - 8rem)' // Ajustar para móvil si necesario
+      mobileHeight: MAP_MOBILE_HEIGHT
     }
   );
 
@@ -21,27 +27,22 @@ const MapContainer = ({ onMapReady }) => {
 
     // Inicializar el mapa
     const map = L.map(mapRef.current, {
-      center: [-12.0464, -77.0428], // Lima, Perú
-      zoom: 12,
+      center: MAP_CONFIG.defaultCenter,
+      zoom: MAP_CONFIG.defaultZoom,
       zoomControl: true,
       attributionControl: true
     });
 
-    // Agregar capa de tiles
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors',
-      maxZoom: 19
+    L.tileLayer(MAP_CONFIG.tileLayerUrl, {
+      attribution: MAP_CONFIG.attribution,
+      maxZoom: MAP_CONFIG.maxZoom
     }).addTo(map);
 
-    // Guardar referencia
     mapInstanceRef.current = map;
 
-    // Notificar que el mapa está listo
     if (onMapReady) {
       onMapReady(map);
     }
-
-    // Cleanup
     return () => {
       if (mapInstanceRef.current) {
         mapInstanceRef.current.remove();
@@ -54,18 +55,25 @@ const MapContainer = ({ onMapReady }) => {
     <div className={styles.mapContainer} style={getMapContainerStyle()}>
       <div ref={mapRef} className={styles.leafletMap} />
       
-      {/* Controles adicionales */}
       <div className="absolute top-4 right-4 z-10">
         <button
           onClick={toggleFullscreen}
           className="bg-white p-2 rounded-lg shadow-md hover:bg-gray-50 transition-colors"
-          title={isFullscreen ? 'Salir de pantalla completa' : 'Pantalla completa'}
+          title={isFullscreen ? t('monitoring.map.exitFullscreen') : t('monitoring.map.enterFullscreen')}
         >
-          {isFullscreen ? '⛶' : '⛶'}
+          {isFullscreen ? (
+            <ArrowsPointingInIcon className="w-5 h-5 text-gray-700" />
+          ) : (
+            <ArrowsPointingOutIcon className="w-5 h-5 text-gray-700" />
+          )}
         </button>
       </div>
     </div>
   );
+};
+
+MapContainer.propTypes = {
+  onMapReady: PropTypes.func
 };
 
 export default MapContainer;

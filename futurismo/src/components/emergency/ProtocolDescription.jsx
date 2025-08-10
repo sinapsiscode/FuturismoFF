@@ -7,8 +7,8 @@ const ProtocolDescription = ({ protocol }) => {
   const { t } = useTranslation();
 
   return (
-    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-      <h3 className="text-lg font-medium text-blue-900 mb-2 flex items-center">
+    <div className="p-4 border border-blue-200 rounded-lg bg-blue-50">
+      <h3 className="flex items-center mb-2 text-lg font-medium text-blue-900">
         <ShieldCheckIcon className="w-5 h-5 mr-2" />
         {t('emergency.protocol.protocolDescription')}
       </h3>

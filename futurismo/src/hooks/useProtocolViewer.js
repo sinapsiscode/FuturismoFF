@@ -1,42 +1,21 @@
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../stores/authStore';
+import { PRIORITY_COLORS, CONTACT_TYPES, PRIORITY_LEVELS } from '../constants/emergencyConstants';
 
 const useProtocolViewer = (protocol) => {
   const { t } = useTranslation();
   const { user } = useAuthStore();
 
   const getPriorityColor = (priority) => {
-    const colors = {
-      alta: 'bg-red-100 text-red-800 border-red-200',
-      media: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-      baja: 'bg-green-100 text-green-800 border-green-200'
-    };
-    return colors[priority] || 'bg-gray-100 text-gray-800 border-gray-200';
+    return PRIORITY_COLORS[priority] || PRIORITY_COLORS.default;
   };
 
-  const getContactTypeIcon = (type) => {
-    const icons = {
-      emergency: '🚨',
-      coordinator: '👔',
-      management: '🏢',
-      police: '👮',
-      medical: '🏥',
-      insurance: '📋',
-      towing: '🚛',
-      weather: '🌦️',
-      local: '🏛️',
-      operations: '⚙️'
-    };
-    return icons[type] || '📞';
+  const getContactType = (type) => {
+    return CONTACT_TYPES[type] || 'default';
   };
 
-  const getPriorityIcon = (priority) => {
-    const icons = {
-      alta: '🔴',
-      media: '🟡',
-      baja: '🟢'
-    };
-    return icons[priority] || '⚪';
+  const getPriorityLevel = (priority) => {
+    return PRIORITY_LEVELS[priority] || 'default';
   };
 
   const importantReminders = [
@@ -51,7 +30,7 @@ const useProtocolViewer = (protocol) => {
     steps: protocol?.content?.steps?.length || 0,
     contacts: protocol?.content?.contacts?.length || 0,
     materials: protocol?.content?.materials?.length || 0,
-    priorityIcon: getPriorityIcon(protocol?.priority)
+    priority: protocol?.priority
   };
 
   const canEdit = user?.role === 'admin';
@@ -60,8 +39,8 @@ const useProtocolViewer = (protocol) => {
     t,
     user,
     getPriorityColor,
-    getContactTypeIcon,
-    getPriorityIcon,
+    getContactType,
+    getPriorityLevel,
     importantReminders,
     stats,
     canEdit

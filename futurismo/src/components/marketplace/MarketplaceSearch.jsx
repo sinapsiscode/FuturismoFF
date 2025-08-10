@@ -1,18 +1,16 @@
 import { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import { MagnifyingGlassIcon, ArrowsUpDownIcon } from '@heroicons/react/24/outline';
 import { useDebouncedCallback } from 'use-debounce';
+import { useTranslation } from 'react-i18next';
 import useMarketplaceStore from '../../stores/marketplaceStore';
+import { SORT_OPTIONS } from '../../constants/marketplaceConstants';
 
 const MarketplaceSearch = ({ onSearchChange }) => {
   const { searchQuery, sortBy, searchGuides, setSortBy } = useMarketplaceStore();
   const [localQuery, setLocalQuery] = useState(searchQuery);
 
-  const sortOptions = [
-    { value: 'rating', label: 'Mejor calificación' },
-    { value: 'price', label: 'Precio más bajo' },
-    { value: 'experience', label: 'Más experiencia' },
-    { value: 'reviews', label: 'Más reseñas' }
-  ];
+  const { t } = useTranslation();
 
   const debouncedSearch = useDebouncedCallback((value) => {
     searchGuides(value);
@@ -48,7 +46,7 @@ const MarketplaceSearch = ({ onSearchChange }) => {
             type="text"
             value={localQuery}
             onChange={handleSearchChange}
-            placeholder="Buscar guías por nombre, especialidad o zona..."
+            placeholder={t('marketplace.search.placeholder')}
             className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-cyan-500 focus:border-cyan-500"
           />
         </div>
@@ -61,9 +59,9 @@ const MarketplaceSearch = ({ onSearchChange }) => {
             onChange={handleSortChange}
             className="block w-full lg:w-48 pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-cyan-500 focus:border-cyan-500 rounded-lg"
           >
-            {sortOptions.map(option => (
+            {SORT_OPTIONS.map(option => (
               <option key={option.value} value={option.value}>
-                {option.label}
+                {t(option.label)}
               </option>
             ))}
           </select>
@@ -71,6 +69,10 @@ const MarketplaceSearch = ({ onSearchChange }) => {
       </div>
     </div>
   );
+};
+
+MarketplaceSearch.propTypes = {
+  onSearchChange: PropTypes.func
 };
 
 export default MarketplaceSearch;

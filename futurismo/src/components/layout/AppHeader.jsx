@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../../stores/authStore';
@@ -6,13 +6,10 @@ import { useLayout } from '../../contexts/LayoutContext';
 import { 
   Bars3Icon, 
   BellIcon, 
-  MagnifyingGlassIcon, 
-  ChevronDownIcon, 
-  ArrowRightOnRectangleIcon, 
-  UserIcon, 
-  CogIcon 
+  MagnifyingGlassIcon
 } from '@heroicons/react/24/outline';
 import LanguageToggle from '../common/LanguageToggle';
+import ProfileMenu from './ProfileMenu';
 
 const AppHeader = () => {
   const navigate = useNavigate();
@@ -20,21 +17,7 @@ const AppHeader = () => {
   const { toggleSidebar, viewport } = useLayout();
   const { t } = useTranslation();
   
-  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const profileMenuRef = useRef(null);
-
-  // Cerrar menú al hacer clic fuera
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target)) {
-        setProfileMenuOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
 
   const handleLogout = () => {
     logout();
@@ -52,11 +35,10 @@ const AppHeader = () => {
     <div className="h-16 px-4 sm:px-6 lg:px-8 flex items-center justify-between">
       {/* Left section */}
       <div className="flex items-center gap-4">
-        {/* Menu button */}
         <button
           onClick={toggleSidebar}
           className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
-          aria-label="Toggle menu"
+          aria-label={t('common.toggleMenu')}
         >
           <Bars3Icon className="w-5 h-5 text-gray-500" />
         </button>
@@ -78,7 +60,6 @@ const AppHeader = () => {
 
       {/* Right section */}
       <div className="flex items-center gap-2 sm:gap-4">
-        {/* Language toggle */}
         <LanguageToggle />
 
         {/* Notifications */}
@@ -87,61 +68,11 @@ const AppHeader = () => {
           <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full" />
         </button>
 
-        {/* Profile menu */}
-        <div className="relative" ref={profileMenuRef}>
-          <button
-            onClick={() => setProfileMenuOpen(!profileMenuOpen)}
-            className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100 transition-colors"
-          >
-            <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-              <span className="text-white text-sm font-medium">
-                {user?.name?.charAt(0).toUpperCase() || 'U'}
-              </span>
-            </div>
-            {viewport.isDesktop && (
-              <>
-                <span className="text-sm font-medium text-gray-900">
-                  {user?.name || 'Usuario'}
-                </span>
-                <ChevronDownIcon className="w-4 h-4 text-gray-500" />
-              </>
-            )}
-          </button>
-
-          {/* Dropdown */}
-          {profileMenuOpen && (
-            <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-1 z-50">
-              <button
-                onClick={() => {
-                  navigate('/profile');
-                  setProfileMenuOpen(false);
-                }}
-                className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full"
-              >
-                <UserIcon className="w-4 h-4 mr-3" />
-                {t('profile.myProfile')}
-              </button>
-              <button
-                onClick={() => {
-                  navigate('/settings');
-                  setProfileMenuOpen(false);
-                }}
-                className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full"
-              >
-                <CogIcon className="w-4 h-4 mr-3" />
-                {t('profile.configuration')}
-              </button>
-              <hr className="my-1" />
-              <button
-                onClick={handleLogout}
-                className="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full"
-              >
-                <ArrowRightOnRectangleIcon className="w-4 h-4 mr-3" />
-                {t('profile.logout')}
-              </button>
-            </div>
-          )}
-        </div>
+        <ProfileMenu 
+          user={user} 
+          viewport={viewport} 
+          onLogout={handleLogout} 
+        />
       </div>
     </div>
   );

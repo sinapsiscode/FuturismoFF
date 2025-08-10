@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
+import PropTypes from 'prop-types';
+import { useTranslation } from 'react-i18next';
 import { 
-  XMarkIcon as X, 
-  ChatBubbleLeftRightIcon as MessageCircle, 
-  UserIcon as User, 
-  BuildingOffice2Icon as Building 
+  XMarkIcon, 
+  ChatBubbleLeftRightIcon, 
+  UserIcon, 
+  BuildingOffice2Icon 
 } from '@heroicons/react/24/outline';
 import ServiceAreaFeedback from './ServiceAreaFeedback';
 import StaffFeedback from './StaffFeedback';
@@ -11,10 +13,11 @@ import StaffFeedback from './StaffFeedback';
 const FeedbackModal = ({ 
   isOpen, 
   onClose, 
-  type = 'service', // 'service' or 'staff'
+  type = 'service',
   data = null,
   onSubmit 
 }) => {
+  const { t } = useTranslation();
   const [currentStep, setCurrentStep] = useState(1);
   const [feedbackData, setFeedbackData] = useState(null);
 
@@ -40,14 +43,14 @@ const FeedbackModal = ({
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                <Building className="text-blue-600" size={20} />
+                <BuildingOffice2Icon className="text-blue-600 w-5 h-5" />
               </div>
               <div>
                 <h2 className="text-xl font-bold text-gray-800">
-                  Opiniones y Sugerencias
+                  {t('feedback.modal.opinionsTitle')}
                 </h2>
                 <p className="text-gray-600">
-                  {data?.serviceName || 'Sobre el Servicio'}
+                  {data?.serviceName || t('feedback.modal.aboutService')}
                 </p>
               </div>
             </div>
@@ -55,7 +58,7 @@ const FeedbackModal = ({
               onClick={handleClose}
               className="text-gray-400 hover:text-gray-600 transition-colors"
             >
-              <X size={24} />
+              <XMarkIcon className="w-6 h-6" />
             </button>
           </div>
 
@@ -74,14 +77,14 @@ const FeedbackModal = ({
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                <User className="text-green-600" size={20} />
+                <UserIcon className="text-green-600 w-5 h-5" />
               </div>
               <div>
                 <h2 className="text-xl font-bold text-gray-800">
-                  Retroalimentación de Personal
+                  {t('feedback.modal.staffFeedbackTitle')}
                 </h2>
                 <p className="text-gray-600">
-                  Opiniones y sugerencias sobre el equipo
+                  {t('feedback.modal.staffFeedbackSubtitle')}
                 </p>
               </div>
             </div>
@@ -89,7 +92,7 @@ const FeedbackModal = ({
               onClick={handleClose}
               className="text-gray-400 hover:text-gray-600 transition-colors"
             >
-              <X size={24} />
+              <XMarkIcon className="w-6 h-6" />
             </button>
           </div>
 
@@ -112,6 +115,14 @@ const FeedbackModal = ({
       </div>
     </div>
   );
+};
+
+FeedbackModal.propTypes = {
+  isOpen: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  type: PropTypes.oneOf(['service', 'staff']),
+  data: PropTypes.object,
+  onSubmit: PropTypes.func.isRequired
 };
 
 export default FeedbackModal;

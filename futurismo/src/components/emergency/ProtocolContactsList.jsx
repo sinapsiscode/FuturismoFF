@@ -2,8 +2,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 import { PhoneIcon } from '@heroicons/react/24/outline';
+import ContactTypeIcon from './ContactTypeIcon';
 
-const ProtocolContactsList = ({ contacts, getContactTypeIcon }) => {
+const ProtocolContactsList = ({ contacts }) => {
   const { t } = useTranslation();
 
   return (
@@ -20,9 +21,9 @@ const ProtocolContactsList = ({ contacts, getContactTypeIcon }) => {
             className="bg-red-50 border border-red-200 rounded-lg p-4"
           >
             <div className="flex items-center space-x-3">
-              <span className="text-2xl">
-                {getContactTypeIcon(contact.type)}
-              </span>
+              <div className="p-2 bg-red-100 rounded-lg">
+                <ContactTypeIcon type={contact.type} className="w-6 h-6 text-red-600" />
+              </div>
               <div className="flex-1">
                 <h4 className="font-medium text-red-900">{contact.name}</h4>
                 <p className="text-red-700 font-mono text-lg font-bold">
@@ -52,8 +53,7 @@ ProtocolContactsList.propTypes = {
     name: PropTypes.string.isRequired,
     phone: PropTypes.string.isRequired,
     type: PropTypes.string.isRequired
-  })).isRequired,
-  getContactTypeIcon: PropTypes.func.isRequired
+  })).isRequired
 };
 
 export default ProtocolContactsList;
