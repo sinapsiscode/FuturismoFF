@@ -20,13 +20,13 @@ const NotificationsSettings = () => {
     isLoading
   } = useSettingsStore();
 
-  const [formData, setFormData] = useState(settings.notifications);
+  const [formData, setFormData] = useState(settings.notifications || {});
 
   const handleChannelToggle = (channel, enabled) => {
     setFormData(prev => ({
       ...prev,
       [channel]: {
-        ...prev[channel],
+        ...prev[channel] || {},
         enabled
       }
     }));
@@ -36,7 +36,7 @@ const NotificationsSettings = () => {
     setFormData(prev => ({
       ...prev,
       [channel]: {
-        ...prev[channel],
+        ...prev[channel] || {},
         [notification]: enabled
       }
     }));
@@ -121,7 +121,7 @@ const NotificationsSettings = () => {
                   <label className="relative inline-flex items-center cursor-pointer">
                     <input
                       type="checkbox"
-                      checked={formData[channel.key].enabled}
+                      checked={formData[channel.key]?.enabled || false}
                       onChange={(e) => handleChannelToggle(channel.key, e.target.checked)}
                       className="sr-only peer"
                     />
@@ -130,7 +130,7 @@ const NotificationsSettings = () => {
                 </div>
               </div>
 
-              {formData[channel.key].enabled && (
+              {formData[channel.key]?.enabled && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 pt-4 border-t border-gray-100">
                   {notificationTypes.map((notificationType) => {
                     // Solo mostrar notificaciones específicas para SMS
@@ -159,7 +159,7 @@ const NotificationsSettings = () => {
                           </div>
                           <input
                             type="checkbox"
-                            checked={formData[channel.key].emergencyOnly || false}
+                            checked={formData[channel.key]?.emergencyOnly || false}
                             onChange={(e) => handleNotificationToggle(channel.key, NOTIFICATION_TYPES.EMERGENCY_ONLY, e.target.checked)}
                             className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                           />
@@ -167,7 +167,7 @@ const NotificationsSettings = () => {
                       );
                     }
 
-                    if (formData[channel.key][notificationType.key] !== undefined) {
+                    if (formData[channel.key]?.[notificationType.key] !== undefined) {
                       return (
                         <div key={notificationType.key} className="flex items-center justify-between">
                           <div>
@@ -180,7 +180,7 @@ const NotificationsSettings = () => {
                           </div>
                           <input
                             type="checkbox"
-                            checked={formData[channel.key][notificationType.key]}
+                            checked={formData[channel.key]?.[notificationType.key] || false}
                             onChange={(e) => handleNotificationToggle(channel.key, notificationType.key, e.target.checked)}
                             className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                           />
@@ -192,7 +192,7 @@ const NotificationsSettings = () => {
                 </div>
               )}
 
-              {!formData[channel.key].enabled && (
+              {!formData[channel.key]?.enabled && (
                 <div className="mt-4 pt-4 border-t border-gray-100">
                   <p className="text-sm text-gray-500 text-center py-4">
                     {t('settings.notifications.channelDisabled', { channel: channel.label.toLowerCase() })}
