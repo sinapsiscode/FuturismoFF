@@ -673,6 +673,29 @@ const useUsersStore = create((set, get) => ({
   
   setCurrentUser: (user) => set({ currentUser: user }),
   
+  // Helper function to get roles directly
+  getRoles: () => {
+    const { roles } = get();
+    return roles.length > 0 ? roles : [
+      { id: 'admin', name: 'Administrador', description: 'Acceso total al sistema' },
+      { id: 'agency', name: 'Agencia', description: 'Gestión de reservas y tours' },
+      { id: 'guide', name: 'Guía', description: 'Vista de asignaciones y agenda' },
+      { id: 'viewer', name: 'Visualizador', description: 'Solo lectura' }
+    ];
+  },
+  
+  // Helper function to get permissions by module
+  getPermissionsByModule: () => {
+    const { permissions } = get();
+    return permissions.reduce((acc, perm) => {
+      if (!acc[perm.module]) {
+        acc[perm.module] = [];
+      }
+      acc[perm.module].push(perm);
+      return acc;
+    }, {});
+  },
+  
   resetStore: () => {
     set({
       users: [],

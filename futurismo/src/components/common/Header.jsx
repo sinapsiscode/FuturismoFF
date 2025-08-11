@@ -1,11 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
-import { Bars3Icon, BellIcon } from '@heroicons/react/24/outline';
+import { Bars3Icon } from '@heroicons/react/24/outline';
 import useHeader from '../../hooks/useHeader';
 import LanguageToggle from './LanguageToggle';
 import SearchBar from './SearchBar';
 import ProfileMenu from './ProfileMenu';
+import NotificationBell from '../notifications/NotificationBell';
 
 const Header = ({ toggleSidebar, sidebarOpen }) => {
   const { t } = useTranslation();
@@ -51,19 +52,7 @@ const Header = ({ toggleSidebar, sidebarOpen }) => {
           <div className="flex items-center space-x-4">
             <LanguageToggle />
             
-            {/* Notifications */}
-            <button
-              onClick={toggleNotifications}
-              className="relative p-2 rounded-lg hover:bg-gray-100 transition-colors"
-              aria-label={t('notifications.title')}
-            >
-              <BellIcon className="w-5 h-5 text-gray-500" />
-              {unreadCount > 0 && (
-                <span className="absolute top-0 right-0 -mt-1 -mr-1 px-2 py-1 text-xs text-white bg-red-500 rounded-full">
-                  {unreadCount > 9 ? '9+' : unreadCount}
-                </span>
-              )}
-            </button>
+            <NotificationBell />
 
             <ProfileMenu
               isOpen={profileMenuOpen}
