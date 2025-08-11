@@ -48,32 +48,41 @@ const Sidebar = ({ isOpen, toggleSidebar, isMobile }) => {
       guideItems.push({ path: '/profile', icon: UserIcon, label: t('navigation.profile') });
       return guideItems;
     } else if (user?.role === 'admin') {
-      return [
-        ...baseItems,
-        { path: '/monitoring', icon: MapIcon, label: t('navigation.monitoring') },
-        { path: '/admin/reservations', icon: CalendarIcon, label: t('navigation.reservationManagement') },
-        { path: '/assignments', icon: UserCircleIcon, label: t('navigation.assignments') },
-        { path: '/guides', icon: UserIcon, label: t('navigation.guides') },
-        { path: '/clients', icon: BuildingOffice2Icon, label: 'Clientes' },
-        { path: '/drivers', icon: UserIcon, label: 'Choferes' },
-        { path: '/vehicles', icon: TruckIcon, label: 'Vehículos' },
-        { path: '/marketplace', icon: MagnifyingGlassIcon, label: t('navigation.marketplace') },
-        { path: '/providers', icon: BuildingOffice2Icon, label: t('navigation.providers') },
-        { path: '/emergency', icon: ShieldCheckIcon, label: t('navigation.emergencies') },
-        { path: '/agenda', icon: CalendarDaysIcon, label: t('navigation.coordination') },
-        { path: '/admin/reports', icon: ChartBarIcon, label: t('navigation.reports') },
-        { path: '/history', icon: DocumentTextIcon, label: t('navigation.history') },
-        { path: '/chat', icon: ChatBubbleLeftRightIcon, label: t('navigation.chat') },
-        { path: '/users', icon: UserGroupIcon, label: t('navigation.users') },
-        { path: '/settings', icon: CogIcon, label: t('navigation.settings') },
-        { path: '/profile', icon: UserIcon, label: t('navigation.profile') }
-      ];
+      try {
+        return [
+          ...baseItems,
+          { path: '/monitoring', icon: MapIcon, label: t('navigation.monitoring') },
+          { path: '/admin/reservations', icon: CalendarIcon, label: t('navigation.reservationManagement') },
+          { path: '/assignments', icon: UserCircleIcon, label: t('navigation.assignments') },
+          { path: '/guides', icon: UserIcon, label: t('navigation.guides') },
+          { path: '/clients', icon: BuildingOffice2Icon, label: 'Clientes' },
+          { path: '/drivers', icon: TruckIcon, label: 'Choferes' },
+          { path: '/vehicles', icon: TruckIcon, label: 'Vehículos' },
+          { path: '/marketplace', icon: MagnifyingGlassIcon, label: t('navigation.marketplace') },
+          { path: '/providers', icon: BuildingOffice2Icon, label: t('navigation.providers') },
+          { path: '/emergency', icon: ShieldCheckIcon, label: t('navigation.emergencies') },
+          { path: '/agenda', icon: CalendarDaysIcon, label: t('navigation.coordination') },
+          { path: '/admin/reports', icon: ChartBarIcon, label: t('navigation.reports') },
+          { path: '/history', icon: DocumentTextIcon, label: t('navigation.history') },
+          { path: '/chat', icon: ChatBubbleLeftRightIcon, label: t('navigation.chat') },
+          { path: '/users', icon: UserGroupIcon, label: t('navigation.users') },
+          { path: '/settings', icon: CogIcon, label: t('navigation.settings') },
+          { path: '/profile', icon: UserIcon, label: t('navigation.profile') }
+        ];
+      } catch (error) {
+        console.error('Error generating admin menu:', error);
+        return baseItems;
+      }
     }
     
     return baseItems;
   };
   
   const menuItems = getMenuItems();
+  
+  // Debug: verificar que los items se generen correctamente
+  console.log('Sidebar rendering for user:', user);
+  console.log('Menu items generated:', menuItems);
   
   // Routes that should only match exactly (not as prefixes)
   const exactMatchRoutes = ['/marketplace', '/dashboard', '/monitoring', '/reservations', '/history', '/chat', '/profile'];

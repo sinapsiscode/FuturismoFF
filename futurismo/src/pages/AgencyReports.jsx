@@ -113,7 +113,7 @@ const AgencyReports = () => {
   };
 
   const exportReport = () => {
-    // Implementar exportación a PDF/Excel
+    // Implementar exportación a PDF/Excel (sin CSV)
     console.log('Exportando reporte...', reportData);
   };
 

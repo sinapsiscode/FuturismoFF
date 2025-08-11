@@ -8,7 +8,6 @@ import {
   UserIcon,
   EyeIcon,
   ChatBubbleLeftRightIcon,
-  PhoneIcon,
   EnvelopeIcon,
   MapPinIcon,
   FunnelIcon
@@ -119,12 +118,6 @@ const AdminAgendaView = () => {
     console.log('Ver detalles de:', guide);
   };
 
-  const handleCallGuide = (guide) => {
-    // Aquí podrías integrar con un sistema de llamadas o mostrar el número
-    if (guide.phone) {
-      window.open(`tel:${guide.phone}`, '_self');
-    }
-  };
 
   const filteredGuides = freelanceGuides.filter(guide => selectedGuides.includes(guide.id));
 
@@ -293,17 +286,10 @@ const AdminAgendaView = () => {
                     </button>
                     <button
                       onClick={() => handleSendMessage(guide)}
-                      className="flex-1 px-2 py-1 bg-green-50 text-green-600 rounded text-xs hover:bg-green-100 transition-colors"
+                      className="w-full px-2 py-1 bg-green-50 text-green-600 rounded text-xs hover:bg-green-100 transition-colors"
                       title="Enviar mensaje"
                     >
                       <ChatBubbleLeftRightIcon className="h-3 w-3 mx-auto" />
-                    </button>
-                    <button
-                      onClick={() => handleCallGuide(guide)}
-                      className="flex-1 px-2 py-1 bg-purple-50 text-purple-600 rounded text-xs hover:bg-purple-100 transition-colors"
-                      title={`Llamar a ${guide.phone || 'N/A'}`}
-                    >
-                      <PhoneIcon className="h-3 w-3 mx-auto" />
                     </button>
                   </div>
                 </div>

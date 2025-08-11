@@ -137,9 +137,9 @@ function Reports() {
       .slice(0, 5);
   }
 
-  const exportToCSV = async () => {
+  const exportToExcel = async () => {
     try {
-      // Usar el servicio de estadísticas para exportar
+      // Usar el servicio de estadísticas para exportar solo Excel (sin CSV)
       const blob = await useStatisticsStore.getState().exportToExcel({
         startDate: format(startDate, 'yyyy-MM-dd'),
         endDate: format(endDate, 'yyyy-MM-dd'),
@@ -156,37 +156,8 @@ function Reports() {
         
         toast.success('Reporte exportado exitosamente');
       } else {
-        // Fallback: exportar CSV básico
-        const headers = ['Métrica', 'Valor'];
-        const rows = [
-          ['Total Reservas', reportData.totalBookings],
-          ['Ingresos Totales', `S/. ${(reportData.totalRevenue || 0).toFixed(2)}`],
-          ['Total Usuarios', reportData.totalUsers],
-          ['Total Proveedores', reportData.totalProviders],
-          '',
-          ['Estados de Reservas', ''],
-          ...Object.entries(reportData.bookingsByStatus || {}).map(([status, count]) => [status, count]),
-          '',
-          ['Top Destinos', ''],
-          ...(reportData.topDestinations || []).map(d => [d.location, d.count]),
-          '',
-          ['Top Proveedores', ''],
-          ...(reportData.topProviders || []).map(p => [p.providerName, `S/. ${(p.revenue || 0).toFixed(2)}`])
-        ];
-
-        const csvContent = [headers, ...rows]
-          .map(row => row.join(','))
-          .join('\n');
-
-        const csvBlob = new Blob([csvContent], { type: 'text/csv' });
-        const url = window.URL.createObjectURL(csvBlob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `reporte_${format(new Date(), 'yyyy-MM-dd')}.csv`;
-        a.click();
-        window.URL.revokeObjectURL(url);
-        
-        toast.success('Reporte CSV exportado exitosamente');
+        // Solo Excel, no CSV fallback
+        toast.error('Error al generar el archivo Excel');
       }
     } catch (error) {
       console.error('Error al exportar reporte:', error);
@@ -276,12 +247,13 @@ function Reports() {
 
             {/* Botón exportar */}
             <button
-              onClick={exportToCSV}
+              onClick={exportToExcel}
               className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
             >
               <DocumentArrowDownIcon className="h-5 w-5" />
               Exportar Excel
             </button>
+
           </div>
         </div>
 

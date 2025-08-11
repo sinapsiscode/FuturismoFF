@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeftIcon, PhoneIcon, ExclamationTriangleIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
+import { ArrowLeftIcon, ExclamationTriangleIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
 import TourProgress from '../../components/monitoring/TourProgress';
 import toast from 'react-hot-toast';
 
@@ -67,14 +67,6 @@ const GuideTourView = () => {
                 <ExclamationTriangleIcon className="w-4 h-4" />
                 Reportar Incidente
               </button>
-              
-              <button
-                onClick={() => window.open('tel:+51987654321')}
-                className="btn btn-outline flex items-center gap-2"
-              >
-                <PhoneIcon className="w-4 h-4" />
-                Contactar Agencia
-              </button>
 
               <button
                 onClick={handleCompleteTour}
@@ -117,12 +109,9 @@ const GuideTourView = () => {
             <p className="text-sm text-gray-600 mb-3">
               Agencia: +51 987 654 321
             </p>
-            <button 
-              onClick={() => window.open('tel:+51987654321')}
-              className="btn btn-outline w-full"
-            >
-              Llamar Ahora
-            </button>
+            <p className="text-xs text-gray-500">
+              Contacta a la agencia por chat o mensaje
+            </p>
           </div>
 
           <div className="bg-white p-4 rounded-lg shadow border border-gray-200">

@@ -57,13 +57,6 @@ const useExportPanel = () => {
       icon: DocumentTextIcon, 
       color: 'bg-red-500 hover:bg-red-600',
       description: t('dashboard.export.formats.pdf.description')
-    },
-    { 
-      format: 'csv', 
-      label: 'CSV', 
-      icon: PhotoIcon, 
-      color: 'bg-blue-500 hover:bg-blue-600',
-      description: t('dashboard.export.formats.csv.description')
     }
   ];
 

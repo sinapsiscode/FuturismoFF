@@ -4,7 +4,6 @@ import {
   ClockIcon, 
   UserGroupIcon, 
   ExclamationTriangleIcon,
-  PhoneIcon,
   ChatBubbleLeftRightIcon
 } from '@heroicons/react/24/outline';
 import { formatters } from '../../utils/formatters';
@@ -36,10 +35,6 @@ const TourHeader = ({ tour, estimatedDelay, progressPercentage }) => {
         </div>
 
         <div className="flex items-center gap-3">
-          <button className="btn btn-outline flex items-center gap-2">
-            <PhoneIcon className="w-4 h-4" />
-            {t('monitoring.tour.callGuide')}
-          </button>
           <button className="btn btn-primary flex items-center gap-2">
             <ChatBubbleLeftRightIcon className="w-4 h-4" />
             {t('monitoring.tour.sendMessage')}

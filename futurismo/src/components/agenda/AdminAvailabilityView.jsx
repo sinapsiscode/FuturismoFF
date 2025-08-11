@@ -5,7 +5,6 @@ import {
   ClockIcon,
   CalendarDaysIcon,
   MapPinIcon,
-  PhoneIcon,
   ChatBubbleLeftRightIcon
 } from '@heroicons/react/24/outline';
 import { Dialog, Transition } from '@headlessui/react';
@@ -216,10 +215,6 @@ const AdminAvailabilityView = () => {
               <button className="flex-1 flex items-center justify-center space-x-1 px-2 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600">
                 <ChatBubbleLeftRightIcon className="w-3 h-3" />
                 <span>Chat</span>
-              </button>
-              <button className="flex-1 flex items-center justify-center space-x-1 px-2 py-1 bg-green-500 text-white rounded text-xs hover:bg-green-600">
-                <PhoneIcon className="w-3 h-3" />
-                <span>Llamar</span>
               </button>
             </div>
           </div>

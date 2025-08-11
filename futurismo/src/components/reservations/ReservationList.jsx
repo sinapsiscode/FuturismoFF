@@ -44,10 +44,20 @@ const ReservationList = () => {
   const [selectedReservation, setSelectedReservation] = useState(null);
   const [showDetail, setShowDetail] = useState(false);
   const [showActions, setShowActions] = useState(null);
-  const [showExportModal, setShowExportModal] = useState(false);
   const [showRatingModal, setShowRatingModal] = useState(false);
   const [selectedService, setSelectedService] = useState(null);
+  const [showExportModal, setShowExportModal] = useState(false);
 
+  const handleExport = () => {
+    // Verificar si hay datos para exportar
+    if (filteredReservations.length === 0) {
+      toast.warning(t('reservations.noDataToExport'));
+      return;
+    }
+    
+    // Abrir el modal de exportación
+    setShowExportModal(true);
+  };
   
   const getStatusLabel = (status) => {
     const labels = {
@@ -116,16 +126,6 @@ const ReservationList = () => {
   };
 
 
-  const handleExport = () => {
-    // Verificar si hay datos para exportar
-    if (filteredReservations.length === 0) {
-      toast.warning(t('reservations.noDataToExport'));
-      return;
-    }
-    
-    // Abrir el modal de exportación
-    setShowExportModal(true);
-  };
 
   const handleModalExport = async (format) => {
     try {
@@ -183,7 +183,7 @@ const ReservationList = () => {
               <button 
                 onClick={handleExport}
                 className="btn btn-outline flex items-center gap-2 hover:bg-primary-50 hover:border-primary-500"
-                title="Exportar reservas filtradas en Excel, PDF o CSV"
+                title="Exportar reservas filtradas en Excel y PDF"
               >
                 <ArrowDownTrayIcon className="w-4 h-4" />
                 {t('search.export')} ({filteredReservations.length})

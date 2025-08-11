@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   CalendarIcon,
   UserGroupIcon,
@@ -12,7 +13,8 @@ import {
   TruckIcon,
   XMarkIcon,
   InformationCircleIcon,
-  ChevronRightIcon
+  ChevronRightIcon,
+  BuildingOffice2Icon
 } from '@heroicons/react/24/outline';
 import { CheckIcon } from '@heroicons/react/24/solid';
 import useToursStore from '../stores/toursStore';
@@ -24,6 +26,7 @@ import { formatters } from '../utils/formatters';
 import toast from 'react-hot-toast';
 
 const TourAssignments = () => {
+  const navigate = useNavigate();
   const [selectedTour, setSelectedTour] = useState(null);
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [assignmentType, setAssignmentType] = useState('guide'); // 'guide', 'agency', 'driver', 'vehicle'
@@ -253,6 +256,54 @@ const TourAssignments = () => {
         <p className="text-gray-600">
           Asigna guías, agencias, choferes y vehículos a los tours programados
         </p>
+      </div>
+
+      {/* Quick Access Management */}
+      <div className="mb-8">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Gestión de Recursos</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <button
+            onClick={() => navigate('/drivers')}
+            className="bg-white rounded-lg shadow p-4 hover:shadow-md transition-shadow text-left border border-gray-200"
+          >
+            <div className="flex items-center">
+              <TruckIcon className="w-6 h-6 text-blue-600 mr-3" />
+              <div>
+                <h4 className="font-semibold text-gray-900">Choferes</h4>
+                <p className="text-sm text-gray-600">Gestionar conductores</p>
+              </div>
+              <ChevronRightIcon className="w-4 h-4 text-gray-400 ml-auto" />
+            </div>
+          </button>
+          
+          <button
+            onClick={() => navigate('/clients')}
+            className="bg-white rounded-lg shadow p-4 hover:shadow-md transition-shadow text-left border border-gray-200"
+          >
+            <div className="flex items-center">
+              <BuildingOffice2Icon className="w-6 h-6 text-green-600 mr-3" />
+              <div>
+                <h4 className="font-semibold text-gray-900">Clientes</h4>
+                <p className="text-sm text-gray-600">Gestionar clientes</p>
+              </div>
+              <ChevronRightIcon className="w-4 h-4 text-gray-400 ml-auto" />
+            </div>
+          </button>
+          
+          <button
+            onClick={() => navigate('/vehicles')}
+            className="bg-white rounded-lg shadow p-4 hover:shadow-md transition-shadow text-left border border-gray-200"
+          >
+            <div className="flex items-center">
+              <TruckIcon className="w-6 h-6 text-purple-600 mr-3" />
+              <div>
+                <h4 className="font-semibold text-gray-900">Vehículos</h4>
+                <p className="text-sm text-gray-600">Gestionar flota</p>
+              </div>
+              <ChevronRightIcon className="w-4 h-4 text-gray-400 ml-auto" />
+            </div>
+          </button>
+        </div>
       </div>
 
       {/* Stats */}
