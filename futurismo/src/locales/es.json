@@ -1456,5 +1456,126 @@
       "religion": "Religión",
       "museums": "Museos"
     }
+  },
+  "history": {
+    "title": "Historial de Servicios",
+    "description": {
+      "admin": "Gestiona y revisa todos los servicios realizados en el sistema",
+      "agency": "Consulta el historial completo de servicios de tu agencia",
+      "guide": "Revisa tu historial personal de servicios realizados"
+    },
+    "stats": {
+      "filtered": "Filtrados",
+      "completed": "Completados", 
+      "pending": "Pendientes"
+    },
+    "filters": {
+      "title": "Filtros de Búsqueda",
+      "clear": "Limpiar filtros",
+      "searchPlaceholder": "Buscar por servicio, cliente, guía o chofer...",
+      "dateRange": "Rango de fechas",
+      "status": "Estado",
+      "serviceType": "Tipo de servicio",
+      "guide": "Guía",
+      "driver": "Chofer",
+      "vehicle": "Vehículo",
+      "dateRange": {
+        "all": "Todas las fechas",
+        "today": "Hoy",
+        "week": "Última semana",
+        "month": "Último mes",
+        "year": "Último año"
+      },
+      "status": {
+        "all": "Todos los estados",
+        "completed": "Completado",
+        "cancelled": "Cancelado", 
+        "pending": "Pendiente"
+      },
+      "serviceType": {
+        "all": "Todos los tipos",
+        "regular": "Tour Regular",
+        "private": "Tour Privado",
+        "transfer": "Traslado"
+      },
+      "guide": {
+        "all": "Todos los guías"
+      },
+      "driver": {
+        "all": "Todos los choferes"
+      },
+      "vehicle": {
+        "all": "Todos los vehículos"
+      }
+    },
+    "table": {
+      "headers": {
+        "date": "Fecha",
+        "service": "Servicio",
+        "client": "Cliente", 
+        "type": "Tipo",
+        "status": "Estado",
+        "guide": "Guía",
+        "amount": "Monto",
+        "actions": "Acciones"
+      },
+      "driver": "Chofer",
+      "status": {
+        "completed": "Completado",
+        "cancelled": "Cancelado",
+        "pending": "Pendiente"
+      },
+      "serviceType": {
+        "regular": "Regular",
+        "private": "Privado",
+        "transfer": "Traslado"
+      },
+      "actions": {
+        "viewDetails": "Ver detalles"
+      },
+      "noResults": "No se encontraron resultados",
+      "noResultsDescription": "Intenta ajustar los filtros de búsqueda"
+    },
+    "pagination": {
+      "previous": "Anterior",
+      "next": "Siguiente", 
+      "pageInfo": "Página {{current}} de {{total}}",
+      "showing": "Mostrando",
+      "to": "a",
+      "of": "de",
+      "results": "resultados"
+    },
+    "details": {
+      "title": "Detalles del Servicio",
+      "basicInfo": "Información Básica",
+      "serviceName": "Nombre del Servicio",
+      "client": "Cliente",
+      "date": "Fecha",
+      "status": "Estado",
+      "type": "Tipo",
+      "serviceDetails": "Detalles del Servicio",
+      "duration": "Duración",
+      "passengers": "Pasajeros", 
+      "amount": "Monto",
+      "guide": "Guía",
+      "transport": "Transporte",
+      "driver": "Chofer",
+      "vehicle": "Vehículo",
+      "notes": "Notas",
+      "serviceType": {
+        "regular": "Tour Regular",
+        "private": "Tour Privado", 
+        "transfer": "Traslado"
+      },
+      "status": {
+        "completed": "Completado",
+        "cancelled": "Cancelado",
+        "pending": "Pendiente"
+      }
+    },
+    "error": {
+      "title": "Error al cargar historial",
+      "retry": "Reintentar"
+    }
   }
 }

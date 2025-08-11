@@ -16,10 +16,6 @@ const resources = {
   en: { translation: enTranslations }
 };
 
-console.log('🌍 Cargando traducciones...');
-console.log('📊 Dashboard stats en español:', esTranslations.dashboard?.stats);
-console.log('🔑 Clave vsPreviousMonth:', esTranslations.dashboard?.stats?.vsPreviousMonth);
-
 i18n
   .use(LanguageDetector)
   .use(initReactI18next)
@@ -34,15 +30,7 @@ i18n
       order: ['localStorage', 'navigator'],
       caches: ['localStorage']
     },
-    debug: true // Activar debug para ver qué está pasando
-  })
-  .then(() => {
-    console.log('✅ i18n inicializado correctamente');
-    console.log('🏷️ Idioma detectado:', i18n.language);
-    console.log('🔍 Probando traducción:', i18n.t('dashboard.stats.vsPreviousMonth'));
-  })
-  .catch(error => {
-    console.error('❌ Error inicializando i18n:', error);
+    debug: false
   });
 
 export default i18n;
