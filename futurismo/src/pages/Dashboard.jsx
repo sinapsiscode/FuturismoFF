@@ -36,7 +36,6 @@ const Dashboard = () => {
         activeServices: 48,
         totalAgencies: 12,
         totalGuides: 35,
-        systemHealth: 99.9,
         totalReservations: 1847,
         totalTourists: 4532,
         totalRevenue: 285700
@@ -105,7 +104,7 @@ const Dashboard = () => {
       </div>
 
       {/* Stats Squares2X2Icon */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className={`grid grid-cols-1 md:grid-cols-2 ${user?.role === 'admin' ? 'lg:grid-cols-3' : 'lg:grid-cols-4'} gap-6 mb-8`}>
         {user?.role === 'guide' ? (
           <>
             <StatsCard
@@ -189,12 +188,6 @@ const Dashboard = () => {
               icon={CurrencyDollarIcon}
               trend="+28%"
               color="secondary"
-            />
-            <StatsCard
-              title={t('dashboard.systemHealth')}
-              value={`${stats.systemHealth}%`}
-              icon={ChartBarIcon}
-              color="primary"
             />
           </>
         )}  

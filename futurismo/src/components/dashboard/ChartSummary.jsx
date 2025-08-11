@@ -8,7 +8,8 @@ const ChartSummary = ({ summaryData }) => {
   const summaryItems = [
     {
       label: t('dashboard.chart.summary.popularTour'),
-      value: summaryData.popularTour
+      value: summaryData.popularTour,
+      highlight: true
     },
     {
       label: t('dashboard.chart.summary.avgPerBooking'),
@@ -17,20 +18,18 @@ const ChartSummary = ({ summaryData }) => {
     {
       label: t('dashboard.chart.summary.bestDay'),
       value: summaryData.bestDay
-    },
-    {
-      label: t('dashboard.chart.summary.conversionRate'),
-      value: `${summaryData.conversionRate}%`
     }
   ];
 
   return (
-    <div className="mt-6 pt-6 border-t border-gray-200">
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+    <div className="mt-8 pt-6 border-t border-gray-100">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {summaryItems.map((item, index) => (
-          <div key={index}>
-            <p className="text-sm text-gray-600">{item.label}</p>
-            <p className="font-semibold text-gray-900">{item.value}</p>
+          <div key={index} className="text-center">
+            <p className="text-sm font-medium text-gray-500 uppercase tracking-wider">{item.label}</p>
+            <p className={`mt-1 text-lg font-bold ${item.highlight ? 'text-blue-600' : 'text-gray-900'}`}>
+              {item.value}
+            </p>
           </div>
         ))}
       </div>

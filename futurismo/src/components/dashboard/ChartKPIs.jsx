@@ -11,69 +11,72 @@ const ChartKPIs = ({ kpiData }) => {
     {
       key: 'totalReservas',
       label: t('dashboard.chart.kpis.totalReservations'),
-      bgClass: 'bg-primary-50',
-      textClass: 'text-primary',
+      bgClass: 'bg-blue-50',
+      textClass: 'text-blue',
       showCurrency: false
     },
     {
       key: 'totalTuristas',
       label: t('dashboard.chart.kpis.totalTourists'),
-      bgClass: 'bg-secondary-50',
-      textClass: 'text-secondary',
+      bgClass: 'bg-amber-50',
+      textClass: 'text-amber',
       showCurrency: false
     },
     {
       key: 'ingresosTotales',
       label: t('dashboard.chart.kpis.totalRevenue'),
-      bgClass: 'bg-success-50',
-      textClass: 'text-success',
+      bgClass: 'bg-green-50',
+      textClass: 'text-green',
       showCurrency: true
-    },
-    {
-      key: 'tasaOcupacion',
-      label: t('dashboard.chart.kpis.occupancyRate'),
-      bgClass: 'bg-purple-50',
-      textClass: 'text-purple',
-      showCurrency: false,
-      isPercentage: true
     }
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
       {kpiConfigs.map((config) => {
         const data = kpiData[config.key];
         const isPositive = data.crecimiento >= 0;
         
         return (
-          <div key={config.key} className={`${config.bgClass} rounded-lg p-4`}>
-            <div className="flex items-center justify-between mb-2">
-              <p className={`text-sm font-medium ${config.textClass}-900`}>
+          <div key={config.key} className={`${config.bgClass} rounded-xl p-6 relative overflow-hidden`}>
+            <div className="flex items-center justify-between mb-3">
+              <p className={`text-sm font-semibold ${config.textClass}-700 uppercase tracking-wider`}>
                 {config.label}
               </p>
-              <div className={`flex items-center text-xs font-medium ${
+              <div className={`flex items-center text-sm font-bold ${
                 isPositive ? 'text-green-600' : 'text-red-600'
               }`}>
                 {isPositive ? (
-                  <ArrowTrendingUpIcon className="w-3 h-3 mr-1" />
+                  <ArrowTrendingUpIcon className="w-4 h-4 mr-1" />
                 ) : (
-                  <ArrowTrendingDownIcon className="w-3 h-3 mr-1" />
+                  <ArrowTrendingDownIcon className="w-4 h-4 mr-1" />
                 )}
                 {Math.abs(data.crecimiento)}%
               </div>
             </div>
-            <p className={`text-2xl font-bold ${config.textClass}-800`}>
+            <p className={`text-3xl font-bold ${config.textClass}-900`}>
               {config.showCurrency && '$'}
-              {config.showCurrency ? formatters.formatCurrency(data.actual) : data.actual}
+              {config.showCurrency ? formatters.formatCurrency(data.actual) : data.actual.toLocaleString()}
               {config.isPercentage && '%'}
             </p>
-            <p className={`text-xs ${config.textClass}-700 mt-1`}>
+            <p className={`text-sm ${config.textClass}-600 mt-2`}>
               {t('dashboard.chart.kpis.vs')} 
-              {config.showCurrency && ' $'}
-              {config.showCurrency ? formatters.formatCurrency(data.anterior) : data.anterior}
-              {config.isPercentage && '%'} 
+              {config.showCurrency ? formatters.formatCurrency(data.anterior) : data.anterior.toLocaleString()}
               {' '}{t('dashboard.chart.kpis.previousMonth')}
             </p>
+            <div className={`absolute -right-4 -bottom-4 ${config.textClass}-100 opacity-20`}>
+              <svg className="w-24 h-24" fill="currentColor" viewBox="0 0 24 24">
+                {config.key === 'totalReservas' && (
+                  <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/>
+                )}
+                {config.key === 'totalTuristas' && (
+                  <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+                )}
+                {config.key === 'ingresosTotales' && (
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1.93.66 1.64 2.08 1.64 1.51 0 2.1-.59 2.1-1.42 0-.84-.37-1.17-2.31-1.56-2.16-.47-3.66-1.25-3.66-3.46 0-1.79 1.29-2.93 3.27-3.26V4.68h2.67v1.95c1.37.37 2.5 1.23 2.61 2.85h-1.98c-.1-.81-.6-1.44-1.76-1.44-1.26 0-1.83.47-1.83 1.21 0 .68.39 1.01 2.32 1.39 2.02.41 3.66 1.12 3.66 3.65-.01 1.94-1.39 3.04-3.19 3.4z"/>
+                )}
+              </svg>
+            </div>
           </div>
         );
       })}
@@ -94,11 +97,6 @@ ChartKPIs.propTypes = {
       crecimiento: PropTypes.number.isRequired
     }).isRequired,
     ingresosTotales: PropTypes.shape({
-      actual: PropTypes.number.isRequired,
-      anterior: PropTypes.number.isRequired,
-      crecimiento: PropTypes.number.isRequired
-    }).isRequired,
-    tasaOcupacion: PropTypes.shape({
       actual: PropTypes.number.isRequired,
       anterior: PropTypes.number.isRequired,
       crecimiento: PropTypes.number.isRequired
