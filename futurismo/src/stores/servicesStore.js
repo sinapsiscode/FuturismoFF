@@ -9,7 +9,9 @@ const useServicesStore = create((set, get) => ({
   historicalServices: [],
   filters: {
     status: '',
-    date: null,
+    date: '',
+    guide: '',
+    client: '',
     serviceType: '',
     search: ''
   },
@@ -18,32 +20,48 @@ const useServicesStore = create((set, get) => ({
   selectedService: null,
   mapView: true, // true = vista mapa, false = vista tarjetas
 
+  // Paginación
+  pagination: {
+    page: 1,
+    pageSize: 20,
+    total: 0,
+    totalPages: 0
+  },
+
   // Acciones
   loadServices: async (filters = {}) => {
     set({ isLoading: true, error: null });
     
     try {
-      const result = await servicesService.getServices(filters);
+      const { filters: storeFilters, pagination } = get();
+      const params = {
+        ...storeFilters,
+        ...filters,
+        page: pagination.page,
+        pageSize: pagination.pageSize
+      };
+      
+      const result = await servicesService.getServices(params);
       
       if (!result.success) {
         throw new Error(result.error || 'Error al cargar servicios');
       }
       
       const services = result.data;
-      const active = services.filter(s => 
-        s.status !== SERVICE_STATUS.FINISHED && 
-        s.status !== SERVICE_STATUS.CANCELLED
-      );
-      
-      const historical = services.filter(s => 
-        s.status === SERVICE_STATUS.FINISHED || 
-        s.status === SERVICE_STATUS.CANCELLED
-      );
+      // Como ahora son plantillas de servicios, no hay servicios activos/históricos
+      const active = services; // Todos los servicios están "activos" (disponibles)
+      const historical = []; // No hay histórico de plantillas
       
       set({ 
         services, 
         activeServices: active,
         historicalServices: historical,
+        pagination: {
+          page: 1,
+          pageSize: 20,
+          total: services.length,
+          totalPages: Math.ceil(services.length / 20)
+        },
         isLoading: false
       });
       
@@ -94,10 +112,7 @@ const useServicesStore = create((set, get) => ({
       
       set((state) => ({
         services: [...state.services, result.data],
-        activeServices: result.data.status !== SERVICE_STATUS.FINISHED && 
-                       result.data.status !== SERVICE_STATUS.CANCELLED
-          ? [...state.activeServices, result.data]
-          : state.activeServices,
+        activeServices: [...state.activeServices, result.data], // Todos los servicios son activos
         isLoading: false
       }));
       
@@ -128,14 +143,8 @@ const useServicesStore = create((set, get) => ({
         
         return {
           services: updatedServices,
-          activeServices: updatedServices.filter(s => 
-            s.status !== SERVICE_STATUS.FINISHED && 
-            s.status !== SERVICE_STATUS.CANCELLED
-          ),
-          historicalServices: updatedServices.filter(s => 
-            s.status === SERVICE_STATUS.FINISHED || 
-            s.status === SERVICE_STATUS.CANCELLED
-          ),
+          activeServices: updatedServices, // Todos los servicios son activos
+          historicalServices: [], // No hay histórico de plantillas
           isLoading: false
         };
       });
@@ -208,17 +217,44 @@ const useServicesStore = create((set, get) => ({
     }
   },
 
+  // Gestión de filtros con recarga automática
   setFilters: (filters) => {
     set((state) => ({
-      filters: { ...state.filters, ...filters }
+      filters: { ...state.filters, ...filters },
+      pagination: { ...state.pagination, page: 1 }
     }));
+    return get().loadServices();
+  },
+
+  clearFilters: () => {
+    set({
+      filters: {
+        status: '',
+        date: '',
+        guide: '',
+        client: '',
+        serviceType: '',
+        search: ''
+      },
+      pagination: { ...get().pagination, page: 1 }
+    });
+    return get().loadServices();
+  },
+
+  setPage: (page) => {
+    set((state) => ({
+      pagination: { ...state.pagination, page }
+    }));
+    return get().loadServices();
   },
 
   resetFilters: () => {
     set({
       filters: {
         status: '',
-        date: null,
+        date: '',
+        guide: '',
+        client: '',
         serviceType: '',
         search: ''
       }

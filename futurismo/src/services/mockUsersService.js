@@ -9,8 +9,8 @@ import { APP_CONFIG } from '../config/app.config';
 const SYSTEM_ROLES = [
   { id: 'admin', name: 'Administrador', description: 'Acceso total al sistema' },
   { id: 'agency', name: 'Agencia', description: 'Gestión de reservas y tours' },
-  { id: 'guide', name: 'Guía', description: 'Vista de asignaciones y agenda' },
-  { id: 'viewer', name: 'Visualizador', description: 'Solo lectura' }
+  { id: 'guide-planta', name: 'Guía Planta', description: 'Guía empleado fijo de la empresa' },
+  { id: 'guide-freelance', name: 'Guía Freelance', description: 'Guía independiente por servicios' }
 ];
 
 // Permisos del sistema
@@ -95,7 +95,7 @@ const MOCK_USERS_DB = [
     id: 'user-003',
     email: 'juan.perez@futurismo.com',
     name: 'Juan Pérez',
-    roleId: 'guide',
+    roleId: 'guide-planta',
     status: 'activo',
     phone: '+51 976 543 210',
     department: 'Operaciones',

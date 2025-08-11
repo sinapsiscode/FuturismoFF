@@ -1,7 +1,8 @@
-import { XMarkIcon, CalendarIcon, ClockIcon, UserGroupIcon, MapPinIcon, PhoneIcon, CurrencyDollarIcon, DocumentTextIcon, ArrowDownTrayIcon, PaperAirplaneIcon, PencilIcon, CheckCircleIcon, ExclamationTriangleIcon, BuildingOfficeIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon, CalendarIcon, ClockIcon, UserGroupIcon, MapPinIcon, PhoneIcon, CurrencyDollarIcon, DocumentTextIcon, ArrowDownTrayIcon, PencilIcon, CheckCircleIcon, ExclamationTriangleIcon, BuildingOfficeIcon, EyeIcon, UserIcon } from '@heroicons/react/24/outline';
 import { formatters } from '../../utils/formatters';
 import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
+import { paymentVoucherService } from '../../services/paymentVoucherService';
 
 const ReservationDetail = ({ reservation, onClose }) => {
   const { t } = useTranslation();
@@ -27,22 +28,30 @@ const ReservationDetail = ({ reservation, onClose }) => {
     }
   };
 
-  const handleSendVoucher = () => {
-    // Implementar envío de voucher
-    // TODO: Implementar envío de voucher por email
-    toast.info(t('reservations.sendEmailNotImplemented'));
-  };
 
   const handleDownloadVoucher = () => {
-    // Implementar descarga de voucher
-    // TODO: Implementar descarga de voucher PDF
-    toast.info(t('reservations.downloadPdfNotImplemented'));
+    try {
+      paymentVoucherService.downloadVoucher(reservation, `nota-pago-${reservation.id}.pdf`);
+      toast.success('Nota de pago descargada exitosamente');
+    } catch (error) {
+      console.error('Error downloading voucher:', error);
+      toast.error('Error al descargar la nota de pago');
+    }
   };
 
   const handleConfirmPayment = () => {
     // Implementar confirmación de pago
     // TODO: Implementar confirmación de pago
-    toast.info(t('reservations.confirmPaymentNotImplemented'));
+    toast('Función de confirmar pago aún no implementada', { icon: 'ℹ️' });
+  };
+
+  const handlePreviewVoucher = () => {
+    try {
+      paymentVoucherService.previewVoucher(reservation);
+    } catch (error) {
+      console.error('Error previewing voucher:', error);
+      toast.error('Error al previsualizar la nota de pago');
+    }
   };
 
   return (
@@ -334,18 +343,18 @@ const ReservationDetail = ({ reservation, onClose }) => {
         <div className="flex items-center justify-between p-6 border-t border-gray-200 bg-gray-50">
           <div className="flex gap-3">
             <button
+              onClick={handlePreviewVoucher}
+              className="btn btn-outline flex items-center gap-2"
+            >
+              <EyeIcon className="w-4 h-4" />
+              Previsualizar
+            </button>
+            <button
               onClick={handleDownloadVoucher}
               className="btn btn-outline flex items-center gap-2"
             >
               <ArrowDownTrayIcon className="w-4 h-4" />
               Descargar Voucher
-            </button>
-            <button
-              onClick={handleSendVoucher}
-              className="btn btn-outline flex items-center gap-2"
-            >
-              <PaperAirplaneIcon className="w-4 h-4" />
-              Enviar por Email
             </button>
           </div>
 

@@ -679,8 +679,8 @@ const useUsersStore = create((set, get) => ({
     return roles.length > 0 ? roles : [
       { id: 'admin', name: 'Administrador', description: 'Acceso total al sistema' },
       { id: 'agency', name: 'Agencia', description: 'Gestión de reservas y tours' },
-      { id: 'guide', name: 'Guía', description: 'Vista de asignaciones y agenda' },
-      { id: 'viewer', name: 'Visualizador', description: 'Solo lectura' }
+      { id: 'guide-planta', name: 'Guía Planta', description: 'Guía empleado fijo de la empresa' },
+      { id: 'guide-freelance', name: 'Guía Freelance', description: 'Guía independiente por servicios' }
     ];
   },
   

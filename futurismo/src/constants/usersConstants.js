@@ -7,13 +7,9 @@ export const USER_STATUS = {
 // User roles
 export const USER_ROLES = {
   ADMIN: 'admin',
-  AGENCY: 'agencia',
-  GUIDE: 'guia',
-  SUPERVISOR: 'supervisor',
-  SALES: 'ventas',
-  ACCOUNTANT: 'contador',
-  RECEPTIONIST: 'recepcionista',
-  MARKETING: 'marketing'
+  AGENCY: 'agency',
+  GUIDE_PLANTA: 'guide-planta',
+  GUIDE_FREELANCE: 'guide-freelance'
 };
 
 import { GUIDE_TYPES as SHARED_GUIDE_TYPES } from './sharedConstants';
@@ -65,22 +61,15 @@ export const DEFAULT_PERMISSIONS = {
     'users.create', 'users.read', 'users.update', 'users.delete',
     'reservations.manage', 'guides.manage', 'reports.view', 'system.admin'
   ],
-  [USER_ROLES.SUPERVISOR]: [
-    'users.read', 'reservations.manage', 'guides.read', 'guides.assign',
-    'monitoring.view', 'reports.view'
-  ],
-  [USER_ROLES.SALES]: [
+  [USER_ROLES.AGENCY]: [
     'reservations.create', 'reservations.read', 'reservations.update',
-    'clients.manage', 'reports.basic'
+    'clients.manage', 'guides.read', 'reports.basic'
   ],
-  [USER_ROLES.ACCOUNTANT]: [
-    'reports.financial', 'reservations.read', 'clients.read', 'payments.manage'
+  [USER_ROLES.GUIDE_PLANTA]: [
+    'reservations.read', 'guides.read', 'agenda.view', 'chat.access'
   ],
-  [USER_ROLES.RECEPTIONIST]: [
-    'reservations.read', 'clients.read', 'guides.read', 'chat.access'
-  ],
-  [USER_ROLES.MARKETING]: [
-    'reports.marketing', 'clients.read', 'reservations.read'
+  [USER_ROLES.GUIDE_FREELANCE]: [
+    'reservations.read', 'marketplace.view', 'agenda.view', 'chat.access'
   ]
 };
 
@@ -138,12 +127,8 @@ export const USER_TABS = [
 export const ROLE_COLORS = {
   [USER_ROLES.ADMIN]: 'red',
   [USER_ROLES.AGENCY]: 'blue',
-  [USER_ROLES.GUIDE]: 'green',
-  [USER_ROLES.SUPERVISOR]: 'purple',
-  [USER_ROLES.SALES]: 'yellow',
-  [USER_ROLES.ACCOUNTANT]: 'indigo',
-  [USER_ROLES.RECEPTIONIST]: 'pink',
-  [USER_ROLES.MARKETING]: 'orange'
+  [USER_ROLES.GUIDE_PLANTA]: 'green',
+  [USER_ROLES.GUIDE_FREELANCE]: 'teal'
 };
 
 // Status colors

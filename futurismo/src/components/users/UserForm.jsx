@@ -74,8 +74,7 @@ const UserForm = ({ user = null, onSubmit, onCancel, isLoading = false }) => {
     getRoles,
     getPermissionsByModule,
     createUser,
-    updateUser,
-    validateUserData
+    updateUser
   } = useUsersStore();
 
   const [roles, setRoles] = useState([]);
@@ -117,7 +116,18 @@ const UserForm = ({ user = null, onSubmit, onCancel, isLoading = false }) => {
   useEffect(() => {
     const systemRoles = getRoles();
     const permissions = getPermissionsByModule();
-    setRoles(systemRoles);
+    console.log('Roles obtenidos:', systemRoles);
+    console.log('Permisos obtenidos:', permissions);
+    
+    // Fallback si getRoles() no devuelve nada
+    const finalRoles = systemRoles?.length ? systemRoles : [
+      { id: 'admin', name: 'Administrador', description: 'Acceso total al sistema' },
+      { id: 'agency', name: 'Agencia', description: 'Gestión de reservas y tours' },
+      { id: 'guide-planta', name: 'Guía Planta', description: 'Guía empleado fijo de la empresa' },
+      { id: 'guide-freelance', name: 'Guía Freelance', description: 'Guía independiente por servicios' }
+    ];
+    
+    setRoles(finalRoles);
     setPermissionsByModule(permissions);
     
     if (user?.permissions) {
@@ -152,15 +162,7 @@ const UserForm = ({ user = null, onSubmit, onCancel, isLoading = false }) => {
       preferences: user?.preferences || DEFAULT_PREFERENCES
     };
 
-    // Validar datos del usuario
-    const validation = validateUserData(userData);
-    if (!validation.isValid) {
-      // Mostrar errores de validación
-      Object.keys(validation.errors).forEach(field => {
-        setValue(field, userData[field], { shouldValidate: true });
-      });
-      return;
-    }
+    // La validación ya está hecha por yup
 
     try {
       if (isEdit) {

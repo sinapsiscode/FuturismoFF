@@ -5,6 +5,7 @@ import { formatters } from '../../utils/formatters';
 import { useReservationsStore } from '../../stores/reservationsStore';
 import { useAuthStore } from '../../stores/authStore';
 import ReservationDetail from './ReservationDetail';
+import ReservationEditModal from './ReservationEditModal';
 import ExportModal from '../common/ExportModal';
 import exportService from '../../services/exportService';
 import ServiceRatingModal from '../ratings/ServiceRatingModal';
@@ -13,6 +14,7 @@ import toast from 'react-hot-toast';
 import { mockReservations } from '../../data/mockReservationsData';
 import { useReservationFilters } from '../../hooks/useReservationFilters';
 import { getStatusBadge, getPaymentBadge, canRateService } from '../../utils/reservationHelpers';
+import { paymentVoucherService } from '../../services/paymentVoucherService';
 
 const ReservationList = () => {
   const { reservations } = useReservationsStore();
@@ -43,6 +45,7 @@ const ReservationList = () => {
   // Estados locales para UI
   const [selectedReservation, setSelectedReservation] = useState(null);
   const [showDetail, setShowDetail] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [showActions, setShowActions] = useState(null);
   const [showRatingModal, setShowRatingModal] = useState(false);
   const [selectedService, setSelectedService] = useState(null);
@@ -87,8 +90,8 @@ const ReservationList = () => {
   };
 
   const handleEdit = (reservation) => {
-    // TODO: Implementar edición
-    toast.info(t('reservations.editNotImplemented'));
+    setSelectedReservation(reservation);
+    setShowEditModal(true);
     setShowActions(null);
   };
 
@@ -123,6 +126,35 @@ const ReservationList = () => {
     setShowRatingModal(false);
     setSelectedService(null);
     toast.success(t('ratings.service.allRatingsCompleted'));
+  };
+
+  const handleSaveReservation = (updatedReservation) => {
+    // TODO: En una implementación real, aquí se actualizaría la reserva en la base de datos
+    // Por ahora solo mostramos el mensaje de éxito
+    setShowEditModal(false);
+    setSelectedReservation(null);
+    // El toast de éxito se muestra desde el modal
+  };
+
+  const handleGenerateVoucher = (reservation) => {
+    try {
+      paymentVoucherService.downloadVoucher(reservation, `nota-pago-${reservation.id}.pdf`);
+      toast.success('Nota de pago generada y descargada exitosamente');
+    } catch (error) {
+      console.error('Error generating voucher:', error);
+      toast.error('Error al generar la nota de pago');
+    }
+    setShowActions(null);
+  };
+
+  const handlePreviewVoucher = (reservation) => {
+    try {
+      paymentVoucherService.previewVoucher(reservation);
+    } catch (error) {
+      console.error('Error previewing voucher:', error);
+      toast.error('Error al previsualizar la nota de pago');
+    }
+    setShowActions(null);
   };
 
 
@@ -389,6 +421,7 @@ const ReservationList = () => {
                                 {t('search.edit')}
                               </button>
                               <button
+                                onClick={() => handleGenerateVoucher(reservation)}
                                 className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                               >
                                 <DocumentTextIcon className="w-4 h-4" />
@@ -470,6 +503,19 @@ const ReservationList = () => {
             setShowDetail(false);
             setSelectedReservation(null);
           }}
+        />
+      )}
+
+      {/* Modal de edición */}
+      {showEditModal && selectedReservation && (
+        <ReservationEditModal
+          reservation={selectedReservation}
+          isOpen={showEditModal}
+          onClose={() => {
+            setShowEditModal(false);
+            setSelectedReservation(null);
+          }}
+          onSave={handleSaveReservation}
         />
       )}
 

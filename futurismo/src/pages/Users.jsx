@@ -6,8 +6,8 @@ import {
   InformationCircleIcon
 } from '@heroicons/react/24/outline';
 import UserList from '../components/users/UserList';
-import UserForm from '../components/users/UserFormSimple';
-import { useUsersStore } from '../stores/usersStoreSimple';
+import UserForm from '../components/users/UserForm';
+import { useUsersStore } from '../stores/usersStore';
 
 const Users = () => {
   const [currentView, setCurrentView] = useState('list'); // 'list', 'create', 'edit', 'view'

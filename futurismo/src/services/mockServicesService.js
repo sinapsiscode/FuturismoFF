@@ -10,166 +10,98 @@ import { SERVICE_STATUS } from '../utils/constants';
 const MOCK_SERVICES_DB = [
   {
     id: 'service-001',
-    code: 'TUR001',
+    code: 'SRV001',
     type: 'city_tour',
-    status: SERVICE_STATUS.IN_SERVICE,
-    client: { 
-      id: 'client-001',
-      name: 'María González', 
-      phone: '+51 987654321',
-      email: 'maria.gonzalez@email.com'
-    },
-    guide: { 
-      id: 'guide-001',
-      name: 'Carlos Mendoza', 
-      phone: '+51 123456789',
-      photoUrl: '/avatars/guide1.jpg'
-    },
-    date: new Date().toISOString().split('T')[0],
-    startTime: '09:00',
-    endTime: '13:00',
-    pickupLocation: 'Plaza de Armas',
-    pickupCoordinates: { lat: -12.0464, lng: -77.0428 },
-    destination: 'Circuito Mágico del Agua',
-    destinationCoordinates: { lat: -12.0711, lng: -77.0369 },
-    currentLocation: { lat: -12.0564, lng: -77.0398 },
-    guideLocation: { lat: -12.0564, lng: -77.0398 },
-    participants: 4,
-    price: 150,
-    notes: 'Cliente solicita parada para fotos en el parque Kennedy',
-    lastUpdate: new Date().toISOString(),
-    createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
+    title: 'City Tour Lima Centro Histórico',
+    destination: 'Centro Histórico de Lima',
+    description: 'Recorrido por los principales atractivos del centro histórico de Lima, incluyendo Plaza de Armas, Catedral, Palacio de Gobierno y Casa de la Literatura.',
+    duration: 4,
+    maxParticipants: 15,
+    language: 'es',
+    requiresGuide: true,
+    requiresTransport: true,
+    basePrice: 45.00,
+    includes: 'Transporte, guía certificado, entradas a museos',
+    excludes: 'Almuerzo, bebidas, gastos personales',
+    notes: 'Disponible todos los días. Punto de encuentro en Plaza San Martín.',
+    createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+    lastUpdate: new Date().toISOString()
   },
   {
     id: 'service-002',
-    code: 'TUR002',
+    code: 'SRV002',
     type: 'museum_tour',
-    status: SERVICE_STATUS.PENDING,
-    client: { 
-      id: 'client-002',
-      name: 'John Smith', 
-      phone: '+1 555-0123',
-      email: 'john.smith@email.com'
-    },
-    guide: { 
-      id: 'guide-002',
-      name: 'Ana Rivera', 
-      phone: '+51 987654321',
-      photoUrl: '/avatars/guide2.jpg'
-    },
-    date: new Date().toISOString().split('T')[0],
-    startTime: '14:00',
-    endTime: '17:00',
-    pickupLocation: 'Hotel Miraflores',
-    pickupCoordinates: { lat: -12.1215, lng: -77.0298 },
-    destination: 'Museo Nacional',
-    destinationCoordinates: { lat: -12.0814, lng: -77.0037 },
-    currentLocation: null,
-    guideLocation: { lat: -12.1215, lng: -77.0298 },
-    participants: 2,
-    price: 80,
-    notes: 'Tour en inglés',
-    lastUpdate: new Date().toISOString(),
-    createdAt: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString()
+    title: 'Tour de Museos de Lima',
+    destination: 'Museo Nacional y MALI',
+    description: 'Visita a los principales museos de Lima: Museo Nacional de Arqueología, Antropología e Historia del Perú y Museo de Arte de Lima.',
+    duration: 3,
+    maxParticipants: 12,
+    language: 'en',
+    requiresGuide: true,
+    requiresTransport: false,
+    basePrice: 35.00,
+    includes: 'Guía especializado, entradas a museos',
+    excludes: 'Transporte, refrigerios',
+    notes: 'Tour ideal para amantes del arte y la historia. Disponible martes a domingo.',
+    createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+    lastUpdate: new Date().toISOString()
   },
   {
     id: 'service-003',
-    code: 'TUR003',
-    type: 'historical_tour',
-    status: SERVICE_STATUS.ON_WAY,
-    client: { 
-      id: 'client-003',
-      name: 'Sophie Dubois', 
-      phone: '+33 123456789',
-      email: 'sophie.dubois@email.com'
-    },
-    guide: { 
-      id: 'guide-003',
-      name: 'Miguel Torres', 
-      phone: '+51 876543210',
-      photoUrl: '/avatars/guide3.jpg'
-    },
-    date: new Date().toISOString().split('T')[0],
-    startTime: '11:30',
-    endTime: '15:30',
-    pickupLocation: 'Barranco',
-    pickupCoordinates: { lat: -12.1533, lng: -77.0244 },
-    destination: 'Centro Histórico',
-    destinationCoordinates: { lat: -12.0464, lng: -77.0428 },
-    currentLocation: { lat: -12.1033, lng: -77.0344 },
-    guideLocation: { lat: -12.1033, lng: -77.0344 },
-    participants: 6,
-    price: 200,
-    notes: 'Incluye almuerzo en restaurante típico',
-    lastUpdate: new Date().toISOString(),
-    createdAt: new Date(Date.now() - 30 * 60 * 1000).toISOString()
+    code: 'SRV003',
+    type: 'gastronomy_tour',
+    title: 'Tour Gastronómico por Miraflores',
+    destination: 'Miraflores y Barranco',
+    description: 'Experiencia culinaria visitando mercados locales, restaurantes tradicionales y cevicherías emblemáticas.',
+    duration: 5,
+    maxParticipants: 8,
+    language: 'es',
+    requiresGuide: true,
+    requiresTransport: true,
+    basePrice: 120.00,
+    includes: 'Transporte, guía gastronómico, degustaciones, almuerzo',
+    excludes: 'Bebidas alcohólicas, propinas',
+    notes: 'Incluye visita a mercado de Surquillo y 3 restaurantes. No apto para vegetarianos estrictos.',
+    createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+    lastUpdate: new Date().toISOString()
   },
   {
     id: 'service-004',
-    code: 'TUR004',
-    type: 'gastronomy_tour',
-    status: SERVICE_STATUS.PAUSED,
-    client: { 
-      id: 'client-004',
-      name: 'Roberto Silva', 
-      phone: '+51 555-9876',
-      email: 'roberto.silva@email.com'
-    },
-    guide: { 
-      id: 'guide-004',
-      name: 'Lucia Fernandez', 
-      phone: '+51 765432109',
-      photoUrl: '/avatars/guide4.jpg'
-    },
-    date: new Date().toISOString().split('T')[0],
-    startTime: '16:00',
-    endTime: '19:00',
-    pickupLocation: 'San Isidro',
-    pickupCoordinates: { lat: -12.0956, lng: -77.0364 },
-    destination: 'Larco Mar',
-    destinationCoordinates: { lat: -12.1319, lng: -77.0305 },
-    currentLocation: { lat: -12.1156, lng: -77.0334 },
-    guideLocation: { lat: -12.1156, lng: -77.0334 },
-    participants: 3,
-    price: 120,
-    notes: 'Un participante es vegetariano',
-    lastUpdate: new Date().toISOString(),
-    createdAt: new Date(Date.now() - 45 * 60 * 1000).toISOString()
+    code: 'SRV004',
+    type: 'nature_tour',
+    title: 'Tour Ecológico Pantanos de Villa',
+    destination: 'Pantanos de Villa',
+    description: 'Recorrido por los humedales más importantes de Lima, observación de aves y flora nativa.',
+    duration: 3,
+    maxParticipants: 20,
+    language: 'es',
+    requiresGuide: true,
+    requiresTransport: true,
+    basePrice: 25.00,
+    includes: 'Transporte, guía naturalista, entrada al refugio',
+    excludes: 'Almuerzo, equipos de observación',
+    notes: 'Recomendable llevar ropa cómoda y protector solar. Ideal para familias.',
+    createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+    lastUpdate: new Date().toISOString()
   },
   {
     id: 'service-005',
-    code: 'TUR005',
+    code: 'SRV005',
     type: 'adventure_tour',
-    status: SERVICE_STATUS.FINISHED,
-    client: { 
-      id: 'client-005',
-      name: 'Emma Johnson', 
-      phone: '+44 20 7946 0958',
-      email: 'emma.johnson@email.com'
-    },
-    guide: { 
-      id: 'guide-005',
-      name: 'Pedro Ramirez', 
-      phone: '+51 654321098',
-      photoUrl: '/avatars/guide5.jpg'
-    },
-    date: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-    startTime: '08:00',
-    endTime: '18:00',
-    pickupLocation: 'Callao',
-    pickupCoordinates: { lat: -12.0735, lng: -77.0826 },
-    destination: 'Fortaleza del Real Felipe',
-    destinationCoordinates: { lat: -12.0620, lng: -77.1470 },
-    currentLocation: { lat: -12.0735, lng: -77.0826 },
-    guideLocation: { lat: -12.0735, lng: -77.0826 },
-    participants: 8,
-    price: 300,
-    notes: 'Tour completado exitosamente',
-    completedAt: new Date(Date.now() - 18 * 60 * 60 * 1000).toISOString(),
-    rating: 5,
-    feedback: 'Excelente servicio, el guía muy profesional',
-    lastUpdate: new Date(Date.now() - 18 * 60 * 60 * 1000).toISOString(),
-    createdAt: new Date(Date.now() - 36 * 60 * 60 * 1000).toISOString()
+    title: 'Aventura en Pachacamac',
+    destination: 'Sitio Arqueológico de Pachacamac',
+    description: 'Tour de aventura combinando arqueología y deportes: visita al santuario prehispánico y actividades de sandboarding.',
+    duration: 6,
+    maxParticipants: 10,
+    language: 'es',
+    requiresGuide: true,
+    requiresTransport: true,
+    basePrice: 85.00,
+    includes: 'Transporte 4x4, guía especializado, equipos para sandboard, almuerzo',
+    excludes: 'Seguro de accidentes, bebidas extras',
+    notes: 'Edad mínima 12 años. Se requiere firma de deslinde de responsabilidades.',
+    createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+    lastUpdate: new Date().toISOString()
   }
 ];
 
@@ -220,7 +152,7 @@ class MockServicesService {
 
   generateCode() {
     const number = this.services.length + 1;
-    return `TUR${String(number).padStart(3, '0')}`;
+    return `SRV${String(number).padStart(3, '0')}`;
   }
 
   // Obtener todos los servicios
@@ -229,24 +161,15 @@ class MockServicesService {
     
     let filtered = [...this.services];
     
-    // Filtrar por estado
-    if (filters.status) {
-      filtered = filtered.filter(s => s.status === filters.status);
-    }
-    
-    // Filtrar por fecha
-    if (filters.date) {
-      filtered = filtered.filter(s => s.date === filters.date);
-    }
-    
     // Filtrar por tipo
-    if (filters.type) {
-      filtered = filtered.filter(s => s.type === filters.type);
+    if (filters.type || filters.serviceType) {
+      const typeFilter = filters.type || filters.serviceType;
+      filtered = filtered.filter(s => s.type === typeFilter);
     }
     
-    // Filtrar por guía
-    if (filters.guideId) {
-      filtered = filtered.filter(s => s.guide.id === filters.guideId);
+    // Filtrar por idioma
+    if (filters.language) {
+      filtered = filtered.filter(s => s.language === filters.language);
     }
     
     // Filtrar por búsqueda
@@ -254,17 +177,17 @@ class MockServicesService {
       const searchTerm = filters.search.toLowerCase();
       filtered = filtered.filter(s => 
         s.code.toLowerCase().includes(searchTerm) ||
-        s.client.name.toLowerCase().includes(searchTerm) ||
-        s.guide.name.toLowerCase().includes(searchTerm) ||
-        s.destination.toLowerCase().includes(searchTerm)
+        (s.title && s.title.toLowerCase().includes(searchTerm)) ||
+        s.destination.toLowerCase().includes(searchTerm) ||
+        (s.description && s.description.toLowerCase().includes(searchTerm))
       );
     }
     
-    // Ordenar por fecha y hora
+    // Ordenar por fecha de creación (más reciente primero)
     filtered.sort((a, b) => {
-      const dateCompare = b.date.localeCompare(a.date);
-      if (dateCompare !== 0) return dateCompare;
-      return a.startTime.localeCompare(b.startTime);
+      const dateA = a.createdAt || new Date().toISOString();
+      const dateB = b.createdAt || new Date().toISOString();
+      return dateB.localeCompare(dateA);
     });
     
     return {
@@ -273,28 +196,10 @@ class MockServicesService {
     };
   }
 
-  // Obtener servicios activos
+  // Obtener servicios activos (ahora simplemente devuelve todos los servicios disponibles)
   async getActiveServices(filters = {}) {
-    const activeStatuses = [
-      SERVICE_STATUS.PENDING,
-      SERVICE_STATUS.ON_WAY,
-      SERVICE_STATUS.IN_SERVICE,
-      SERVICE_STATUS.PAUSED
-    ];
-    
-    const result = await this.getServices({
-      ...filters,
-      status: filters.status || activeStatuses
-    });
-    
-    if (!result.success) return result;
-    
-    // Filtrar solo servicios activos si no se especificó estado
-    if (!filters.status) {
-      result.data = result.data.filter(s => activeStatuses.includes(s.status));
-    }
-    
-    return result;
+    // Como ahora los servicios son plantillas, simplemente devolvemos todos los servicios
+    return this.getServices(filters);
   }
 
   // Obtener servicio por ID
