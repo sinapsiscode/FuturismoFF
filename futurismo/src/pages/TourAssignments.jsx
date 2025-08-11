@@ -9,24 +9,32 @@ import {
   FunnelIcon,
   UserIcon,
   BuildingOfficeIcon,
+  TruckIcon,
   XMarkIcon,
-  InformationCircleIcon
+  InformationCircleIcon,
+  ChevronRightIcon
 } from '@heroicons/react/24/outline';
 import { CheckIcon } from '@heroicons/react/24/solid';
 import useToursStore from '../stores/toursStore';
 import useGuidesStore from '../stores/guidesStore';
 import useClientsStore from '../stores/clientsStore';
+import useDriversStore from '../stores/driversStore';
+import useVehiclesStore from '../stores/vehiclesStore';
 import { formatters } from '../utils/formatters';
 import toast from 'react-hot-toast';
 
 const TourAssignments = () => {
   const [selectedTour, setSelectedTour] = useState(null);
   const [showAssignModal, setShowAssignModal] = useState(false);
-  const [assignmentType, setAssignmentType] = useState('guide'); // 'guide' o 'agency'
+  const [assignmentType, setAssignmentType] = useState('guide'); // 'guide', 'agency', 'driver', 'vehicle'
   const [selectedGuide, setSelectedGuide] = useState('');
   const [selectedAgency, setSelectedAgency] = useState('');
+  const [selectedDriver, setSelectedDriver] = useState('');
+  const [selectedVehicle, setSelectedVehicle] = useState('');
   const [validateCompetences, setValidateCompetences] = useState(true);
   const [availableGuides, setAvailableGuides] = useState([]);
+  const [availableDrivers, setAvailableDrivers] = useState([]);
+  const [availableVehicles, setAvailableVehicles] = useState([]);
   const [checkingAvailability, setCheckingAvailability] = useState(false);
   const [filter, setFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
@@ -44,6 +52,8 @@ const TourAssignments = () => {
   
   const { guides, fetchGuides } = useGuidesStore();
   const { clients, initialize: initializeClients } = useClientsStore();
+  const { fetchAvailableDrivers, assignDriver } = useDriversStore();
+  const { fetchAvailableVehicles, assignVehicle } = useVehiclesStore();
 
   // Cargar datos al montar
   useEffect(() => {
@@ -102,97 +112,154 @@ const TourAssignments = () => {
   const handleOpenAssignModal = async (tour) => {
     setSelectedTour(tour);
     setShowAssignModal(true);
+    setAssignmentType('guide');
     setSelectedGuide('');
     setSelectedAgency('');
+    setSelectedDriver('');
+    setSelectedVehicle('');
+    setValidateCompetences(true);
     
     // Cargar guías disponibles
-    if (tour.date) {
-      setCheckingAvailability(true);
-      try {
-        const result = await getAvailableGuidesForTour(tour.id, tour.date);
-        setAvailableGuides(result.guides || []);
-      } catch (error) {
-        console.error('Error cargando guías disponibles:', error);
-        toast.error('Error al cargar guías disponibles');
-      } finally {
-        setCheckingAvailability(false);
-      }
+    setCheckingAvailability(true);
+    try {
+      const date = tour.date || new Date().toISOString();
+      const guides = await getAvailableGuidesForTour(tour.id, date);
+      setAvailableGuides(guides);
+    } catch (error) {
+      console.error('Error cargando guías disponibles:', error);
+      toast.error('Error al cargar guías disponibles');
+    } finally {
+      setCheckingAvailability(false);
     }
   };
 
-  // Manejar asignación
+  // Cargar recursos disponibles según el tipo de asignación
+  const handleAssignmentTypeChange = async (type) => {
+    setAssignmentType(type);
+    
+    if (!selectedTour) return;
+    
+    const tourDate = selectedTour.date || new Date().toISOString();
+    
+    setCheckingAvailability(true);
+    try {
+      switch (type) {
+        case 'driver':
+          const drivers = await fetchAvailableDrivers(tourDate);
+          setAvailableDrivers(drivers);
+          break;
+          
+        case 'vehicle':
+          const passengers = selectedTour.groupSize || 10;
+          const vehicles = await fetchAvailableVehicles(tourDate, passengers);
+          setAvailableVehicles(vehicles);
+          break;
+      }
+    } catch (error) {
+      console.error(`Error cargando ${type}s disponibles:`, error);
+      toast.error(`Error al cargar ${type === 'driver' ? 'choferes' : 'vehículos'} disponibles`);
+    } finally {
+      setCheckingAvailability(false);
+    }
+  };
+
+  // Asignar recurso al tour
   const handleAssign = async () => {
     if (!selectedTour) return;
-
+    
     try {
-      if (assignmentType === 'guide') {
-        if (!selectedGuide) {
-          toast.error('Por favor selecciona un guía');
-          return;
-        }
-
-        await assignGuideToTour(selectedTour.id, selectedGuide, {
-          validateCompetences,
-          role: 'principal'
-        });
-        
-        toast.success('Guía asignado correctamente');
-      } else {
-        if (!selectedAgency) {
-          toast.error('Por favor selecciona una agencia');
-          return;
-        }
-
-        await assignTourToAgency(selectedTour.id, selectedAgency, {
-          commission: 10,
-          contractType: 'standard'
-        });
-        
-        toast.success('Tour asignado a agencia correctamente');
+      switch (assignmentType) {
+        case 'guide':
+          if (!selectedGuide) {
+            toast.error('Seleccione un guía');
+            return;
+          }
+          await assignGuideToTour(selectedTour.id, selectedGuide, { validateCompetences });
+          toast.success('Guía asignado exitosamente');
+          break;
+          
+        case 'agency':
+          if (!selectedAgency) {
+            toast.error('Seleccione una agencia');
+            return;
+          }
+          await assignTourToAgency(selectedTour.id, selectedAgency);
+          toast.success('Agencia asignada exitosamente');
+          break;
+          
+        case 'driver':
+          if (!selectedDriver) {
+            toast.error('Seleccione un chofer');
+            return;
+          }
+          await assignDriver(selectedDriver, {
+            tourId: selectedTour.id,
+            tourCode: selectedTour.code,
+            date: selectedTour.date || new Date().toISOString(),
+            vehicleId: selectedVehicle || null
+          });
+          toast.success('Chofer asignado exitosamente');
+          break;
+          
+        case 'vehicle':
+          if (!selectedVehicle) {
+            toast.error('Seleccione un vehículo');
+            return;
+          }
+          await assignVehicle(selectedVehicle, {
+            tourId: selectedTour.id,
+            tourCode: selectedTour.code,
+            date: selectedTour.date || new Date().toISOString(),
+            passengers: selectedTour.groupSize || 10,
+            driverId: selectedDriver || null
+          });
+          toast.success('Vehículo asignado exitosamente');
+          break;
       }
-
+      
+      // Recargar tours y cerrar modal
+      await loadTours();
       setShowAssignModal(false);
-      setSelectedTour(null);
     } catch (error) {
-      toast.error(error.message || 'Error al realizar la asignación');
+      console.error('Error en asignación:', error);
     }
   };
 
   // Remover asignación
-  const handleRemoveAssignment = async (tour, type = 'guide') => {
-    if (!confirm(`¿Estás seguro de remover la asignación ${type === 'guide' ? 'del guía' : 'de la agencia'}?`)) {
-      return;
-    }
-
-    try {
-      await removeAssignment(tour.id, type);
-      toast.success('Asignación removida correctamente');
-    } catch (error) {
-      toast.error('Error al remover la asignación');
+  const handleRemoveAssignment = async (tourId, type = 'guide') => {
+    if (window.confirm('¿Está seguro de remover esta asignación?')) {
+      try {
+        await removeAssignment(tourId, type);
+        toast.success('Asignación removida exitosamente');
+      } catch (error) {
+        console.error('Error removiendo asignación:', error);
+      }
     }
   };
 
-  if (isLoading && tours.length === 0) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      </div>
-    );
-  }
-
+  // Obtener agencias (clientes tipo agencia)
+  const agencies = clients.filter(c => c.type === 'agency' && c.status === 'active');
+  
   return (
-    <div className="space-y-6">
+    <div className="p-6 max-w-7xl mx-auto">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Asignación de Tours</h1>
-        <p className="text-gray-600">Gestiona las asignaciones de guías y agencias para los tours</p>
+      <div className="mb-8">
+        <div className="flex items-center mb-4">
+          <UserGroupIcon className="h-8 w-8 text-blue-600 mr-3" />
+          <h1 className="text-3xl font-bold text-gray-900">
+            Asignación de Tours
+          </h1>
+        </div>
+        <p className="text-gray-600">
+          Asigna guías, agencias, choferes y vehículos a los tours programados
+        </p>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      {/* Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <div className="bg-white p-6 rounded-lg shadow-sm border">
           <div className="flex items-center">
-            <UserGroupIcon className="h-8 w-8 text-purple-600" />
+            <ClockIcon className="h-8 w-8 text-blue-600" />
             <div className="ml-3">
               <p className="text-sm font-medium text-gray-500">Total Tours</p>
               <p className="text-2xl font-bold text-gray-900">{counts.total}</p>
@@ -298,72 +365,115 @@ const TourAssignments = () => {
                   {formatters.formatDate(tour.date || tour.createdAt)}
                 </div>
                 <div className="flex items-center text-sm text-gray-600">
-                  <ClockIcon className="h-4 w-4 mr-2" />
-                  {tour.duration} horas
+                  <UserGroupIcon className="h-4 w-4 mr-2" />
+                  {tour.groupSize || 0} participantes
                 </div>
                 <div className="flex items-center text-sm text-gray-600">
-                  <UserGroupIcon className="h-4 w-4 mr-2" />
-                  Capacidad: {tour.capacity} personas
+                  <ClockIcon className="h-4 w-4 mr-2" />
+                  {tour.duration || 'N/A'} - {tour.category}
                 </div>
               </div>
 
-              {/* Asignaciones actuales */}
-              {(tour.assignedGuide || tour.assignedAgency) && (
-                <div className="border-t pt-4 mb-4 space-y-2">
-                  {tour.assignedGuide && (
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center text-sm">
-                        <UserIcon className="h-4 w-4 mr-2 text-blue-600" />
-                        <span className="text-gray-700">Guía: {tour.assignedGuide.name}</span>
-                      </div>
-                      <button
-                        onClick={() => handleRemoveAssignment(tour, 'guide')}
-                        className="text-red-600 hover:text-red-800"
-                      >
-                        <XMarkIcon className="h-4 w-4" />
-                      </button>
+              {/* Assignments */}
+              <div className="space-y-2 mb-4 pt-4 border-t">
+                {/* Guía */}
+                {tour.assignedGuide ? (
+                  <div className="flex items-center justify-between text-sm">
+                    <div className="flex items-center text-green-700">
+                      <UserIcon className="h-4 w-4 mr-2" />
+                      <span>
+                        {guides.find(g => g.id === tour.assignedGuide)?.name || 'Guía asignado'}
+                      </span>
                     </div>
-                  )}
-                  {tour.assignedAgency && (
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center text-sm">
-                        <BuildingOfficeIcon className="h-4 w-4 mr-2 text-purple-600" />
-                        <span className="text-gray-700">Agencia: {tour.assignedAgency.name}</span>
-                      </div>
-                      <button
-                        onClick={() => handleRemoveAssignment(tour, 'agency')}
-                        className="text-red-600 hover:text-red-800"
-                      >
-                        <XMarkIcon className="h-4 w-4" />
-                      </button>
+                    <button
+                      onClick={() => handleRemoveAssignment(tour.id, 'guide')}
+                      className="text-red-600 hover:text-red-800"
+                    >
+                      <XMarkIcon className="h-4 w-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="text-sm text-gray-500">
+                    <UserIcon className="h-4 w-4 inline mr-2" />
+                    Sin guía asignado
+                  </div>
+                )}
+
+                {/* Agencia */}
+                {tour.assignedAgency ? (
+                  <div className="flex items-center justify-between text-sm">
+                    <div className="flex items-center text-green-700">
+                      <BuildingOfficeIcon className="h-4 w-4 mr-2" />
+                      <span>
+                        {agencies.find(a => a.id === tour.assignedAgency)?.name || 'Agencia asignada'}
+                      </span>
                     </div>
-                  )}
-                </div>
-              )}
+                    <button
+                      onClick={() => handleRemoveAssignment(tour.id, 'agency')}
+                      className="text-red-600 hover:text-red-800"
+                    >
+                      <XMarkIcon className="h-4 w-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="text-sm text-gray-500">
+                    <BuildingOfficeIcon className="h-4 w-4 inline mr-2" />
+                    Sin agencia asignada
+                  </div>
+                )}
+
+                {/* Chofer */}
+                {tour.assignedDriver ? (
+                  <div className="flex items-center justify-between text-sm">
+                    <div className="flex items-center text-green-700">
+                      <UserIcon className="h-4 w-4 mr-2" />
+                      <span>Chofer asignado</span>
+                    </div>
+                    <button
+                      onClick={() => handleRemoveAssignment(tour.id, 'driver')}
+                      className="text-red-600 hover:text-red-800"
+                    >
+                      <XMarkIcon className="h-4 w-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="text-sm text-gray-500">
+                    <UserIcon className="h-4 w-4 inline mr-2" />
+                    Sin chofer asignado
+                  </div>
+                )}
+
+                {/* Vehículo */}
+                {tour.assignedVehicle ? (
+                  <div className="flex items-center justify-between text-sm">
+                    <div className="flex items-center text-green-700">
+                      <TruckIcon className="h-4 w-4 mr-2" />
+                      <span>Vehículo asignado</span>
+                    </div>
+                    <button
+                      onClick={() => handleRemoveAssignment(tour.id, 'vehicle')}
+                      className="text-red-600 hover:text-red-800"
+                    >
+                      <XMarkIcon className="h-4 w-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="text-sm text-gray-500">
+                    <TruckIcon className="h-4 w-4 inline mr-2" />
+                    Sin vehículo asignado
+                  </div>
+                )}
+              </div>
 
               {/* Actions */}
-              <div className="flex space-x-2">
-                {!tour.assignedGuide && (
-                  <button
-                    onClick={() => handleOpenAssignModal(tour)}
-                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                  >
-                    Asignar
-                  </button>
-                )}
-                {tour.assignedGuide && !tour.assignedAgency && (
-                  <button
-                    onClick={() => {
-                      setSelectedTour(tour);
-                      setAssignmentType('agency');
-                      setShowAssignModal(true);
-                    }}
-                    className="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
-                  >
-                    Asignar a Agencia
-                  </button>
-                )}
-              </div>
+              <button
+                onClick={() => handleOpenAssignModal(tour)}
+                className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center"
+                disabled={isLoading}
+              >
+                Gestionar Asignaciones
+                <ChevronRightIcon className="h-4 w-4 ml-2" />
+              </button>
             </div>
           </div>
         ))}
@@ -371,22 +481,24 @@ const TourAssignments = () => {
 
       {/* Empty State */}
       {filteredTours.length === 0 && (
-        <div className="bg-white rounded-lg shadow-sm border p-12 text-center">
-          <CalendarIcon className="mx-auto h-12 w-12 text-gray-400" />
-          <h3 className="mt-2 text-sm font-medium text-gray-900">No hay tours</h3>
-          <p className="mt-1 text-sm text-gray-500">
-            {searchTerm ? 'No se encontraron tours con los filtros aplicados.' : 'No hay tours disponibles.'}
+        <div className="bg-white rounded-lg shadow-sm border p-8 text-center">
+          <ExclamationTriangleIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-gray-900 mb-2">
+            No se encontraron tours
+          </h3>
+          <p className="text-gray-500">
+            No hay tours que coincidan con los filtros seleccionados.
           </p>
         </div>
       )}
 
-      {/* Modal de Asignación */}
+      {/* Assignment Modal */}
       {showAssignModal && selectedTour && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-6">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg max-w-md w-full p-6">
+            <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900">
-                Asignar Tour: {selectedTour.name}
+                Asignar recursos a {selectedTour.name}
               </h3>
               <button
                 onClick={() => setShowAssignModal(false)}
@@ -396,157 +508,214 @@ const TourAssignments = () => {
               </button>
             </div>
 
-            {/* Tipo de asignación */}
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Tipo de Asignación
-              </label>
-              <div className="flex space-x-4">
+            {/* Assignment Type Tabs */}
+            <div className="flex space-x-2 mb-6">
+              {[
+                { key: 'guide', label: 'Guía', icon: UserIcon },
+                { key: 'agency', label: 'Agencia', icon: BuildingOfficeIcon },
+                { key: 'driver', label: 'Chofer', icon: UserIcon },
+                { key: 'vehicle', label: 'Vehículo', icon: TruckIcon }
+              ].map(({ key, label, icon: Icon }) => (
                 <button
-                  onClick={() => setAssignmentType('guide')}
-                  className={`flex-1 p-3 rounded-lg border-2 transition-colors ${
-                    assignmentType === 'guide'
-                      ? 'border-blue-600 bg-blue-50'
-                      : 'border-gray-300 hover:border-gray-400'
+                  key={key}
+                  onClick={() => handleAssignmentTypeChange(key)}
+                  className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center justify-center ${
+                    assignmentType === key
+                      ? 'bg-blue-100 text-blue-800'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
-                  <UserIcon className="h-6 w-6 mx-auto mb-1 text-blue-600" />
-                  <span className="text-sm font-medium">Asignar Guía</span>
+                  <Icon className="h-4 w-4 mr-1" />
+                  {label}
                 </button>
-                <button
-                  onClick={() => setAssignmentType('agency')}
-                  className={`flex-1 p-3 rounded-lg border-2 transition-colors ${
-                    assignmentType === 'agency'
-                      ? 'border-purple-600 bg-purple-50'
-                      : 'border-gray-300 hover:border-gray-400'
-                  }`}
-                >
-                  <BuildingOfficeIcon className="h-6 w-6 mx-auto mb-1 text-purple-600" />
-                  <span className="text-sm font-medium">Asignar Agencia</span>
-                </button>
-              </div>
+              ))}
             </div>
 
-            {/* Selección de Guía */}
+            {/* Guide Assignment */}
             {assignmentType === 'guide' && (
-              <>
-                <div className="mb-6">
+              <div className="space-y-4">
+                <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Seleccionar Guía
                   </label>
-                  
                   {checkingAvailability ? (
                     <div className="text-center py-4">
                       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
                       <p className="text-sm text-gray-500 mt-2">Verificando disponibilidad...</p>
                     </div>
                   ) : (
-                    <div className="space-y-2">
-                      {availableGuides.length > 0 ? (
-                        availableGuides.map((guide) => (
-                          <label
-                            key={guide.id}
-                            className={`block p-4 border rounded-lg cursor-pointer transition-colors ${
-                              selectedGuide === guide.id
-                                ? 'border-blue-600 bg-blue-50'
-                                : 'border-gray-300 hover:border-gray-400'
-                            }`}
-                          >
-                            <input
-                              type="radio"
-                              value={guide.id}
-                              checked={selectedGuide === guide.id}
-                              onChange={(e) => setSelectedGuide(e.target.value)}
-                              className="sr-only"
-                            />
-                            <div className="flex items-start justify-between">
-                              <div>
-                                <p className="font-medium text-gray-900">{guide.name}</p>
-                                <p className="text-sm text-gray-500">
-                                  {guide.languages.join(', ')} • Rating: {guide.rating}
-                                </p>
-                                <p className="text-xs text-gray-400">
-                                  {guide.toursCompleted} tours completados
-                                </p>
-                              </div>
-                              {guide.availability === 'busy' && (
-                                <span className="text-xs text-orange-600">
-                                  Ocupado hasta {guide.busyUntil}
-                                </span>
-                              )}
-                              {guide.availability === 'available' && (
-                                <CheckIcon className="h-5 w-5 text-green-600" />
-                              )}
-                            </div>
-                          </label>
-                        ))
-                      ) : (
-                        <div className="text-center py-8 text-gray-500">
-                          <InformationCircleIcon className="h-8 w-8 mx-auto mb-2" />
-                          <p>No hay guías disponibles para esta fecha</p>
-                        </div>
-                      )}
-                    </div>
+                    <select
+                      value={selectedGuide}
+                      onChange={(e) => setSelectedGuide(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      <option value="">Seleccione un guía</option>
+                      {availableGuides.map((guide) => (
+                        <option key={guide.id} value={guide.id}>
+                          {guide.name} - {guide.specialization}
+                        </option>
+                      ))}
+                    </select>
                   )}
                 </div>
 
-                {/* Validar competencias */}
-                <div className="mb-6">
-                  <label className="flex items-center">
-                    <input
-                      type="checkbox"
-                      checked={validateCompetences}
-                      onChange={(e) => setValidateCompetences(e.target.checked)}
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                    />
-                    <span className="ml-2 text-sm text-gray-700">
-                      Validar competencias y certificaciones del guía
-                    </span>
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id="validateCompetences"
+                    checked={validateCompetences}
+                    onChange={(e) => setValidateCompetences(e.target.checked)}
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  />
+                  <label htmlFor="validateCompetences" className="ml-2 text-sm text-gray-700">
+                    Validar competencias del guía
                   </label>
                 </div>
-              </>
+
+                {availableGuides.length === 0 && !checkingAvailability && (
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                    <p className="text-sm text-yellow-800">
+                      No hay guías disponibles para este tour en la fecha seleccionada.
+                    </p>
+                  </div>
+                )}
+              </div>
             )}
 
-            {/* Selección de Agencia */}
+            {/* Agency Assignment */}
             {assignmentType === 'agency' && (
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Seleccionar Agencia
-                </label>
-                <select
-                  value={selectedAgency}
-                  onChange={(e) => setSelectedAgency(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                >
-                  <option value="">Selecciona una agencia</option>
-                  {clients
-                    .filter(client => client.type === 'agency')
-                    .map((agency) => (
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Seleccionar Agencia
+                  </label>
+                  <select
+                    value={selectedAgency}
+                    onChange={(e) => setSelectedAgency(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="">Seleccione una agencia</option>
+                    {agencies.map((agency) => (
                       <option key={agency.id} value={agency.id}>
-                        {agency.name} - {agency.contact}
+                        {agency.name}
                       </option>
                     ))}
-                </select>
+                  </select>
+                </div>
+              </div>
+            )}
+
+            {/* Driver Assignment */}
+            {assignmentType === 'driver' && (
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Seleccionar Chofer
+                  </label>
+                  {checkingAvailability ? (
+                    <div className="text-center py-4">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                      <p className="text-sm text-gray-500 mt-2">Verificando disponibilidad...</p>
+                    </div>
+                  ) : (
+                    <select
+                      value={selectedDriver}
+                      onChange={(e) => setSelectedDriver(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      <option value="">Seleccione un chofer</option>
+                      {availableDrivers.map((driver) => (
+                        <option key={driver.id} value={driver.id}>
+                          {driver.fullName} - Licencia: {driver.licenseCategory}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                </div>
+
+                {availableDrivers.length === 0 && !checkingAvailability && (
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                    <p className="text-sm text-yellow-800">
+                      No hay choferes disponibles para este tour en la fecha seleccionada.
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Vehicle Assignment */}
+            {assignmentType === 'vehicle' && (
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Seleccionar Vehículo
+                  </label>
+                  {checkingAvailability ? (
+                    <div className="text-center py-4">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                      <p className="text-sm text-gray-500 mt-2">Verificando disponibilidad...</p>
+                    </div>
+                  ) : (
+                    <select
+                      value={selectedVehicle}
+                      onChange={(e) => setSelectedVehicle(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      <option value="">Seleccione un vehículo</option>
+                      {availableVehicles.map((vehicle) => (
+                        <option key={vehicle.id} value={vehicle.id}>
+                          {vehicle.plate} - {vehicle.brand} {vehicle.model} ({vehicle.capacity} pax)
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                </div>
+
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                  <div className="flex items-start">
+                    <InformationCircleIcon className="h-5 w-5 text-blue-600 mt-0.5 mr-2" />
+                    <div className="text-sm text-blue-800">
+                      <p>Capacidad requerida: {selectedTour.groupSize || 10} pasajeros</p>
+                      {selectedVehicle && availableVehicles.find(v => v.id === selectedVehicle) && (
+                        <p className="mt-1">
+                          Vehículo seleccionado: {availableVehicles.find(v => v.id === selectedVehicle).capacity} plazas
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {availableVehicles.length === 0 && !checkingAvailability && (
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                    <p className="text-sm text-yellow-800">
+                      No hay vehículos disponibles con la capacidad requerida para este tour.
+                    </p>
+                  </div>
+                )}
               </div>
             )}
 
             {/* Actions */}
-            <div className="flex space-x-3">
+            <div className="flex justify-end space-x-3 mt-6">
               <button
                 onClick={() => setShowAssignModal(false)}
-                className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
               >
                 Cancelar
               </button>
               <button
                 onClick={handleAssign}
                 disabled={
+                  isLoading ||
                   (assignmentType === 'guide' && !selectedGuide) ||
-                  (assignmentType === 'agency' && !selectedAgency)
+                  (assignmentType === 'agency' && !selectedAgency) ||
+                  (assignmentType === 'driver' && !selectedDriver) ||
+                  (assignmentType === 'vehicle' && !selectedVehicle)
                 }
-                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
               >
-                Confirmar Asignación
+                <CheckIcon className="h-4 w-4 mr-2" />
+                Asignar
               </button>
             </div>
           </div>

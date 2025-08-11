@@ -1,6 +1,6 @@
 import { NavLink } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import { HomeIcon, MapIcon, CalendarIcon, ClockIcon, ChatBubbleLeftRightIcon, UserIcon, ChevronLeftIcon, ChevronRightIcon, CogIcon, UserGroupIcon, DocumentTextIcon, CalendarDaysIcon, BuildingOffice2Icon, ShieldCheckIcon, ChartBarIcon, StarIcon, UserCircleIcon, CurrencyDollarIcon, MagnifyingGlassIcon, BriefcaseIcon } from '@heroicons/react/24/outline';
+import { HomeIcon, MapIcon, CalendarIcon, ClockIcon, ChatBubbleLeftRightIcon, UserIcon, ChevronLeftIcon, ChevronRightIcon, CogIcon, UserGroupIcon, DocumentTextIcon, CalendarDaysIcon, BuildingOffice2Icon, ShieldCheckIcon, ChartBarIcon, StarIcon, UserCircleIcon, CurrencyDollarIcon, MagnifyingGlassIcon, BriefcaseIcon, TruckIcon } from '@heroicons/react/24/outline';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../../stores/authStore';
 
@@ -54,6 +54,8 @@ const Sidebar = ({ isOpen, toggleSidebar, isMobile }) => {
         { path: '/assignments', icon: UserCircleIcon, label: t('navigation.assignments') },
         { path: '/guides', icon: UserIcon, label: t('navigation.guides') },
         { path: '/clients', icon: BuildingOffice2Icon, label: 'Clientes' },
+        { path: '/drivers', icon: UserIcon, label: 'Choferes' },
+        { path: '/vehicles', icon: TruckIcon, label: 'Vehículos' },
         { path: '/marketplace', icon: MagnifyingGlassIcon, label: t('navigation.marketplace') },
         { path: '/providers', icon: BuildingOffice2Icon, label: t('navigation.providers') },
         { path: '/emergency', icon: ShieldCheckIcon, label: t('navigation.emergencies') },
