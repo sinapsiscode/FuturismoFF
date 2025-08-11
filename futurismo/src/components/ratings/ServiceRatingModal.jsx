@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { XMarkIcon, UserGroupIcon, CheckCircleIcon, ClockIcon } from '@heroicons/react/24/outline';
 import TouristRating from './TouristRating';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
+import { RATING_STEPS, UI_DELAYS, TOURIST_RATING_VALUES } from '../../constants/ratingsConstants';
 
 const ServiceRatingModal = ({ 
   isOpen, 
@@ -12,7 +14,8 @@ const ServiceRatingModal = ({
 }) => {
   const [completedRatings, setCompletedRatings] = useState(new Set());
   const [allRatings, setAllRatings] = useState({});
-  const [currentStep, setCurrentStep] = useState('rating'); // 'rating' | 'summary'
+  const { t } = useTranslation();
+  const [currentStep, setCurrentStep] = useState(RATING_STEPS.RATING);
 
   if (!isOpen) return null;
 
@@ -23,8 +26,8 @@ const ServiceRatingModal = ({
     // Si todos los turistas han sido valorados, mostrar resumen
     if (completedRatings.size + 1 === tourists.length) {
       setTimeout(() => {
-        setCurrentStep('summary');
-      }, 1000);
+        setCurrentStep(RATING_STEPS.SUMMARY);
+      }, UI_DELAYS.STEP_TRANSITION);
     }
   };
 
@@ -33,15 +36,15 @@ const ServiceRatingModal = ({
       onAllRatingsCompleted(allRatings);
     }
     onClose();
-    toast.success('🎉 Valoraciones completadas exitosamente');
+    toast.success(t('ratings.service.allRatingsCompleted'));
   };
 
   const getRatingStats = () => {
     const ratings = Object.values(allRatings);
     return {
-      excellent: ratings.filter(r => r.rating === 'excellent').length,
-      good: ratings.filter(r => r.rating === 'good').length,
-      poor: ratings.filter(r => r.rating === 'poor').length,
+      excellent: ratings.filter(r => r.rating === TOURIST_RATING_VALUES.EXCELLENT).length,
+      good: ratings.filter(r => r.rating === TOURIST_RATING_VALUES.GOOD).length,
+      poor: ratings.filter(r => r.rating === TOURIST_RATING_VALUES.POOR).length,
       total: ratings.length
     };
   };

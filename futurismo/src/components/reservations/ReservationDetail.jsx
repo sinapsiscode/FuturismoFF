@@ -1,7 +1,11 @@
 import { XMarkIcon, CalendarIcon, ClockIcon, UserGroupIcon, MapPinIcon, PhoneIcon, CurrencyDollarIcon, DocumentTextIcon, ArrowDownTrayIcon, PaperAirplaneIcon, PencilIcon, CheckCircleIcon, ExclamationTriangleIcon, BuildingOfficeIcon } from '@heroicons/react/24/outline';
 import { formatters } from '../../utils/formatters';
+import { useTranslation } from 'react-i18next';
+import toast from 'react-hot-toast';
 
 const ReservationDetail = ({ reservation, onClose }) => {
+  const { t } = useTranslation();
+  
   if (!reservation) return null;
 
   const getStatusColor = (status) => {
@@ -25,17 +29,20 @@ const ReservationDetail = ({ reservation, onClose }) => {
 
   const handleSendVoucher = () => {
     // Implementar envío de voucher
-    console.log('Enviar voucher por email');
+    // TODO: Implementar envío de voucher por email
+    toast.info(t('reservations.sendEmailNotImplemented'));
   };
 
   const handleDownloadVoucher = () => {
     // Implementar descarga de voucher
-    console.log('Descargar voucher PDF');
+    // TODO: Implementar descarga de voucher PDF
+    toast.info(t('reservations.downloadPdfNotImplemented'));
   };
 
   const handleConfirmPayment = () => {
     // Implementar confirmación de pago
-    console.log('Confirmar pago');
+    // TODO: Implementar confirmación de pago
+    toast.info(t('reservations.confirmPaymentNotImplemented'));
   };
 
   return (

@@ -1,5 +1,5 @@
 import { jsPDF } from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import useEmergencyStore from '../stores/emergencyStore';
@@ -242,7 +242,7 @@ class EmergencyPDFService {
       step
     ]);
     
-    pdf.autoTable({
+    autoTable(pdf, {
       startY: this.currentY,
       head: [['#', 'Acción a Realizar']],
       body: stepsData,
@@ -290,7 +290,7 @@ class EmergencyPDFService {
       contact.type.charAt(0).toUpperCase() + contact.type.slice(1)
     ]);
     
-    pdf.autoTable({
+    autoTable(pdf, {
       startY: this.currentY,
       head: [['Contacto', 'Teléfono', 'Tipo']],
       body: contactsData,
@@ -575,7 +575,7 @@ class EmergencyPDFService {
       contact.type.charAt(0).toUpperCase() + contact.type.slice(1)
     ]);
     
-    pdf.autoTable({
+    autoTable(pdf, {
       startY: this.currentY,
       head: [['Contacto', 'Teléfono', 'Tipo']],
       body: contactsData,

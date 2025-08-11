@@ -1,6 +1,20 @@
-import { useState } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { DocumentTextIcon, DocumentIcon } from '@heroicons/react/24/outline';
+import {
+  EXPORT_FORMATS,
+  FILE_EXTENSIONS,
+  FORMAT_COLORS,
+  EXPORT_RECOMMENDATIONS,
+  EXPORT_TIMEOUTS,
+  EXPORT_STATUS_KEYS
+} from '../constants/exportConstants';
 
+/**
+ * Hook personalizado para gestionar modal de exportación
+ * @param {number} reservationCount - Número de reservaciones a exportar
+ * @param {string} filterStatus - Estado actual del filtro
+ * @returns {Object} Estado y funciones para el modal de exportación
+ */
 const useExportModal = (reservationCount = 0, filterStatus = 'all') => {
   const [selectedFormat, setSelectedFormat] = useState(null);
   const [isExporting, setIsExporting] = useState(false);
@@ -71,10 +85,10 @@ const useExportModal = (reservationCount = 0, filterStatus = 'all') => {
         setIsExporting(false);
         onClose();
         setSelectedFormat(null);
-      }, 1000);
+      }, EXPORT_TIMEOUTS.PROCESS_DELAY);
     } catch (error) {
       setIsExporting(false);
-      console.error('Export error:', error);
+      // Error manejado en el componente padre
     }
   };
 

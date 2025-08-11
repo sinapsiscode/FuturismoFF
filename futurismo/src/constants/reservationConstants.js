@@ -13,11 +13,14 @@ export const PAYMENT_STATUS = {
   REFUNDED: 'refunded'
 };
 
+import { DOCUMENT_TYPES as SHARED_DOCUMENT_TYPES } from './sharedConstants';
+
+// Reservation-specific document types
 export const DOCUMENT_TYPES = {
-  DNI: 'dni',
-  PASSPORT: 'passport',
-  RUC: 'ruc',
-  CE: 'ce'
+  DNI: SHARED_DOCUMENT_TYPES.DNI,
+  PASSPORT: SHARED_DOCUMENT_TYPES.PASSPORT,
+  RUC: SHARED_DOCUMENT_TYPES.RUC,
+  CE: SHARED_DOCUMENT_TYPES.CE
 };
 
 export const RESERVATION_ACTIONS = {
@@ -29,10 +32,13 @@ export const RESERVATION_ACTIONS = {
   DUPLICATE: 'duplicate'
 };
 
+import { EXPORT_FORMATS as SHARED_EXPORT_FORMATS } from './sharedConstants';
+
+// Re-export export formats from shared constants
 export const EXPORT_FORMATS = {
-  PDF: 'pdf',
-  EXCEL: 'excel',
-  CSV: 'csv'
+  PDF: SHARED_EXPORT_FORMATS.PDF,
+  EXCEL: SHARED_EXPORT_FORMATS.EXCEL,
+  CSV: SHARED_EXPORT_FORMATS.CSV
 };
 
 export const TOUR_TYPES = {
@@ -74,7 +80,10 @@ export const SORT_OPTIONS = {
   TOTAL: 'total'
 };
 
-export const ITEMS_PER_PAGE_OPTIONS = [10, 25, 50, 100];
+import { PAGINATION_DEFAULTS } from './sharedConstants';
+
+// Re-export pagination options from shared constants
+export const ITEMS_PER_PAGE_OPTIONS = PAGINATION_DEFAULTS.PAGE_SIZE_OPTIONS;
 
 export const DEFAULT_FILTERS = {
   status: 'all',
@@ -94,3 +103,72 @@ export const RATING_ASPECTS = {
   VALUE: 'value',
   GUIDE: 'guide'
 };
+
+// Re-export pagination settings from shared constants
+export const PAGINATION = {
+  DEFAULT_PAGE: PAGINATION_DEFAULTS.DEFAULT_PAGE,
+  DEFAULT_ITEMS_PER_PAGE: PAGINATION_DEFAULTS.PAGE_SIZE
+};
+
+export const RESERVATION_STATUS_SPANISH = {
+  confirmada: 'confirmada',
+  pendiente: 'pendiente',
+  cancelada: 'cancelada',
+  completada: 'completada',
+  en_proceso: 'en_proceso'
+};
+
+export const PAYMENT_STATUS_SPANISH = {
+  pagado: 'pagado',
+  pendiente: 'pendiente',
+  parcial: 'parcial',
+  reembolsado: 'reembolsado'
+};
+
+export const STATUS_BADGE_COLORS = {
+  pendiente: 'badge-yellow',
+  confirmada: 'badge-green',
+  cancelada: 'badge-red',
+  completada: 'badge-blue',
+  en_proceso: 'badge-orange',
+  default: 'badge-gray'
+};
+
+export const PAYMENT_BADGE_COLORS = {
+  pendiente: 'badge-yellow',
+  pagado: 'badge-green',
+  parcial: 'badge-orange',
+  reembolsado: 'badge-blue',
+  default: 'badge-gray'
+};
+
+export const TIMELINE_CONFIG = {
+  START_HOUR: 6,
+  END_HOUR: 22,
+  HOURS_COUNT: 17,
+  DEFAULT_DURATION: 2,
+  HOUR_HEIGHT_PX: 60,
+  RESERVATION_OFFSET_PX: 10,
+  HOUR_WIDTH_PX: 80,
+  MIN_HOUR_HEIGHT: '60px'
+};
+
+export const WIZARD_STEPS = {
+  SERVICE: 1,
+  DETAILS: 2,
+  CONFIRMATION: 3
+};
+
+export const SERVICE_TYPES = {
+  TOUR: 'tour',
+  TRANSFER: 'transfer',
+  CUSTOM: 'custom'
+};
+
+export const PAYMENT_METHODS = {
+  CASH: 'cash',
+  CARD: 'card',
+  TRANSFER: 'transfer'
+};
+
+export const MAX_COMPANIONS_PER_GROUP = 50;

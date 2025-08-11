@@ -1,414 +1,700 @@
+/**
+ * Store de agencias
+ * Maneja el estado global de agencias
+ */
+
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { format, addDays, subDays, startOfMonth, endOfMonth, eachDayOfInterval } from 'date-fns';
+import { format, addDays, eachDayOfInterval } from 'date-fns';
 import { es } from 'date-fns/locale';
-
-// Datos mock para desarrollo
-const generateMockReservations = () => {
-  const reservations = [];
-  const today = new Date();
-  
-  // Generar reservas para los últimos 30 días y próximos 30 días
-  for (let i = -30; i <= 30; i++) {
-    const date = addDays(today, i);
-    const dateKey = format(date, 'yyyy-MM-dd');
-    
-    // Probabilidad de tener reservas (más alta para días recientes)
-    if (Math.random() > 0.7) {
-      const numReservations = Math.floor(Math.random() * 3) + 1;
-      
-      for (let j = 0; j < numReservations; j++) {
-        const reservation = {
-          id: `res_${dateKey}_${j}`,
-          agencyId: 'agency1', // ID de la agencia actual
-          date: dateKey,
-          serviceType: ['City Tour', 'Machu Picchu', 'Valle Sagrado', 'Islas Ballestas', 'Nazca Lines'][Math.floor(Math.random() * 5)],
-          clientName: ['Familia García', 'Sr. Johnson', 'Pareja López', 'Grupo Estudiantes', 'Sra. Williams'][Math.floor(Math.random() * 5)],
-          participants: Math.floor(Math.random() * 8) + 1,
-          totalAmount: (Math.floor(Math.random() * 300) + 50),
-          status: ['confirmed', 'pending', 'cancelled'][Math.floor(Math.random() * 3)],
-          guideAssigned: Math.random() > 0.5 ? ['Carlos Mendoza', 'María Torres', 'Ana Quispe'][Math.floor(Math.random() * 3)] : null,
-          time: ['08:00', '09:00', '14:00', '15:00'][Math.floor(Math.random() * 4)],
-          duration: Math.floor(Math.random() * 6) + 2, // 2-8 horas
-          commission: Math.floor(Math.random() * 50) + 10, // Comisión de la agencia
-          points: Math.floor(Math.random() * 20) + 5, // Puntos ganados
-          createdAt: new Date(date),
-          updatedAt: new Date()
-        };
-        
-        reservations.push(reservation);
-      }
-    }
-  }
-  
-  return reservations;
-};
-
-// Generar transacciones de puntos mock
-const generateMockPointsTransactions = () => {
-  const transactions = [];
-  const today = new Date();
-  
-  for (let i = -60; i <= 0; i++) {
-    const date = addDays(today, i);
-    
-    if (Math.random() > 0.8) {
-      transactions.push({
-        id: `pt_${Date.now()}_${i}`,
-        agencyId: 'agency1',
-        type: Math.random() > 0.3 ? 'earned' : 'redeemed',
-        amount: Math.floor(Math.random() * 50) + 5,
-        reason: ['Reserva confirmada', 'Tour completado', 'Bonus mensual', 'Canje descuento', 'Promoción especial'][Math.floor(Math.random() * 5)],
-        relatedReservation: Math.random() > 0.5 ? `res_${format(date, 'yyyy-MM-dd')}_0` : null,
-        date: format(date, 'yyyy-MM-dd'),
-        createdAt: date,
-        processedBy: 'system'
-      });
-    }
-  }
-  
-  return transactions;
-};
+import { agencyService } from '../services/agencyService';
+import {
+  DATE_FORMATS,
+  DEFAULT_AGENCY,
+  STORAGE_CONFIG,
+  RESERVATION_STATUS
+} from '../constants/agencyConstants';
 
 const useAgencyStore = create(
   persist(
     (set, get) => ({
       // Estado
-      currentAgency: {
-        id: 'agency1',
-        name: 'Turismo Aventura S.A.C.',
-        email: 'agencia@test.com',
-        phone: '+51 987 654 321',
-        address: 'Av. Sol 123, Cusco',
-        pointsBalance: 450,
-        totalEarned: 1250,
-        totalRedeemed: 800,
-        memberSince: '2022-01-15',
-        tier: 'gold' // bronze, silver, gold, platinum
+      currentAgency: null,
+      reservations: [],
+      pointsTransactions: [],
+      availableSlots: {},
+      isLoading: false,
+      error: null,
+      
+      // Paginación
+      reservationsPagination: {
+        page: 1,
+        pageSize: 20,
+        total: 0,
+        totalPages: 0
       },
       
-      reservations: generateMockReservations(),
-      pointsTransactions: generateMockPointsTransactions(),
-      availableSlots: {},
+      transactionsPagination: {
+        page: 1,
+        pageSize: 50,
+        total: 0,
+        totalPages: 0
+      },
+      
+      // Filtros
+      reservationsFilters: {
+        startDate: '',
+        endDate: '',
+        status: '',
+        serviceType: ''
+      },
+      
+      transactionsFilters: {
+        startDate: '',
+        endDate: '',
+        type: ''
+      },
+      
+      // Estadísticas
+      stats: null,
+      monthlyReport: null,
+      yearlyComparison: null,
+      calendarData: {},
       
       // Acciones
       actions: {
+        // Inicialización
+        initialize: async (agencyId = DEFAULT_AGENCY.ID) => {
+          set({ isLoading: true, error: null });
+          
+          try {
+            const result = await agencyService.getAgencyById(agencyId);
+            
+            if (!result.success) {
+              throw new Error(result.error || 'Error al cargar agencia');
+            }
+            
+            set({
+              currentAgency: result.data,
+              isLoading: false
+            });
+            
+            // Cargar datos adicionales
+            await Promise.all([
+              get().actions.fetchReservations(),
+              get().actions.fetchPointsTransactions()
+            ]);
+            
+            return true;
+          } catch (error) {
+            set({
+              isLoading: false,
+              error: error.message
+            });
+            throw error;
+          }
+        },
+        
         // === GESTIÓN DE RESERVAS ===
-        getReservations: (filters = {}) => {
-          const { reservations } = get();
-          let filtered = [...reservations];
+        fetchReservations: async () => {
+          const { currentAgency, reservationsFilters, reservationsPagination } = get();
           
-          if (filters.startDate && filters.endDate) {
-            filtered = filtered.filter(res => 
-              res.date >= filters.startDate && res.date <= filters.endDate
-            );
+          if (!currentAgency) return;
+          
+          set({ isLoading: true, error: null });
+          
+          try {
+            const params = {
+              ...reservationsFilters,
+              page: reservationsPagination.page,
+              pageSize: reservationsPagination.pageSize
+            };
+            
+            const result = await agencyService.getReservations(currentAgency.id, params);
+            
+            if (!result.success) {
+              throw new Error(result.error || 'Error al cargar reservaciones');
+            }
+            
+            set({
+              reservations: result.data.reservations,
+              reservationsPagination: {
+                page: result.data.page,
+                pageSize: result.data.pageSize,
+                total: result.data.total,
+                totalPages: result.data.totalPages
+              },
+              isLoading: false
+            });
+            
+            return result.data;
+          } catch (error) {
+            set({ 
+              isLoading: false,
+              error: error.message
+            });
+            throw error;
           }
-          
-          if (filters.status) {
-            filtered = filtered.filter(res => res.status === filters.status);
-          }
-          
-          if (filters.serviceType) {
-            filtered = filtered.filter(res => 
-              res.serviceType.toLowerCase().includes(filters.serviceType.toLowerCase())
-            );
-          }
-          
-          return filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
         },
         
         getReservationsByDate: (date) => {
           const { reservations } = get();
-          const dateKey = format(new Date(date), 'yyyy-MM-dd');
+          const dateKey = format(new Date(date), DATE_FORMATS.DATE_KEY);
           return reservations.filter(res => res.date === dateKey);
         },
         
-        addReservation: (reservationData) => {
-          const newReservation = {
-            id: `res_${Date.now()}`,
-            agencyId: get().currentAgency.id,
-            ...reservationData,
-            status: 'pending',
-            createdAt: new Date(),
-            updatedAt: new Date()
-          };
+        createReservation: async (reservationData) => {
+          const { currentAgency } = get();
           
-          set(state => ({
-            reservations: [...state.reservations, newReservation]
-          }));
+          if (!currentAgency) {
+            throw new Error('No hay agencia activa');
+          }
           
-          return newReservation;
-        },
-        
-        updateReservation: (reservationId, updates) => {
-          const state = get();
-          const reservation = state.reservations.find(res => res.id === reservationId);
+          set({ isLoading: true, error: null });
           
-          // Si la reserva cambia de 'pending' a 'confirmed', agregar puntos automáticamente
-          if (reservation && reservation.status === 'pending' && updates.status === 'confirmed') {
-            const pointsToEarn = get().actions.calculatePointsForReservation(reservation);
-            
-            // Agregar transacción de puntos automática
-            const pointsTransaction = {
-              id: `pt_auto_${Date.now()}`,
-              agencyId: state.currentAgency.id,
-              type: 'earned',
-              amount: pointsToEarn,
-              reason: `Reserva confirmada - ${reservation.serviceType}`,
-              relatedReservation: reservationId,
-              date: format(new Date(), 'yyyy-MM-dd'),
-              createdAt: new Date(),
-              processedBy: 'system'
+          try {
+            const data = {
+              ...reservationData,
+              agencyId: currentAgency.id
             };
             
-            set(state => ({
-              reservations: state.reservations.map(res =>
-                res.id === reservationId 
-                  ? { ...res, ...updates, updatedAt: new Date() }
-                  : res
-              ),
-              pointsTransactions: [...state.pointsTransactions, pointsTransaction]
+            const result = await agencyService.createReservation(data);
+            
+            if (!result.success) {
+              throw new Error(result.error || 'Error al crear reservación');
+            }
+            
+            set((state) => ({
+              reservations: [result.data, ...state.reservations],
+              isLoading: false
             }));
             
-            // Actualizar balance de puntos en currentAgency
-            const newBalance = get().actions.getPointsBalance();
-            set(state => ({
-              currentAgency: {
-                ...state.currentAgency,
-                pointsBalance: newBalance.balance,
-                totalEarned: newBalance.totalEarned,
-                totalRedeemed: newBalance.totalRedeemed
-              }
-            }));
-          } else {
-            // Actualización normal sin cambio de estado a confirmado
-            set(state => ({
-              reservations: state.reservations.map(res =>
-                res.id === reservationId 
-                  ? { ...res, ...updates, updatedAt: new Date() }
-                  : res
-              )
-            }));
+            return result.data;
+          } catch (error) {
+            set({ 
+              isLoading: false,
+              error: error.message
+            });
+            throw error;
           }
         },
         
-        // Calcular puntos basados en la reserva
-        calculatePointsForReservation: (reservation) => {
-          const basePoints = 10; // Puntos base por reserva
-          const amountMultiplier = Math.floor(reservation.totalAmount / 100); // 1 punto por cada 100 soles
-          const participantBonus = Math.floor(reservation.participants / 2); // Bonus por número de participantes
+        updateReservation: async (id, updateData) => {
+          set({ isLoading: true, error: null });
           
-          // Multiplicador por tipo de servicio
-          const serviceMultipliers = {
-            'City Tour': 1,
-            'Machu Picchu': 2,
-            'Valle Sagrado': 1.5,
-            'Islas Ballestas': 1.2,
-            'Nazca Lines': 1.8
-          };
-          
-          const serviceMultiplier = serviceMultipliers[reservation.serviceType] || 1;
-          
-          return Math.floor((basePoints + amountMultiplier + participantBonus) * serviceMultiplier);
+          try {
+            const result = await agencyService.updateReservation(id, updateData);
+            
+            if (!result.success) {
+              throw new Error(result.error || 'Error al actualizar reservación');
+            }
+            
+            set((state) => ({
+              reservations: state.reservations.map(res => 
+                res.id === id ? result.data : res
+              ),
+              isLoading: false
+            }));
+            
+            // Si se confirmó la reserva, actualizar balance de puntos
+            if (updateData.status === RESERVATION_STATUS.CONFIRMED) {
+              await get().actions.fetchPointsBalance();
+            }
+            
+            return result.data;
+          } catch (error) {
+            set({ 
+              isLoading: false,
+              error: error.message
+            });
+            throw error;
+          }
         },
         
-        deleteReservation: (reservationId) => {
-          set(state => ({
-            reservations: state.reservations.filter(res => res.id !== reservationId)
-          }));
+        deleteReservation: async (id) => {
+          set({ isLoading: true, error: null });
+          
+          try {
+            const result = await agencyService.deleteReservation(id);
+            
+            if (!result.success) {
+              throw new Error(result.error || 'Error al eliminar reservación');
+            }
+            
+            set((state) => ({
+              reservations: state.reservations.filter(res => res.id !== id),
+              isLoading: false
+            }));
+            
+            return true;
+          } catch (error) {
+            set({ 
+              isLoading: false,
+              error: error.message
+            });
+            throw error;
+          }
+        },
+        
+        confirmReservation: async (id) => {
+          return get().actions.updateReservation(id, { status: RESERVATION_STATUS.CONFIRMED });
+        },
+        
+        cancelReservation: async (id, reason = '') => {
+          set({ isLoading: true, error: null });
+          
+          try {
+            const result = await agencyService.cancelReservation(id, reason);
+            
+            if (!result.success) {
+              throw new Error(result.error || 'Error al cancelar reservación');
+            }
+            
+            set((state) => ({
+              reservations: state.reservations.map(res => 
+                res.id === id ? result.data : res
+              ),
+              isLoading: false
+            }));
+            
+            return result.data;
+          } catch (error) {
+            set({ 
+              isLoading: false,
+              error: error.message
+            });
+            throw error;
+          }
         },
         
         // === REPORTES Y ESTADÍSTICAS ===
-        getMonthlyReport: (year, month) => {
-          const { reservations } = get();
-          const startDate = format(new Date(year, month - 1, 1), 'yyyy-MM-dd');
-          const endDate = format(new Date(year, month, 0), 'yyyy-MM-dd');
+        fetchMonthlyReport: async (year, month) => {
+          const { currentAgency } = get();
           
-          const monthReservations = reservations.filter(res => 
-            res.date >= startDate && 
-            res.date <= endDate && 
-            res.status === 'confirmed'
-          );
+          if (!currentAgency) return null;
           
-          const totalRevenue = monthReservations.reduce((sum, res) => sum + res.totalAmount, 0);
-          const totalCommission = monthReservations.reduce((sum, res) => sum + (res.commission || 0), 0);
-          const totalParticipants = monthReservations.reduce((sum, res) => sum + res.participants, 0);
+          set({ isLoading: true, error: null });
           
-          // Agrupar por tipo de servicio
-          const serviceBreakdown = monthReservations.reduce((acc, res) => {
-            if (!acc[res.serviceType]) {
-              acc[res.serviceType] = {
-                count: 0,
-                revenue: 0,
-                participants: 0
-              };
+          try {
+            const result = await agencyService.getMonthlyReport(currentAgency.id, year, month);
+            
+            if (!result.success) {
+              throw new Error(result.error || 'Error al cargar reporte mensual');
             }
-            acc[res.serviceType].count++;
-            acc[res.serviceType].revenue += res.totalAmount;
-            acc[res.serviceType].participants += res.participants;
-            return acc;
-          }, {});
-          
-          // Datos por día para gráficos
-          const dailyData = eachDayOfInterval({
-            start: new Date(year, month - 1, 1),
-            end: new Date(year, month, 0)
-          }).map(date => {
-            const dateKey = format(date, 'yyyy-MM-dd');
-            const dayReservations = monthReservations.filter(res => res.date === dateKey);
-            return {
-              date: dateKey,
-              revenue: dayReservations.reduce((sum, res) => sum + res.totalAmount, 0),
-              reservations: dayReservations.length,
-              participants: dayReservations.reduce((sum, res) => sum + res.participants, 0)
-            };
-          });
-          
-          return {
-            period: { year, month },
-            summary: {
-              totalReservations: monthReservations.length,
-              totalRevenue,
-              totalCommission,
-              totalParticipants,
-              averageOrderValue: monthReservations.length > 0 ? totalRevenue / monthReservations.length : 0
-            },
-            serviceBreakdown,
-            dailyData
-          };
+            
+            set({
+              monthlyReport: result.data,
+              isLoading: false
+            });
+            
+            return result.data;
+          } catch (error) {
+            set({ 
+              isLoading: false,
+              error: error.message
+            });
+            throw error;
+          }
         },
         
-        getYearlyComparison: (year) => {
-          const months = Array.from({ length: 12 }, (_, i) => {
-            const report = get().actions.getMonthlyReport(year, i + 1);
-            return {
-              month: i + 1,
-              monthName: format(new Date(year, i, 1), 'MMMM', { locale: es }),
-              ...report.summary
-            };
-          });
+        fetchYearlyComparison: async (year) => {
+          const { currentAgency } = get();
           
-          return months;
+          if (!currentAgency) return null;
+          
+          set({ isLoading: true, error: null });
+          
+          try {
+            const result = await agencyService.getYearlyComparison(currentAgency.id, year);
+            
+            if (!result.success) {
+              throw new Error(result.error || 'Error al cargar comparación anual');
+            }
+            
+            set({
+              yearlyComparison: result.data,
+              isLoading: false
+            });
+            
+            return result.data;
+          } catch (error) {
+            set({ 
+              isLoading: false,
+              error: error.message
+            });
+            throw error;
+          }
         },
         
         // === SISTEMA DE PUNTOS ===
-        getPointsBalance: () => {
-          const { pointsTransactions } = get();
-          const earned = pointsTransactions
-            .filter(pt => pt.type === 'earned')
-            .reduce((sum, pt) => sum + pt.amount, 0);
+        fetchPointsTransactions: async () => {
+          const { currentAgency, transactionsFilters, transactionsPagination } = get();
           
-          const redeemed = pointsTransactions
-            .filter(pt => pt.type === 'redeemed')
-            .reduce((sum, pt) => sum + pt.amount, 0);
+          if (!currentAgency) return;
           
-          return {
-            balance: earned - redeemed,
-            totalEarned: earned,
-            totalRedeemed: redeemed
-          };
-        },
-        
-        addPointsTransaction: (transactionData) => {
-          const newTransaction = {
-            id: `pt_${Date.now()}`,
-            agencyId: get().currentAgency.id,
-            ...transactionData,
-            date: format(new Date(), 'yyyy-MM-dd'),
-            createdAt: new Date()
-          };
+          set({ isLoading: true, error: null });
           
-          set(state => ({
-            pointsTransactions: [...state.pointsTransactions, newTransaction]
-          }));
-          
-          // Actualizar balance en currentAgency
-          const newBalance = get().actions.getPointsBalance();
-          set(state => ({
-            currentAgency: {
-              ...state.currentAgency,
-              pointsBalance: newBalance.balance,
-              totalEarned: newBalance.totalEarned,
-              totalRedeemed: newBalance.totalRedeemed
+          try {
+            const params = {
+              ...transactionsFilters,
+              page: transactionsPagination.page,
+              pageSize: transactionsPagination.pageSize
+            };
+            
+            const result = await agencyService.getPointsTransactions(currentAgency.id, params);
+            
+            if (!result.success) {
+              throw new Error(result.error || 'Error al cargar transacciones');
             }
-          }));
-          
-          return newTransaction;
+            
+            set({
+              pointsTransactions: result.data.transactions,
+              transactionsPagination: {
+                page: result.data.page,
+                pageSize: result.data.pageSize,
+                total: result.data.total,
+                totalPages: result.data.totalPages
+              },
+              isLoading: false
+            });
+            
+            return result.data;
+          } catch (error) {
+            set({ 
+              isLoading: false,
+              error: error.message
+            });
+            throw error;
+          }
         },
         
-        getPointsHistory: (limit = 50) => {
-          const { pointsTransactions } = get();
-          return pointsTransactions
-            .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-            .slice(0, limit);
+        fetchPointsBalance: async () => {
+          const { currentAgency } = get();
+          
+          if (!currentAgency) return;
+          
+          try {
+            const result = await agencyService.getPointsBalance(currentAgency.id);
+            
+            if (!result.success) {
+              throw new Error(result.error || 'Error al cargar balance de puntos');
+            }
+            
+            set((state) => ({
+              currentAgency: {
+                ...state.currentAgency,
+                pointsBalance: result.data.balance,
+                totalEarned: result.data.totalEarned,
+                totalRedeemed: result.data.totalRedeemed,
+                tier: result.data.tier
+              }
+            }));
+            
+            return result.data;
+          } catch (error) {
+            set({ error: error.message });
+            throw error;
+          }
+        },
+        
+        createPointsTransaction: async (transactionData) => {
+          const { currentAgency } = get();
+          
+          if (!currentAgency) {
+            throw new Error('No hay agencia activa');
+          }
+          
+          set({ isLoading: true, error: null });
+          
+          try {
+            const data = {
+              ...transactionData,
+              agencyId: currentAgency.id
+            };
+            
+            const result = await agencyService.createPointsTransaction(data);
+            
+            if (!result.success) {
+              throw new Error(result.error || 'Error al crear transacción');
+            }
+            
+            set((state) => ({
+              pointsTransactions: [result.data, ...state.pointsTransactions],
+              isLoading: false
+            }));
+            
+            // Actualizar balance
+            await get().actions.fetchPointsBalance();
+            
+            return result.data;
+          } catch (error) {
+            set({ 
+              isLoading: false,
+              error: error.message
+            });
+            throw error;
+          }
+        },
+        
+        redeemPoints: async (redemptionData) => {
+          const { currentAgency } = get();
+          
+          if (!currentAgency) {
+            throw new Error('No hay agencia activa');
+          }
+          
+          set({ isLoading: true, error: null });
+          
+          try {
+            const result = await agencyService.redeemPoints(currentAgency.id, redemptionData);
+            
+            if (!result.success) {
+              throw new Error(result.error || 'Error al canjear puntos');
+            }
+            
+            set((state) => ({
+              pointsTransactions: [result.data, ...state.pointsTransactions],
+              isLoading: false
+            }));
+            
+            // Actualizar balance
+            await get().actions.fetchPointsBalance();
+            
+            return result.data;
+          } catch (error) {
+            set({ 
+              isLoading: false,
+              error: error.message
+            });
+            throw error;
+          }
         },
         
         // === DISPONIBILIDAD ===
-        getAvailableSlots: (date) => {
-          const { availableSlots } = get();
-          const dateKey = format(new Date(date), 'yyyy-MM-dd');
-          return availableSlots[dateKey] || [];
+        fetchAvailableSlots: async (date) => {
+          const { currentAgency } = get();
+          
+          if (!currentAgency) return [];
+          
+          try {
+            const result = await agencyService.getAvailableSlots(currentAgency.id, date);
+            
+            if (!result.success) {
+              throw new Error(result.error || 'Error al cargar slots disponibles');
+            }
+            
+            const dateKey = format(new Date(date), DATE_FORMATS.DATE_KEY);
+            set((state) => ({
+              availableSlots: {
+                ...state.availableSlots,
+                [dateKey]: result.data
+              }
+            }));
+            
+            return result.data;
+          } catch (error) {
+            set({ error: error.message });
+            throw error;
+          }
         },
         
-        setAvailableSlots: (date, slots) => {
-          const dateKey = format(new Date(date), 'yyyy-MM-dd');
-          set(state => ({
-            availableSlots: {
-              ...state.availableSlots,
-              [dateKey]: slots
+        setAvailableSlots: async (date, slots) => {
+          const { currentAgency } = get();
+          
+          if (!currentAgency) return;
+          
+          set({ isLoading: true, error: null });
+          
+          try {
+            const result = await agencyService.setAvailableSlots(currentAgency.id, date, slots);
+            
+            if (!result.success) {
+              throw new Error(result.error || 'Error al actualizar slots');
             }
-          }));
+            
+            const dateKey = format(new Date(date), DATE_FORMATS.DATE_KEY);
+            set((state) => ({
+              availableSlots: {
+                ...state.availableSlots,
+                [dateKey]: result.data
+              },
+              isLoading: false
+            }));
+            
+            return result.data;
+          } catch (error) {
+            set({ 
+              isLoading: false,
+              error: error.message
+            });
+            throw error;
+          }
         },
         
         // === CONFIGURACIÓN DE AGENCIA ===
-        updateAgencyProfile: (updates) => {
-          set(state => ({
-            currentAgency: {
-              ...state.currentAgency,
-              ...updates,
-              updatedAt: new Date()
+        updateAgencyProfile: async (updates) => {
+          const { currentAgency } = get();
+          
+          if (!currentAgency) return;
+          
+          set({ isLoading: true, error: null });
+          
+          try {
+            const result = await agencyService.updateAgency(currentAgency.id, updates);
+            
+            if (!result.success) {
+              throw new Error(result.error || 'Error al actualizar perfil');
             }
-          }));
+            
+            set({
+              currentAgency: result.data,
+              isLoading: false
+            });
+            
+            return result.data;
+          } catch (error) {
+            set({ 
+              isLoading: false,
+              error: error.message
+            });
+            throw error;
+          }
         },
         
         // === UTILIDADES ===
-        getCalendarData: (startDate, endDate) => {
-          const reservations = get().actions.getReservations({ startDate, endDate });
-          const calendarData = {};
+        fetchCalendarData: async (startDate, endDate) => {
+          const { currentAgency } = get();
           
-          // Inicializar todos los días del rango
-          let currentDate = new Date(startDate);
-          const end = new Date(endDate);
+          if (!currentAgency) return {};
           
-          while (currentDate <= end) {
-            const dateKey = format(currentDate, 'yyyy-MM-dd');
-            calendarData[dateKey] = {
-              date: dateKey,
-              reservations: [],
-              totalRevenue: 0,
-              totalParticipants: 0,
-              hasAvailability: true
-            };
-            currentDate = addDays(currentDate, 1);
-          }
+          set({ isLoading: true, error: null });
           
-          // Llenar con datos de reservas
-          reservations.forEach(reservation => {
-            if (calendarData[reservation.date]) {
-              calendarData[reservation.date].reservations.push(reservation);
-              if (reservation.status === 'confirmed') {
-                calendarData[reservation.date].totalRevenue += reservation.totalAmount;
-                calendarData[reservation.date].totalParticipants += reservation.participants;
-              }
+          try {
+            const result = await agencyService.getCalendarData(currentAgency.id, startDate, endDate);
+            
+            if (!result.success) {
+              throw new Error(result.error || 'Error al cargar datos del calendario');
             }
-          });
+            
+            set({
+              calendarData: result.data,
+              isLoading: false
+            });
+            
+            return result.data;
+          } catch (error) {
+            set({ 
+              isLoading: false,
+              error: error.message
+            });
+            throw error;
+          }
+        },
+        
+        fetchAgencyStats: async () => {
+          const { currentAgency } = get();
           
-          return calendarData;
+          if (!currentAgency) return null;
+          
+          set({ isLoading: true, error: null });
+          
+          try {
+            const result = await agencyService.getAgencyStats(currentAgency.id);
+            
+            if (!result.success) {
+              throw new Error(result.error || 'Error al cargar estadísticas');
+            }
+            
+            set({
+              stats: result.data,
+              isLoading: false
+            });
+            
+            return result.data;
+          } catch (error) {
+            set({ 
+              isLoading: false,
+              error: error.message
+            });
+            throw error;
+          }
+        },
+        
+        // Filtros
+        setReservationsFilters: (filters) => {
+          set((state) => ({
+            reservationsFilters: { ...state.reservationsFilters, ...filters },
+            reservationsPagination: { ...state.reservationsPagination, page: 1 }
+          }));
+          return get().actions.fetchReservations();
+        },
+        
+        setTransactionsFilters: (filters) => {
+          set((state) => ({
+            transactionsFilters: { ...state.transactionsFilters, ...filters },
+            transactionsPagination: { ...state.transactionsPagination, page: 1 }
+          }));
+          return get().actions.fetchPointsTransactions();
+        },
+        
+        setReservationsPage: (page) => {
+          set((state) => ({
+            reservationsPagination: { ...state.reservationsPagination, page }
+          }));
+          return get().actions.fetchReservations();
+        },
+        
+        setTransactionsPage: (page) => {
+          set((state) => ({
+            transactionsPagination: { ...state.transactionsPagination, page }
+          }));
+          return get().actions.fetchPointsTransactions();
+        },
+        
+        // Utilidades
+        clearError: () => set({ error: null }),
+        
+        resetStore: () => {
+          set({
+            currentAgency: null,
+            reservations: [],
+            pointsTransactions: [],
+            availableSlots: {},
+            isLoading: false,
+            error: null,
+            reservationsPagination: {
+              page: 1,
+              pageSize: 20,
+              total: 0,
+              totalPages: 0
+            },
+            transactionsPagination: {
+              page: 1,
+              pageSize: 50,
+              total: 0,
+              totalPages: 0
+            },
+            reservationsFilters: {
+              startDate: '',
+              endDate: '',
+              status: '',
+              serviceType: ''
+            },
+            transactionsFilters: {
+              startDate: '',
+              endDate: '',
+              type: ''
+            },
+            stats: null,
+            monthlyReport: null,
+            yearlyComparison: null,
+            calendarData: {}
+          });
         }
       }
     }),
     {
-      name: 'agency-store',
+      name: STORAGE_CONFIG.KEY,
       partialize: (state) => ({
         currentAgency: state.currentAgency,
         reservations: state.reservations,

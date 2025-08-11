@@ -1,180 +1,50 @@
-import { create } from 'zustand';
-import mockData, { mockUsers, userRoles, systemPermissions } from '../data/mockData';
+/**
+ * Store de usuarios
+ * Maneja el estado global de usuarios
+ */
 
-const { getMockData } = mockData;
+import { create } from 'zustand';
+import { usersService } from '../services/usersService';
 
 const useUsersStore = create((set, get) => ({
   // Estado
-  users: mockUsers,
-  roles: userRoles,
-  permissions: systemPermissions,
-  currentUser: mockUsers[0], // Usuario admin por defecto
+  users: [],
+  roles: [],
+  permissions: [],
+  currentUser: null,
   isLoading: false,
   error: null,
   
-  // Filtros y búsqueda
+  // Paginación
+  pagination: {
+    page: 1,
+    pageSize: 20,
+    total: 0,
+    totalPages: 0
+  },
+  
+  // Filtros
   filters: {
     role: '',
     status: '',
     department: '',
     search: ''
   },
+  
+  // Estadísticas
+  stats: null,
+  activities: [],
+  sessions: [],
 
-  // Acciones para obtener usuarios
-  getUsers: (filters = {}) => {
-    return getMockData.users(filters);
-  },
-
-  // Obtener usuario por ID
-  getUserById: (userId) => {
-    const { users } = get();
-    return users.find(user => user.id === userId);
-  },
-
-  // Obtener usuarios filtrados según filtros actuales
-  getFilteredUsers: () => {
-    const { filters } = get();
-    return getMockData.users(filters);
-  },
-
-  // Crear nuevo usuario
-  createUser: (userData) => {
-    set((state) => {
-      const newUser = {
-        ...userData,
-        id: `user-${Date.now()}`,
-        createdAt: new Date(),
-        lastLogin: null,
-        status: userData.status || 'activo'
-      };
-      
-      return {
-        users: [...state.users, newUser],
-        error: null
-      };
-    });
-  },
-
-  // Actualizar usuario existente
-  updateUser: (userId, updates) => {
+  // Acciones de filtros
+  setFilters: (filters) => {
     set((state) => ({
-      users: state.users.map(user =>
-        user.id === userId 
-          ? { ...user, ...updates, updatedAt: new Date() }
-          : user
-      ),
-      error: null
+      filters: { ...state.filters, ...filters },
+      pagination: { ...state.pagination, page: 1 }
     }));
+    return get().fetchUsers();
   },
-
-  // Eliminar usuario
-  deleteUser: (userId) => {
-    set((state) => ({
-      users: state.users.filter(user => user.id !== userId),
-      error: null
-    }));
-  },
-
-  // Cambiar estado de usuario (activar/desactivar)
-  toggleUserStatus: (userId) => {
-    set((state) => ({
-      users: state.users.map(user =>
-        user.id === userId 
-          ? { 
-              ...user, 
-              status: user.status === 'activo' ? 'inactivo' : 'activo',
-              updatedAt: new Date()
-            }
-          : user
-      )
-    }));
-  },
-
-  // Resetear contraseña
-  resetUserPassword: (userId, newPassword) => {
-    set((state) => ({
-      users: state.users.map(user =>
-        user.id === userId 
-          ? { 
-              ...user, 
-              passwordReset: true,
-              passwordResetDate: new Date(),
-              updatedAt: new Date()
-            }
-          : user
-      )
-    }));
-  },
-
-  // Actualizar permisos de usuario
-  updateUserPermissions: (userId, permissions) => {
-    set((state) => ({
-      users: state.users.map(user =>
-        user.id === userId 
-          ? { ...user, permissions, updatedAt: new Date() }
-          : user
-      )
-    }));
-  },
-
-  // Obtener roles disponibles
-  getRoles: () => {
-    const { roles } = get();
-    return roles;
-  },
-
-  // Obtener rol por ID
-  getRoleById: (roleId) => {
-    const { roles } = get();
-    return roles.find(role => role.id === roleId);
-  },
-
-  // Obtener permisos del sistema
-  getSystemPermissions: () => {
-    const { permissions } = get();
-    return permissions;
-  },
-
-  // Obtener permisos agrupados por módulo
-  getPermissionsByModule: () => {
-    const { permissions } = get();
-    const grouped = {};
-    
-    permissions.forEach(permission => {
-      if (!grouped[permission.module]) {
-        grouped[permission.module] = [];
-      }
-      grouped[permission.module].push(permission);
-    });
-    
-    return grouped;
-  },
-
-  // Verificar si un usuario tiene un permiso específico
-  userHasPermission: (userId, permissionId) => {
-    const user = get().getUserById(userId);
-    return user?.permissions?.includes(permissionId) || false;
-  },
-
-  // Obtener permisos de un usuario
-  getUserPermissions: (userId) => {
-    const user = get().getUserById(userId);
-    if (!user) return [];
-    
-    const { permissions } = get();
-    return permissions.filter(permission => 
-      user.permissions?.includes(permission.id)
-    );
-  },
-
-  // Establecer filtros
-  setFilters: (newFilters) => {
-    set((state) => ({
-      filters: { ...state.filters, ...newFilters }
-    }));
-  },
-
-  // Limpiar filtros
+  
   clearFilters: () => {
     set({
       filters: {
@@ -182,167 +52,652 @@ const useUsersStore = create((set, get) => ({
         status: '',
         department: '',
         search: ''
+      },
+      pagination: { ...get().pagination, page: 1 }
+    });
+    return get().fetchUsers();
+  },
+  
+  setSearch: (search) => {
+    set((state) => ({
+      filters: { ...state.filters, search },
+      pagination: { ...state.pagination, page: 1 }
+    }));
+    return get().fetchUsers();
+  },
+  
+  setPage: (page) => {
+    set((state) => ({
+      pagination: { ...state.pagination, page }
+    }));
+    return get().fetchUsers();
+  },
+
+  // Acciones CRUD
+  fetchUsers: async () => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const { filters, pagination } = get();
+      const params = {
+        ...filters,
+        page: pagination.page,
+        pageSize: pagination.pageSize
+      };
+      
+      const result = await usersService.getUsers(params);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al cargar usuarios');
       }
-    });
-  },
-
-  // Obtener estadísticas de usuarios
-  getUsersStatistics: () => {
-    const { users } = get();
-    
-    const total = users.length;
-    const active = users.filter(u => u.status === 'activo').length;
-    const inactive = users.filter(u => u.status === 'inactivo').length;
-    
-    // Usuarios por rol
-    const byRole = {};
-    users.forEach(user => {
-      byRole[user.role] = (byRole[user.role] || 0) + 1;
-    });
-    
-    // Usuarios por departamento
-    const byDepartment = {};
-    users.forEach(user => {
-      byDepartment[user.department] = (byDepartment[user.department] || 0) + 1;
-    });
-    
-    // Últimos logins
-    const recentLogins = users
-      .filter(u => u.lastLogin)
-      .sort((a, b) => new Date(b.lastLogin) - new Date(a.lastLogin))
-      .slice(0, 5);
-    
-    return {
-      total,
-      active,
-      inactive,
-      activeRate: total > 0 ? (active / total * 100).toFixed(1) : 0,
-      byRole,
-      byDepartment,
-      recentLogins
-    };
-  },
-
-  // Buscar usuarios
-  searchUsers: (searchTerm) => {
-    set((state) => ({
-      filters: { ...state.filters, search: searchTerm }
-    }));
-  },
-
-  // Obtener usuarios por departamento
-  getUsersByDepartment: (department) => {
-    const { users } = get();
-    return users.filter(user => user.department === department);
-  },
-
-  // Obtener usuarios por rol
-  getUsersByRole: (role) => {
-    const { users } = get();
-    return users.filter(user => user.role === role);
-  },
-
-  // Actualizar último login
-  updateLastLogin: (userId) => {
-    set((state) => ({
-      users: state.users.map(user =>
-        user.id === userId 
-          ? { ...user, lastLogin: new Date() }
-          : user
-      )
-    }));
-  },
-
-  // Actualizar usuario actual
-  setCurrentUser: (user) => {
-    set({ currentUser: user });
-  },
-
-  // Actualizar preferencias de usuario
-  updateUserPreferences: (userId, preferences) => {
-    set((state) => ({
-      users: state.users.map(user =>
-        user.id === userId 
-          ? { 
-              ...user, 
-              preferences: { ...user.preferences, ...preferences },
-              updatedAt: new Date()
-            }
-          : user
-      )
-    }));
-  },
-
-  // Validar datos de usuario
-  validateUserData: (userData) => {
-    const errors = {};
-    
-    if (!userData.username || userData.username.length < 3) {
-      errors.username = 'El nombre de usuario debe tener al menos 3 caracteres';
+      
+      set({
+        users: result.data.users,
+        pagination: {
+          page: result.data.page,
+          pageSize: result.data.pageSize,
+          total: result.data.total,
+          totalPages: result.data.totalPages
+        },
+        isLoading: false
+      });
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
     }
-    
-    if (!userData.email || !/\S+@\S+\.\S+/.test(userData.email)) {
-      errors.email = 'El email no es válido';
-    }
-    
-    if (!userData.firstName || userData.firstName.trim().length === 0) {
-      errors.firstName = 'El nombre es requerido';
-    }
-    
-    if (!userData.lastName || userData.lastName.trim().length === 0) {
-      errors.lastName = 'El apellido es requerido';
-    }
-    
-    if (!userData.role) {
-      errors.role = 'El rol es requerido';
-    }
-    
-    if (!userData.department) {
-      errors.department = 'El departamento es requerido';
-    }
-    
-    // Verificar email único
-    const { users } = get();
-    const existingUser = users.find(user => 
-      user.email === userData.email && user.id !== userData.id
-    );
-    if (existingUser) {
-      errors.email = 'Este email ya está en uso';
-    }
-    
-    // Verificar username único
-    const existingUsername = users.find(user => 
-      user.username === userData.username && user.id !== userData.id
-    );
-    if (existingUsername) {
-      errors.username = 'Este nombre de usuario ya está en uso';
-    }
-    
-    return {
-      isValid: Object.keys(errors).length === 0,
-      errors
-    };
   },
-
-  // Configurar estados de carga y error
-  setLoading: (isLoading) => set({ isLoading }),
   
-  setError: (error) => set({ error }),
+  fetchUserById: async (id) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await usersService.getUserById(id);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Usuario no encontrado');
+      }
+      
+      set({ isLoading: false });
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
+  },
   
+  createUser: async (userData) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await usersService.createUser(userData);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al crear usuario');
+      }
+      
+      set((state) => ({
+        users: [result.data, ...state.users],
+        isLoading: false
+      }));
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
+  },
+
+  updateUser: async (id, updateData) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await usersService.updateUser(id, updateData);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al actualizar usuario');
+      }
+      
+      set((state) => ({
+        users: state.users.map(u => 
+          u.id === id ? result.data : u
+        ),
+        currentUser: state.currentUser?.id === id 
+          ? result.data 
+          : state.currentUser,
+        isLoading: false
+      }));
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
+  },
+
+  deleteUser: async (id) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await usersService.deleteUser(id);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al eliminar usuario');
+      }
+      
+      set((state) => ({
+        users: state.users.filter(u => u.id !== id),
+        currentUser: state.currentUser?.id === id 
+          ? null 
+          : state.currentUser,
+        isLoading: false
+      }));
+      
+      return true;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
+  },
+
+  toggleUserStatus: async (id, status) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await usersService.toggleUserStatus(id, status);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al cambiar estado');
+      }
+      
+      set((state) => ({
+        users: state.users.map(u => 
+          u.id === id ? result.data : u
+        ),
+        currentUser: state.currentUser?.id === id 
+          ? result.data 
+          : state.currentUser,
+        isLoading: false
+      }));
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
+  },
+
+  resetUserPassword: async (id) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await usersService.resetUserPassword(id);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al resetear contraseña');
+      }
+      
+      set({ isLoading: false });
+      
+      return result;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
+  },
+  
+  changeUserPassword: async (id, passwordData) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await usersService.changeUserPassword(id, passwordData);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al cambiar contraseña');
+      }
+      
+      set({ isLoading: false });
+      
+      return result;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
+  },
+
+  updateUserPermissions: async (id, permissions) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await usersService.updateUserPermissions(id, permissions);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al actualizar permisos');
+      }
+      
+      set((state) => ({
+        users: state.users.map(u => 
+          u.id === id ? result.data : u
+        ),
+        currentUser: state.currentUser?.id === id 
+          ? result.data 
+          : state.currentUser,
+        isLoading: false
+      }));
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
+  },
+  
+  updateUserRole: async (id, roleId) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await usersService.updateUserRole(id, roleId);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al actualizar rol');
+      }
+      
+      set((state) => ({
+        users: state.users.map(u => 
+          u.id === id ? result.data : u
+        ),
+        currentUser: state.currentUser?.id === id 
+          ? result.data 
+          : state.currentUser,
+        isLoading: false
+      }));
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
+  },
+
+  // Roles y permisos
+  fetchRoles: async () => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await usersService.getRoles();
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al cargar roles');
+      }
+      
+      set({
+        roles: result.data,
+        isLoading: false
+      });
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
+  },
+  
+  fetchPermissions: async () => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await usersService.getPermissions();
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al cargar permisos');
+      }
+      
+      set({
+        permissions: result.data.permissions,
+        isLoading: false
+      });
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
+  },
+
+  // Búsqueda
+  searchUsers: async (query) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await usersService.searchUsers(query);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error en la búsqueda');
+      }
+      
+      set({
+        users: result.data,
+        isLoading: false
+      });
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
+  },
+
+  // Estadísticas
+  fetchUsersStats: async () => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await usersService.getUsersStats();
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al cargar estadísticas');
+      }
+      
+      set({
+        stats: result.data,
+        isLoading: false
+      });
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
+  },
+
+  // Actividad de usuario
+  fetchUserActivity: async (id, params = {}) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await usersService.getUserActivity(id, params);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al cargar actividad');
+      }
+      
+      set({
+        activities: result.data.activities,
+        isLoading: false
+      });
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
+  },
+
+  // Validación
+  checkEmailUnique: async (email, excludeId = null) => {
+    try {
+      const result = await usersService.checkEmailUnique(email, excludeId);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al verificar email');
+      }
+      
+      return result.data.unique;
+    } catch (error) {
+      set({ error: error.message });
+      throw error;
+    }
+  },
+
+  // Invitaciones
+  inviteUser: async (inviteData) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await usersService.inviteUser(inviteData);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al invitar usuario');
+      }
+      
+      set((state) => ({
+        users: [result.data, ...state.users],
+        isLoading: false
+      }));
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
+  },
+  
+  resendInvitation: async (userId) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await usersService.resendInvitation(userId);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al reenviar invitación');
+      }
+      
+      set({ isLoading: false });
+      
+      return result;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
+  },
+
+  // Importación/Exportación
+  importUsers: async (file, onProgress = null) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await usersService.importUsers(file, onProgress);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al importar usuarios');
+      }
+      
+      // Recargar lista de usuarios
+      await get().fetchUsers();
+      
+      set({ isLoading: false });
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
+  },
+  
+  exportUsers: async (filters = {}, format = 'excel') => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await usersService.exportUsers(filters, format);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al exportar usuarios');
+      }
+      
+      set({ isLoading: false });
+      
+      return result;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
+  },
+  
+  // Sesiones
+  fetchUserSessions: async (userId) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await usersService.getUserSessions(userId);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al cargar sesiones');
+      }
+      
+      set({
+        sessions: result.data,
+        isLoading: false
+      });
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
+  },
+  
+  terminateUserSession: async (userId, sessionId) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await usersService.terminateUserSession(userId, sessionId);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al terminar sesión');
+      }
+      
+      set((state) => ({
+        sessions: state.sessions.filter(s => s.id !== sessionId),
+        isLoading: false
+      }));
+      
+      return true;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
+  },
+  
+  terminateAllUserSessions: async (userId) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await usersService.terminateAllUserSessions(userId);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al terminar sesiones');
+      }
+      
+      set({
+        sessions: [],
+        isLoading: false
+      });
+      
+      return result;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
+  },
+  
+  // Utilidades
   clearError: () => set({ error: null }),
   
-  // Reinicializar store
-  resetStore: () => set({
-    users: mockUsers,
-    filters: {
-      role: '',
-      status: '',
-      department: '',
-      search: ''
-    },
-    isLoading: false,
-    error: null
-  })
+  setCurrentUser: (user) => set({ currentUser: user }),
+  
+  resetStore: () => {
+    set({
+      users: [],
+      roles: [],
+      permissions: [],
+      currentUser: null,
+      isLoading: false,
+      error: null,
+      pagination: {
+        page: 1,
+        pageSize: 20,
+        total: 0,
+        totalPages: 0
+      },
+      filters: {
+        role: '',
+        status: '',
+        department: '',
+        search: ''
+      },
+      stats: null,
+      activities: [],
+      sessions: []
+    });
+  }
 }));
 
 export { useUsersStore };

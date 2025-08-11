@@ -126,8 +126,6 @@ const ChatList = ({ onSelectChat, selectedChatId }) => {
   );
 };
 
-};
-
 ChatList.propTypes = {
   onSelectChat: PropTypes.func.isRequired,
   selectedChatId: PropTypes.string

@@ -1,260 +1,656 @@
+/**
+ * Store de guías
+ * Maneja el estado global de guías
+ */
+
 import { create } from 'zustand';
-
-// Catálogo de idiomas disponibles
-const languages = [
-  { code: 'es', name: 'Español', flag: '🇪🇸' },
-  { code: 'en', name: 'Inglés', flag: '🇺🇸' },
-  { code: 'fr', name: 'Francés', flag: '🇫🇷' },
-  { code: 'de', name: 'Alemán', flag: '🇩🇪' },
-  { code: 'it', name: 'Italiano', flag: '🇮🇹' },
-  { code: 'pt', name: 'Portugués', flag: '🇵🇹' },
-  { code: 'ja', name: 'Japonés', flag: '🇯🇵' },
-  { code: 'ko', name: 'Coreano', flag: '🇰🇷' },
-  { code: 'zh', name: 'Chino Mandarín', flag: '🇨🇳' },
-  { code: 'ru', name: 'Ruso', flag: '🇷🇺' }
-];
-
-// Datos mock de guías
-const mockGuides = [
-  {
-    id: 'guide001',
-    fullName: 'María Elena Torres Vásquez',
-    dni: '12345678',
-    phone: '+51 987 654 321',
-    email: 'maria.torres@futurismo.com',
-    address: 'Av. Grau 123, Miraflores, Lima',
-    guideType: 'freelance',
-    specializations: {
-      languages: [
-        { code: 'es', level: 'nativo' },
-        { code: 'en', level: 'avanzado' },
-        { code: 'fr', level: 'intermedio' }
-      ],
-      museums: [
-        { name: 'Museo Larco', expertise: 'experto' },
-        { name: 'Museo del Oro', expertise: 'avanzado' },
-        { name: 'Museo Nacional de Antropología', expertise: 'intermedio' }
-      ]
-    },
-    stats: {
-      toursCompleted: 156,
-      yearsExperience: 5,
-      rating: 4.8,
-      certifications: 3
-    },
-    status: 'active',
-    createdAt: '2019-03-15T00:00:00.000Z',
-    updatedAt: '2024-01-15T00:00:00.000Z'
-  },
-  {
-    id: 'guide002',
-    fullName: 'Carlos Alberto Mendoza Silva',
-    dni: '87654321',
-    phone: '+51 987 654 322',
-    email: 'carlos.mendoza@futurismo.com',
-    address: 'Jr. Lima 456, San Isidro, Lima',
-    guideType: 'planta',
-    specializations: {
-      languages: [
-        { code: 'es', level: 'nativo' },
-        { code: 'en', level: 'experto' },
-        { code: 'de', level: 'avanzado' }
-      ],
-      museums: [
-        { name: 'Museo de Arte de Lima', expertise: 'experto' },
-        { name: 'Museo Pedro de Osma', expertise: 'avanzado' }
-      ]
-    },
-    stats: {
-      toursCompleted: 234,
-      yearsExperience: 8,
-      rating: 4.9,
-      certifications: 5
-    },
-    status: 'active',
-    createdAt: '2016-08-20T00:00:00.000Z',
-    updatedAt: '2024-01-10T00:00:00.000Z'
-  },
-  {
-    id: 'guide003',
-    fullName: 'Ana Sofía Quispe Mamani',
-    dni: '11223344',
-    phone: '+51 987 654 323',
-    email: 'ana.quispe@futurismo.com',
-    address: 'Av. Arequipa 789, Lince, Lima',
-    guideType: 'freelance',
-    specializations: {
-      languages: [
-        { code: 'es', level: 'nativo' },
-        { code: 'en', level: 'intermedio' },
-        { code: 'ja', level: 'avanzado' }
-      ],
-      museums: [
-        { name: 'Museo de la Nación', expertise: 'experto' },
-        { name: 'Museo de Sitio Pachacamac', expertise: 'intermedio' }
-      ]
-    },
-    stats: {
-      toursCompleted: 89,
-      yearsExperience: 3,
-      rating: 4.6,
-      certifications: 2
-    },
-    status: 'active',
-    createdAt: '2021-06-10T00:00:00.000Z',
-    updatedAt: '2024-01-05T00:00:00.000Z'
-  }
-];
+import { guidesService } from '../services/guidesService';
+import {
+  AVAILABLE_LANGUAGES,
+  LANGUAGE_LEVELS,
+  EXPERTISE_LEVELS,
+  GUIDE_STATUS_VALUES,
+  AVAILABILITY_STATUS,
+  GUIDE_TYPES,
+  COMMON_MUSEUMS
+} from '../constants/guidesConstants';
 
 const useGuidesStore = create((set, get) => ({
   // Estado
-  guides: mockGuides,
-  languages: languages,
-  museums: [], // Ya no necesitamos un catálogo fijo de museos
+  guides: [],
+  currentGuide: null,
+  isLoading: false,
+  error: null,
   
-  // Funciones principales (acceso directo)
-  getGuides: (filters = {}) => {
-    const { guides } = get();
+  // Configuración
+  availableLanguages: AVAILABLE_LANGUAGES,
+  languageLevels: LANGUAGE_LEVELS,
+  expertiseLevels: EXPERTISE_LEVELS,
+  guideStatuses: GUIDE_STATUS_VALUES,
+  guideTypes: GUIDE_TYPES,
+  commonMuseums: COMMON_MUSEUMS,
+  
+  // Filtros
+  filters: {
+    search: '',
+    status: '',
+    guideType: '',
+    languages: [],
+    museums: [],
+    availability: ''
+  },
+  
+  // Paginación
+  pagination: {
+    page: 1,
+    pageSize: 20,
+    total: 0,
+    totalPages: 0
+  },
+  
+  // Estadísticas
+  summary: null,
+  guideStats: null,
+  
+  // Acciones de filtros
+  setFilters: (filters) => {
+    set((state) => ({
+      filters: { ...state.filters, ...filters },
+      pagination: { ...state.pagination, page: 1 }
+    }));
+    return get().fetchGuides();
+  },
+  
+  clearFilters: () => {
+    set({
+      filters: {
+        search: '',
+        status: '',
+        guideType: '',
+        languages: [],
+        museums: [],
+        availability: ''
+      },
+      pagination: { ...get().pagination, page: 1 }
+    });
+    return get().fetchGuides();
+  },
+  
+  setSearch: (search) => {
+    set((state) => ({
+      filters: { ...state.filters, search },
+      pagination: { ...state.pagination, page: 1 }
+    }));
+    return get().fetchGuides();
+  },
+  
+  setPage: (page) => {
+    set((state) => ({
+      pagination: { ...state.pagination, page }
+    }));
+    return get().fetchGuides();
+  },
+  
+  // Acciones CRUD
+  fetchGuides: async () => {
+    set({ isLoading: true, error: null });
     
-    if (!filters || Object.keys(filters).length === 0) {
-      return guides;
+    try {
+      const { filters, pagination } = get();
+      const params = {
+        ...filters,
+        page: pagination.page,
+        pageSize: pagination.pageSize
+      };
+      
+      const result = await guidesService.getGuides(params);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al cargar guías');
+      }
+      
+      set({
+        guides: result.data.guides,
+        pagination: {
+          page: result.data.page,
+          pageSize: result.data.pageSize,
+          total: result.data.total,
+          totalPages: result.data.totalPages
+        },
+        isLoading: false
+      });
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
     }
+  },
+  
+  fetchGuideById: async (id) => {
+    set({ isLoading: true, error: null });
     
-    return guides.filter(guide => {
-      // Filtro por tipo
-      if (filters.tipo && guide.guideType !== filters.tipo) {
-        return false;
+    try {
+      const result = await guidesService.getGuideById(id);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Guía no encontrado');
       }
       
-      // Filtro por idioma
-      if (filters.language && !guide.specializations.languages.some(lang => lang.code === filters.language)) {
-        return false;
+      set({
+        currentGuide: result.data,
+        isLoading: false
+      });
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
+  },
+  
+  createGuide: async (guideData) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await guidesService.createGuide(guideData);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al crear guía');
       }
       
-      // Filtro por museo
-      if (filters.museum && !guide.specializations.museums.some(museum => 
-        museum.name.toLowerCase().includes(filters.museum.toLowerCase())
-      )) {
-        return false;
+      set((state) => ({
+        guides: [result.data, ...state.guides],
+        isLoading: false
+      }));
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
+  },
+  
+  updateGuide: async (id, updateData) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await guidesService.updateGuide(id, updateData);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al actualizar guía');
+      }
+      
+      set((state) => ({
+        guides: state.guides.map(g => 
+          g.id === id ? result.data : g
+        ),
+        currentGuide: state.currentGuide?.id === id 
+          ? result.data 
+          : state.currentGuide,
+        isLoading: false
+      }));
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
+  },
+  
+  deleteGuide: async (id) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await guidesService.deleteGuide(id);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al eliminar guía');
+      }
+      
+      set((state) => ({
+        guides: state.guides.filter(g => g.id !== id),
+        currentGuide: state.currentGuide?.id === id 
+          ? null 
+          : state.currentGuide,
+        isLoading: false
+      }));
+      
+      return true;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
+  },
+  
+  updateGuideStatus: async (id, status) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await guidesService.updateGuideStatus(id, status);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al actualizar estado');
+      }
+      
+      set((state) => ({
+        guides: state.guides.map(g => 
+          g.id === id ? result.data : g
+        ),
+        currentGuide: state.currentGuide?.id === id 
+          ? result.data 
+          : state.currentGuide,
+        isLoading: false
+      }));
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
+  },
+  
+  // Agenda y disponibilidad
+  fetchGuideAgenda: async (guideId, params = {}) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await guidesService.getGuideAgenda(guideId, params);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al cargar agenda');
+      }
+      
+      set({ isLoading: false });
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
+  },
+  
+  updateGuideAvailability: async (guideId, availability) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await guidesService.updateGuideAvailability(guideId, availability);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al actualizar disponibilidad');
+      }
+      
+      set((state) => ({
+        guides: state.guides.map(g => 
+          g.id === guideId 
+            ? { ...g, availability: result.data }
+            : g
+        ),
+        currentGuide: state.currentGuide?.id === guideId
+          ? { ...state.currentGuide, availability: result.data }
+          : state.currentGuide,
+        isLoading: false
+      }));
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
+  },
+  
+  // Estadísticas
+  fetchGuideStats: async (guideId, params = {}) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await guidesService.getGuideStats(guideId, params);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al cargar estadísticas');
+      }
+      
+      set({
+        guideStats: result.data,
+        isLoading: false
+      });
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
+  },
+  
+  fetchGuidesSummary: async () => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await guidesService.getGuidesSummary();
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al cargar resumen');
+      }
+      
+      set({
+        summary: result.data,
+        isLoading: false
+      });
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
+  },
+  
+  // Certificaciones
+  fetchGuideCertifications: async (guideId) => {
+    try {
+      const result = await guidesService.getGuideCertifications(guideId);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al cargar certificaciones');
+      }
+      
+      return result.data;
+    } catch (error) {
+      set({ error: error.message });
+      throw error;
+    }
+  },
+  
+  addGuideCertification: async (guideId, certification) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await guidesService.addGuideCertification(guideId, certification);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al agregar certificación');
+      }
+      
+      // Actualizar guía en la lista
+      const guide = get().guides.find(g => g.id === guideId);
+      if (guide) {
+        const updatedGuide = {
+          ...guide,
+          certifications: [...(guide.certifications || []), result.data],
+          stats: {
+            ...guide.stats,
+            certifications: (guide.stats.certifications || 0) + 1
+          }
+        };
+        
+        set((state) => ({
+          guides: state.guides.map(g => 
+            g.id === guideId ? updatedGuide : g
+          ),
+          currentGuide: state.currentGuide?.id === guideId
+            ? updatedGuide
+            : state.currentGuide,
+          isLoading: false
+        }));
+      } else {
+        set({ isLoading: false });
+      }
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
+  },
+  
+  removeGuideCertification: async (guideId, certificationId) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await guidesService.removeGuideCertification(guideId, certificationId);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al eliminar certificación');
+      }
+      
+      // Actualizar guía en la lista
+      const guide = get().guides.find(g => g.id === guideId);
+      if (guide) {
+        const updatedGuide = {
+          ...guide,
+          certifications: guide.certifications?.filter(c => c.id !== certificationId) || [],
+          stats: {
+            ...guide.stats,
+            certifications: Math.max(0, (guide.stats.certifications || 0) - 1)
+          }
+        };
+        
+        set((state) => ({
+          guides: state.guides.map(g => 
+            g.id === guideId ? updatedGuide : g
+          ),
+          currentGuide: state.currentGuide?.id === guideId
+            ? updatedGuide
+            : state.currentGuide,
+          isLoading: false
+        }));
+      } else {
+        set({ isLoading: false });
       }
       
       return true;
-    });
-  },
-
-  getGuideAgenda: (guideId, date) => {
-    // Mock agenda data
-    return {
-      guideId,
-      date: date,
-      slots: [
-        { time: '09:00', status: 'available' },
-        { time: '10:00', status: 'busy', tour: 'City Tour Lima' },
-        { time: '11:00', status: 'busy', tour: 'City Tour Lima' },
-        { time: '12:00', status: 'available' },
-        { time: '13:00', status: 'break' },
-        { time: '14:00', status: 'available' },
-        { time: '15:00', status: 'available' },
-        { time: '16:00', status: 'busy', tour: 'Museo Larco' },
-        { time: '17:00', status: 'available' }
-      ]
-    };
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
   },
   
-  // Acciones
-  actions: {
-    // Agregar nuevo guía
-    addGuide: (guideData) => {
-      const newGuide = {
-        id: `guide${Date.now()}`,
-        ...guideData,
-        stats: {
-          toursCompleted: 0,
-          yearsExperience: 0,
-          rating: 0,
-          certifications: 0
-        },
-        status: 'active',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      };
+  // Tours del guía
+  fetchGuideTours: async (guideId, filters = {}) => {
+    try {
+      const result = await guidesService.getGuideTours(guideId, filters);
       
-      set((state) => ({
-        guides: [...state.guides, newGuide]
-      }));
+      if (!result.success) {
+        throw new Error(result.error || 'Error al cargar tours');
+      }
       
-      return newGuide;
-    },
-
-    // Actualizar guía existente
-    updateGuide: (guideId, updateData) => {
-      set((state) => ({
-        guides: state.guides.map(guide =>
-          guide.id === guideId
-            ? { ...guide, ...updateData, updatedAt: new Date().toISOString() }
-            : guide
-        )
-      }));
-    },
-
-    // Eliminar guía
-    deleteGuide: (guideId) => {
-      set((state) => ({
-        guides: state.guides.filter(guide => guide.id !== guideId)
-      }));
-    },
-
-    // Obtener guía por ID
-    getGuideById: (guideId) => {
-      const { guides } = get();
-      return guides.find(guide => guide.id === guideId);
-    },
-
-    // Filtrar guías
-    filterGuides: (filters) => {
-      const { guides } = get();
-      
-      return guides.filter(guide => {
-        // Filtro por tipo
-        if (filters.type && guide.guideType !== filters.type) {
-          return false;
-        }
-        
-        // Filtro por idioma
-        if (filters.language && !guide.specializations.languages.some(lang => lang.code === filters.language)) {
-          return false;
-        }
-        
-        // Filtro por museo (buscar en el nombre)
-        if (filters.museum && !guide.specializations.museums.some(museum => 
-          museum.name.toLowerCase().includes(filters.museum.toLowerCase())
-        )) {
-          return false;
-        }
-        
-        // Filtro por texto de búsqueda
-        if (filters.search) {
-          const searchTerm = filters.search.toLowerCase();
-          return guide.fullName.toLowerCase().includes(searchTerm) ||
-                 guide.email.toLowerCase().includes(searchTerm) ||
-                 guide.dni.includes(searchTerm);
-        }
-        
-        return true;
-      });
-    },
-
-    // Obtener estadísticas
-    getStatistics: () => {
-      const { guides } = get();
-      
-      return {
-        total: guides.length,
-        planta: guides.filter(g => g.guideType === 'planta').length,
-        freelance: guides.filter(g => g.guideType === 'freelance').length,
-        active: guides.filter(g => g.status === 'active').length
-      };
+      return result.data;
+    } catch (error) {
+      set({ error: error.message });
+      throw error;
     }
+  },
+  
+  // Especialización
+  updateGuideSpecialization: async (guideId, specialization) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await guidesService.updateGuideSpecialization(guideId, specialization);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al actualizar especialización');
+      }
+      
+      set((state) => ({
+        guides: state.guides.map(g => 
+          g.id === guideId 
+            ? { ...g, specializations: result.data }
+            : g
+        ),
+        currentGuide: state.currentGuide?.id === guideId
+          ? { ...state.currentGuide, specializations: result.data }
+          : state.currentGuide,
+        isLoading: false
+      }));
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
+  },
+  
+  // Búsqueda avanzada
+  searchByCompetencies: async (requirements) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await guidesService.searchByCompetencies(requirements);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error en la búsqueda');
+      }
+      
+      set({
+        guides: result.data,
+        isLoading: false
+      });
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
+  },
+  
+  checkGuidesAvailability: async (params) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await guidesService.checkGuidesAvailability(params);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al verificar disponibilidad');
+      }
+      
+      set({ isLoading: false });
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
+  },
+  
+  // Importación/Exportación
+  importGuides: async (file, onProgress = null) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await guidesService.importGuides(file, onProgress);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al importar guías');
+      }
+      
+      // Recargar lista de guías
+      await get().fetchGuides();
+      
+      set({ isLoading: false });
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
+  },
+  
+  exportGuides: async (filters = {}, format = 'excel') => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await guidesService.exportGuides(filters, format);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al exportar guías');
+      }
+      
+      set({ isLoading: false });
+      
+      return result;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
+  },
+  
+  // Utilidades
+  clearError: () => set({ error: null }),
+  
+  resetStore: () => {
+    set({
+      guides: [],
+      currentGuide: null,
+      isLoading: false,
+      error: null,
+      filters: {
+        search: '',
+        status: '',
+        guideType: '',
+        languages: [],
+        museums: [],
+        availability: ''
+      },
+      pagination: {
+        page: 1,
+        pageSize: 20,
+        total: 0,
+        totalPages: 0
+      },
+      summary: null,
+      guideStats: null
+    });
   }
 }));
 

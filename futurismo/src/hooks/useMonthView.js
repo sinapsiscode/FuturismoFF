@@ -9,6 +9,12 @@ import {
 } from 'date-fns';
 import useIndependentAgendaStore from '../stores/independentAgendaStore';
 import useAuthStore from '../stores/authStore';
+import { 
+  EVENT_TYPES, 
+  CALENDAR_CONFIG, 
+  CALENDAR_VIEWS,
+  USER_ROLES
+} from '../constants/monthViewConstants';
 
 const useMonthView = () => {
   const { user } = useAuthStore();
@@ -27,12 +33,12 @@ const useMonthView = () => {
   const [hoveredDate, setHoveredDate] = useState(null);
   const [selectedEvent, setSelectedEvent] = useState(null);
 
-  const isAdmin = user?.role === 'admin';
+  const isAdmin = user?.role === USER_ROLES.ADMIN;
   
   const monthStart = startOfMonth(selectedDate);
   const monthEnd = endOfMonth(monthStart);
-  const startDate = startOfWeek(monthStart, { weekStartsOn: 1 });
-  const endDate = endOfWeek(monthEnd, { weekStartsOn: 1 });
+  const startDate = startOfWeek(monthStart, { weekStartsOn: CALENDAR_CONFIG.WEEK_START_DAY });
+  const endDate = endOfWeek(monthEnd, { weekStartsOn: CALENDAR_CONFIG.WEEK_START_DAY });
 
   // Load month events
   useEffect(() => {
@@ -40,7 +46,7 @@ const useMonthView = () => {
     let currentDate = startDate;
 
     while (currentDate <= endDate) {
-      const dateKey = format(currentDate, 'yyyy-MM-dd');
+      const dateKey = format(currentDate, CALENDAR_CONFIG.DATE_FORMAT);
       
       if (isAdmin && currentGuide) {
         // Admin view: only availability
@@ -66,19 +72,19 @@ const useMonthView = () => {
 
   const handleDateHover = (date, isHovering) => {
     if (isHovering) {
-      setHoveredDate(format(date, 'yyyy-MM-dd'));
+      setHoveredDate(format(date, CALENDAR_CONFIG.DATE_FORMAT));
     } else {
       setHoveredDate(null);
     }
   };
 
   const getDayEventIndicators = (date) => {
-    const dateKey = format(date, 'yyyy-MM-dd');
+    const dateKey = format(date, CALENDAR_CONFIG.DATE_FORMAT);
     const dayData = monthEvents[dateKey] || { events: [], availability: [] };
     
-    const personalEvents = dayData.events.filter(e => e.type === 'personal').length;
-    const companyTours = dayData.events.filter(e => e.type === 'company_tour').length;
-    const occupiedSlots = dayData.events.filter(e => e.type === 'occupied').length;
+    const personalEvents = dayData.events.filter(e => e.type === EVENT_TYPES.PERSONAL).length;
+    const companyTours = dayData.events.filter(e => e.type === EVENT_TYPES.COMPANY_TOUR).length;
+    const occupiedSlots = dayData.events.filter(e => e.type === EVENT_TYPES.OCCUPIED).length;
     const availableSlots = dayData.availability.length;
 
     return {
@@ -96,7 +102,7 @@ const useMonthView = () => {
     event.preventDefault();
     event.stopPropagation();
     
-    const dateKey = format(date, 'yyyy-MM-dd');
+    const dateKey = format(date, CALENDAR_CONFIG.DATE_FORMAT);
     const dayData = monthEvents[dateKey] || { events: [] };
     const eventsOfType = dayData.events.filter(e => e.type === eventType);
     
@@ -106,7 +112,7 @@ const useMonthView = () => {
     } else {
       // If multiple events, go to day view
       setSelectedDate(date);
-      setCurrentView('day');
+      setCurrentView(CALENDAR_VIEWS.DAY);
     }
   };
 

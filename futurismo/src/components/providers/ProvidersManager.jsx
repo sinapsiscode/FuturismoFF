@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { MapPinIcon, PlusIcon, MagnifyingGlassIcon, FunnelIcon, Squares2X2Icon, ListBulletIcon, BuildingOffice2Icon, PhoneIcon, EnvelopeIcon, StarIcon, UserGroupIcon, ClockIcon, CalendarIcon, DocumentTextIcon } from '@heroicons/react/24/outline';
 import useProvidersStore from '../../stores/providersStore';
 import ProviderCard from './ProviderCard';
@@ -10,8 +10,10 @@ const ProvidersManager = () => {
   const {
     locations,
     categories,
+    providers,
     selectedLocation,
     selectedCategory,
+    isLoading,
     actions
   } = useProvidersStore();
 
@@ -26,16 +28,66 @@ const ProvidersManager = () => {
     minRating: 0
   });
 
-  // Obtener proveedores filtrados
-  const filteredProviders = useMemo(() => {
-    let providers = actions.searchProviders(searchQuery, {
-      location: selectedLocation || filters.location || undefined,
-      category: selectedCategory || filters.category || undefined,
-      minRating: filters.minRating
-    });
+  // Initialize data
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        await actions.initialize();
+        await actions.fetchProviders();
+      } catch (error) {
+        console.error('Error loading providers data:', error);
+      }
+    };
+    
+    loadData();
+  }, []);
 
-    return providers;
+  // Apply filters when they change
+  useEffect(() => {
+    const applyFilters = async () => {
+      try {
+        const filterParams = {
+          search: searchQuery,
+          location: selectedLocation || filters.location || undefined,
+          category: selectedCategory || filters.category || undefined,
+          minRating: filters.minRating || undefined
+        };
+        
+        await actions.setFilters(filterParams);
+      } catch (error) {
+        console.error('Error applying filters:', error);
+      }
+    };
+    
+    applyFilters();
   }, [searchQuery, filters, selectedLocation, selectedCategory, actions]);
+
+  // Filtrar proveedores local
+  const filteredProviders = useMemo(() => {
+    if (!providers || !Array.isArray(providers)) {
+      return [];
+    }
+    
+    return providers.filter(provider => {
+      if (searchQuery && !provider.name.toLowerCase().includes(searchQuery.toLowerCase())) {
+        return false;
+      }
+      
+      if (filters.location && provider.location !== filters.location) {
+        return false;
+      }
+      
+      if (filters.category && provider.category !== filters.category) {
+        return false;
+      }
+      
+      if (filters.minRating && (provider.rating || 0) < filters.minRating) {
+        return false;
+      }
+      
+      return true;
+    });
+  }, [providers, searchQuery, filters]);
 
   const handleAddProvider = () => {
     setEditingProvider(null);
@@ -47,20 +99,28 @@ const ProvidersManager = () => {
     setShowForm(true);
   };
 
-  const handleDeleteProvider = (providerId) => {
+  const handleDeleteProvider = async (providerId) => {
     if (window.confirm('¿Estás seguro de que deseas eliminar este proveedor?')) {
-      actions.deleteProvider(providerId);
+      try {
+        await actions.deleteProvider(providerId);
+      } catch (error) {
+        console.error('Error deleting provider:', error);
+      }
     }
   };
 
-  const handleSaveProvider = (providerData) => {
-    if (editingProvider) {
-      actions.updateProvider(editingProvider.id, providerData);
-    } else {
-      actions.addProvider(providerData);
+  const handleSaveProvider = async (providerData) => {
+    try {
+      if (editingProvider) {
+        await actions.updateProvider(editingProvider.id, providerData);
+      } else {
+        await actions.createProvider(providerData);
+      }
+      setShowForm(false);
+      setEditingProvider(null);
+    } catch (error) {
+      console.error('Error saving provider:', error);
     }
-    setShowForm(false);
-    setEditingProvider(null);
   };
 
   const getLocationName = (locationId) => {
@@ -183,56 +243,64 @@ const ProvidersManager = () => {
           </div>
         )}
 
-        {/* Lista/Squares2X2Icon de proveedores */}
+        {/* Lista/Grilla de proveedores */}
         <div className="flex-1">
-          {viewMode === 'grid' ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredProviders.map(provider => (
-                <ProviderCard
-                  key={provider.id}
-                  provider={provider}
-                  locationName={getLocationName(provider.location)}
-                  categoryInfo={getCategoryInfo(provider.category)}
-                  onEdit={() => handleEditProvider(provider)}
-                  onDelete={() => handleDeleteProvider(provider.id)}
-                />
-              ))}
+          {isLoading ? (
+            <div className="flex justify-center py-12">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
             </div>
           ) : (
-            <div className="space-y-4">
-              {filteredProviders.map(provider => (
-                <ProviderCard
-                  key={provider.id}
-                  provider={provider}
-                  locationName={getLocationName(provider.location)}
-                  categoryInfo={getCategoryInfo(provider.category)}
-                  onEdit={() => handleEditProvider(provider)}
-                  onDelete={() => handleDeleteProvider(provider.id)}
-                  layout="list"
-                />
-              ))}
-            </div>
-          )}
+            <>
+              {viewMode === 'grid' ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {filteredProviders.map(provider => (
+                    <ProviderCard
+                      key={provider.id}
+                      provider={provider}
+                      locationName={getLocationName(provider.location)}
+                      categoryInfo={getCategoryInfo(provider.category)}
+                      onEdit={() => handleEditProvider(provider)}
+                      onDelete={() => handleDeleteProvider(provider.id)}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {filteredProviders.map(provider => (
+                    <ProviderCard
+                      key={provider.id}
+                      provider={provider}
+                      locationName={getLocationName(provider.location)}
+                      categoryInfo={getCategoryInfo(provider.category)}
+                      onEdit={() => handleEditProvider(provider)}
+                      onDelete={() => handleDeleteProvider(provider.id)}
+                      layout="list"
+                    />
+                  ))}
+                </div>
+              )}
 
-          {filteredProviders.length === 0 && (
-            <div className="text-center py-12">
-              <BuildingOffice2Icon className="mx-auto h-12 w-12 text-gray-400" />
-              <h3 className="mt-2 text-sm font-medium text-gray-900">
-                No se encontraron proveedores
-              </h3>
-              <p className="mt-1 text-sm text-gray-500">
-                Comienza agregando un nuevo proveedor o ajusta los filtros.
-              </p>
-              <div className="mt-6">
-                <button
-                  onClick={handleAddProvider}
-                  className="btn btn-primary"
-                >
-                  <PlusIcon className="w-4 h-4 mr-2" />
-                  Agregar Proveedor
-                </button>
-              </div>
-            </div>
+              {filteredProviders.length === 0 && !isLoading && (
+                <div className="text-center py-12">
+                  <BuildingOffice2Icon className="mx-auto h-12 w-12 text-gray-400" />
+                  <h3 className="mt-2 text-sm font-medium text-gray-900">
+                    No se encontraron proveedores
+                  </h3>
+                  <p className="mt-1 text-sm text-gray-500">
+                    Comienza agregando un nuevo proveedor o ajusta los filtros.
+                  </p>
+                  <div className="mt-6">
+                    <button
+                      onClick={handleAddProvider}
+                      className="btn btn-primary"
+                    >
+                      <PlusIcon className="w-4 h-4 mr-2" />
+                      Agregar Proveedor
+                    </button>
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>

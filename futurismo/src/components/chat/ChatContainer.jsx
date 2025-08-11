@@ -50,8 +50,6 @@ const ChatContainer = () => {
   );
 };
 
-};
-
 ChatContainer.propTypes = {};
 
 export default ChatContainer;

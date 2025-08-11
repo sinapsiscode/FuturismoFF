@@ -2,6 +2,14 @@ import { useState } from 'react';
 import { FaceSmileIcon, FaceFrownIcon, HandThumbUpIcon, HandThumbDownIcon, HeartIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { FaceSmileIcon as FaceSmileSolid, FaceFrownIcon as FaceFrownSolid, HandThumbUpIcon as HandThumbUpSolid, HandThumbDownIcon as HandThumbDownSolid, HeartIcon as HeartSolid } from '@heroicons/react/24/solid';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
+import { 
+  TOURIST_RATING_VALUES, 
+  RATING_ICONS, 
+  RATING_COLORS, 
+  UI_DELAYS, 
+  RATED_BY_TYPES 
+} from '../../constants/ratingsConstants';
 
 const TouristRating = ({ 
   touristId, 
@@ -11,38 +19,39 @@ const TouristRating = ({
   existingRating = null,
   showComments = true 
 }) => {
+  const { t } = useTranslation();
   const [selectedRating, setSelectedRating] = useState(existingRating?.rating || null);
   const [comments, setComments] = useState(existingRating?.comments || '');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const ratingOptions = [
     {
-      value: 'excellent',
-      label: '😊 Excelente',
-      description: 'El turista tuvo una experiencia excepcional',
-      color: 'text-green-600',
-      bgColor: 'bg-green-50 border-green-200 hover:bg-green-100',
-      selectedBg: 'bg-green-500 border-green-500 text-white',
+      value: TOURIST_RATING_VALUES.EXCELLENT,
+      label: `${RATING_ICONS.EXCELLENT} ${t('ratings.tourist.excellent')}`,
+      description: t('ratings.tourist.excellentDescription'),
+      color: RATING_COLORS.EXCELLENT.text,
+      bgColor: RATING_COLORS.EXCELLENT.bg,
+      selectedBg: RATING_COLORS.EXCELLENT.selected,
       icon: FaceSmileIcon,
       iconSolid: FaceSmileSolid
     },
     {
-      value: 'good',
-      label: '👍 Bueno',
-      description: 'El turista quedó satisfecho con el servicio',
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50 border-blue-200 hover:bg-blue-100',
-      selectedBg: 'bg-blue-500 border-blue-500 text-white',
+      value: TOURIST_RATING_VALUES.GOOD,
+      label: `${RATING_ICONS.GOOD} ${t('ratings.tourist.good')}`,
+      description: t('ratings.tourist.goodDescription'),
+      color: RATING_COLORS.GOOD.text,
+      bgColor: RATING_COLORS.GOOD.bg,
+      selectedBg: RATING_COLORS.GOOD.selected,
       icon: HandThumbUpIcon,
       iconSolid: HandThumbUpSolid
     },
     {
-      value: 'poor',
-      label: '😞 Regular',
-      description: 'El turista no quedó completamente satisfecho',
-      color: 'text-red-600',
-      bgColor: 'bg-red-50 border-red-200 hover:bg-red-100',
-      selectedBg: 'bg-red-500 border-red-500 text-white',
+      value: TOURIST_RATING_VALUES.POOR,
+      label: `${RATING_ICONS.POOR} ${t('ratings.tourist.poor')}`,
+      description: t('ratings.tourist.poorDescription'),
+      color: RATING_COLORS.POOR.text,
+      bgColor: RATING_COLORS.POOR.bg,
+      selectedBg: RATING_COLORS.POOR.selected,
       icon: FaceFrownIcon,
       iconSolid: FaceFrownSolid
     }
@@ -54,7 +63,7 @@ const TouristRating = ({
 
   const handleSubmit = async () => {
     if (!selectedRating) {
-      toast.error('Por favor selecciona una valoración');
+      toast.error(t('ratings.tourist.selectRatingError'));
       return;
     }
 
@@ -67,26 +76,24 @@ const TouristRating = ({
         serviceId,
         rating: selectedRating,
         comments: comments.trim(),
-        ratedBy: 'agency', // Indica que fue valorado por la agencia
+        ratedBy: RATED_BY_TYPES.AGENCY,
         ratedAt: new Date(),
         touristName
       };
 
       // Simular delay de API
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, UI_DELAYS.API_SIMULATION));
       
       // En una implementación real, aquí iría la llamada a la API
-      console.log('Rating submitted:', ratingData);
 
-      toast.success(`Valoración "${ratingOptions.find(r => r.value === selectedRating)?.label}" enviada correctamente`);
+      toast.success(t('ratings.tourist.ratingSubmittedSuccess'));
       
       if (onRatingSubmitted) {
         onRatingSubmitted(ratingData);
       }
 
     } catch (error) {
-      toast.error('Error al enviar la valoración');
-      console.error('Error submitting rating:', error);
+      toast.error(t('ratings.tourist.ratingSubmittedError'));
     } finally {
       setIsSubmitting(false);
     }

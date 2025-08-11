@@ -1,10 +1,13 @@
+import { SERVICE_AREAS as SHARED_SERVICE_AREAS } from './sharedConstants';
+
+// Service areas for feedback module
 export const SERVICE_AREAS = [
-  { key: 'customerService', label: 'feedback.areas.customerService' },
-  { key: 'operations', label: 'feedback.areas.operations' },
-  { key: 'punctuality', label: 'feedback.areas.punctuality' },
-  { key: 'communication', label: 'feedback.areas.communication' },
-  { key: 'logistics', label: 'feedback.areas.logistics' },
-  { key: 'safety', label: 'feedback.areas.safety' }
+  { key: SHARED_SERVICE_AREAS.CUSTOMER_SERVICE, label: 'feedback.areas.customerService' },
+  { key: SHARED_SERVICE_AREAS.OPERATIONS, label: 'feedback.areas.operations' },
+  { key: SHARED_SERVICE_AREAS.PUNCTUALITY, label: 'feedback.areas.punctuality' },
+  { key: SHARED_SERVICE_AREAS.COMMUNICATION, label: 'feedback.areas.communication' },
+  { key: SHARED_SERVICE_AREAS.LOGISTICS, label: 'feedback.areas.logistics' },
+  { key: SHARED_SERVICE_AREAS.SAFETY, label: 'feedback.areas.safety' }
 ];
 
 export const STATUS_TYPES = [

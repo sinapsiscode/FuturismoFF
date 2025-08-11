@@ -7,8 +7,12 @@ import {
   CalendarDaysIcon
 } from '@heroicons/react/24/outline';
 import { useSettingsStore } from '../../stores/settingsStore';
+import { useTranslation } from 'react-i18next';
+import { TOUR_LIMITS, DEFAULT_VALUES } from '../../constants/settingsConstants';
+import { getPriceRangeLabel } from '../../utils/settingsHelpers';
 
 const ToursSettings = () => {
+  const { t } = useTranslation();
   const { 
     settings,
     updateToursSettings,
@@ -17,7 +21,7 @@ const ToursSettings = () => {
     isLoading
   } = useSettingsStore();
 
-  const [formData, setFormData] = useState(settings.tours);
+  const [formData, setFormData] = useState(settings.tours || {});
   const [errors, setErrors] = useState({});
 
   const handleChange = (e) => {
@@ -36,7 +40,7 @@ const ToursSettings = () => {
     setFormData(prev => ({
       ...prev,
       workingHours: {
-        ...prev.workingHours,
+        ...prev.workingHours || {},
         [field]: value
       }
     }));
@@ -46,9 +50,9 @@ const ToursSettings = () => {
     setFormData(prev => ({
       ...prev,
       priceRanges: {
-        ...prev.priceRanges,
+        ...prev.priceRanges || {},
         [range]: {
-          ...prev.priceRanges[range],
+          ...prev.priceRanges?.[range] || {},
           [field]: parseFloat(value) || 0
         }
       }
@@ -67,20 +71,22 @@ const ToursSettings = () => {
   const validateForm = () => {
     const newErrors = {};
 
-    if (formData.maxCapacityPerTour < 1) {
-      newErrors.maxCapacityPerTour = 'La capacidad máxima debe ser mayor a 0';
+    if (formData.maxCapacityPerTour < TOUR_LIMITS.MIN_GROUP_SIZE) {
+      newErrors.maxCapacityPerTour = t('settings.tours.errors.capacityMin');
+    } else if (formData.maxCapacityPerTour > TOUR_LIMITS.MAX_GROUP_SIZE) {
+      newErrors.maxCapacityPerTour = t('settings.tours.errors.capacityMax');
     }
 
-    if (formData.minAdvanceBooking < 1) {
-      newErrors.minAdvanceBooking = 'El tiempo mínimo debe ser mayor a 0';
+    if (formData.minAdvanceBooking < TOUR_LIMITS.MIN_ADVANCE_BOOKING_HOURS) {
+      newErrors.minAdvanceBooking = t('settings.tours.errors.advanceBookingMin');
     }
 
     if (formData.maxAdvanceBooking < formData.minAdvanceBooking) {
-      newErrors.maxAdvanceBooking = 'El tiempo máximo debe ser mayor al mínimo';
+      newErrors.maxAdvanceBooking = t('settings.tours.errors.advanceBookingMaxLessThanMin');
     }
 
-    if (formData.defaultDuration < 0.5) {
-      newErrors.defaultDuration = 'La duración debe ser al menos 30 minutos';
+    if (formData.defaultDuration < DEFAULT_VALUES.DURATION_MIN) {
+      newErrors.defaultDuration = t('settings.tours.errors.durationMin');
     }
 
     setErrors(newErrors);
@@ -93,7 +99,7 @@ const ToursSettings = () => {
         <div className="flex items-center mb-6">
           <MapIcon className="h-6 w-6 text-blue-600 mr-3" />
           <h3 className="text-lg font-semibold text-gray-900">
-            Configuración de Tours y Servicios
+            {t('settings.tours.title')}
           </h3>
         </div>
 
@@ -102,13 +108,13 @@ const ToursSettings = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="col-span-2">
               <h4 className="text-md font-medium text-gray-900 mb-4 border-b pb-2">
-                Configuraciones Básicas
+                {t('settings.tours.basicSettings')}
               </h4>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Capacidad Máxima por Tour *
+                {t('settings.tours.maxCapacity')} *
               </label>
               <div className="relative">
                 <UserGroupIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -117,11 +123,12 @@ const ToursSettings = () => {
                   name="maxCapacityPerTour"
                   value={formData.maxCapacityPerTour}
                   onChange={handleChange}
-                  min="1"
+                  min={TOUR_LIMITS.MIN_GROUP_SIZE}
+                  max={TOUR_LIMITS.MAX_GROUP_SIZE}
                   className={`pl-10 pr-4 py-2 w-full border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                     errors.maxCapacityPerTour ? 'border-red-300' : 'border-gray-300'
                   }`}
-                  placeholder="20"
+                  placeholder={t('settings.tours.placeholders.capacity')}
                 />
               </div>
               {errors.maxCapacityPerTour && (
@@ -131,7 +138,7 @@ const ToursSettings = () => {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Duración por Defecto (horas) *
+                {t('settings.tours.defaultDuration')} *
               </label>
               <div className="relative">
                 <ClockIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -140,12 +147,12 @@ const ToursSettings = () => {
                   name="defaultDuration"
                   value={formData.defaultDuration}
                   onChange={handleChange}
-                  min="0.5"
-                  step="0.5"
+                  min={DEFAULT_VALUES.DURATION_MIN}
+                  step={DEFAULT_VALUES.DURATION_STEP}
                   className={`pl-10 pr-4 py-2 w-full border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                     errors.defaultDuration ? 'border-red-300' : 'border-gray-300'
                   }`}
-                  placeholder="4"
+                  placeholder={t('settings.tours.placeholders.duration')}
                 />
               </div>
               {errors.defaultDuration && (
@@ -155,18 +162,18 @@ const ToursSettings = () => {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Reserva Mínima Anticipada (horas) *
+                {t('settings.tours.minAdvanceBooking')} *
               </label>
               <input
                 type="number"
                 name="minAdvanceBooking"
                 value={formData.minAdvanceBooking}
                 onChange={handleChange}
-                min="1"
+                min={DEFAULT_VALUES.ADVANCE_BOOKING_MIN}
                 className={`px-4 py-2 w-full border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                   errors.minAdvanceBooking ? 'border-red-300' : 'border-gray-300'
                 }`}
-                placeholder="24"
+                placeholder={t('settings.tours.placeholders.minAdvanceHours')}
               />
               {errors.minAdvanceBooking && (
                 <p className="mt-1 text-sm text-red-600">{errors.minAdvanceBooking}</p>
@@ -175,18 +182,19 @@ const ToursSettings = () => {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Reserva Máxima Anticipada (días) *
+                {t('settings.tours.maxAdvanceBooking')} *
               </label>
               <input
                 type="number"
                 name="maxAdvanceBooking"
                 value={formData.maxAdvanceBooking}
                 onChange={handleChange}
-                min="1"
+                min={DEFAULT_VALUES.ADVANCE_BOOKING_MIN}
+                max={DEFAULT_VALUES.ADVANCE_BOOKING_MAX_DAYS}
                 className={`px-4 py-2 w-full border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                   errors.maxAdvanceBooking ? 'border-red-300' : 'border-gray-300'
                 }`}
-                placeholder="365"
+                placeholder={t('settings.tours.placeholders.maxAdvanceDays')}
               />
               {errors.maxAdvanceBooking && (
                 <p className="mt-1 text-sm text-red-600">{errors.maxAdvanceBooking}</p>
@@ -195,19 +203,20 @@ const ToursSettings = () => {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Política de Cancelación (horas antes)
+                {t('settings.tours.cancellationPolicy')}
               </label>
               <input
                 type="number"
                 name="cancellationPolicy"
                 value={formData.cancellationPolicy}
                 onChange={handleChange}
-                min="0"
+                min={DEFAULT_VALUES.CANCELLATION_MIN}
+                max={TOUR_LIMITS.MAX_CANCELLATION_HOURS}
                 className="px-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="24"
+                placeholder={t('settings.tours.placeholders.cancellationHours')}
               />
               <p className="mt-1 text-xs text-gray-500">
-                Horas antes del tour para cancelación gratuita
+                {t('settings.tours.cancellationDescription')}
               </p>
             </div>
           </div>
@@ -216,17 +225,17 @@ const ToursSettings = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="col-span-2">
               <h4 className="text-md font-medium text-gray-900 mb-4 border-b pb-2">
-                Horarios de Trabajo
+                {t('settings.tours.workingHours')}
               </h4>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Hora de Inicio
+                {t('settings.tours.startTime')}
               </label>
               <input
                 type="time"
-                value={formData.workingHours.start}
+                value={formData.workingHours?.start || ''}
                 onChange={(e) => handleWorkingHoursChange('start', e.target.value)}
                 className="px-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
@@ -234,11 +243,11 @@ const ToursSettings = () => {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Hora de Fin
+                {t('settings.tours.endTime')}
               </label>
               <input
                 type="time"
-                value={formData.workingHours.end}
+                value={formData.workingHours?.end || ''}
                 onChange={(e) => handleWorkingHoursChange('end', e.target.value)}
                 className="px-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
@@ -249,36 +258,36 @@ const ToursSettings = () => {
           <div className="space-y-4">
             <div className="col-span-2">
               <h4 className="text-md font-medium text-gray-900 mb-4 border-b pb-2">
-                Rangos de Precios (USD)
+                {t('settings.tours.priceRanges')}
               </h4>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {Object.entries(formData.priceRanges).map(([range, values]) => (
+              {Object.entries(formData.priceRanges || {}).map(([range, values]) => (
                 <div key={range} className="border border-gray-200 rounded-lg p-4">
                   <h5 className="font-medium text-gray-900 mb-3 capitalize">
-                    {range === 'budget' ? 'Económico' : 
-                     range === 'standard' ? 'Estándar' :
-                     range === 'premium' ? 'Premium' : 'Lujo'}
+                    {getPriceRangeLabel(range)}
                   </h5>
                   <div className="space-y-2">
                     <div>
-                      <label className="block text-xs text-gray-600">Mínimo</label>
+                      <label className="block text-xs text-gray-600">{t('common.min')}</label>
                       <input
                         type="number"
                         value={values.min}
                         onChange={(e) => handlePriceRangeChange(range, 'min', e.target.value)}
-                        min="0"
+                        min={TOUR_LIMITS.MIN_PRICE}
+                        max={TOUR_LIMITS.MAX_PRICE}
                         className="w-full text-sm border border-gray-300 rounded px-2 py-1"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs text-gray-600">Máximo</label>
+                      <label className="block text-xs text-gray-600">{t('common.max')}</label>
                       <input
                         type="number"
                         value={values.max}
                         onChange={(e) => handlePriceRangeChange(range, 'max', e.target.value)}
-                        min="0"
+                        min={TOUR_LIMITS.MIN_PRICE}
+                        max={TOUR_LIMITS.MAX_PRICE}
                         className="w-full text-sm border border-gray-300 rounded px-2 py-1"
                       />
                     </div>
@@ -292,7 +301,7 @@ const ToursSettings = () => {
           <div className="space-y-4">
             <div className="col-span-2">
               <h4 className="text-md font-medium text-gray-900 mb-4 border-b pb-2">
-                Configuraciones Adicionales
+                {t('settings.tours.additionalSettings')}
               </h4>
             </div>
 
@@ -307,7 +316,7 @@ const ToursSettings = () => {
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                   />
                   <label className="ml-2 block text-sm text-gray-900">
-                    Permitir pagos parciales
+                    {t('settings.tours.allowPartialPayments')}
                   </label>
                 </div>
 
@@ -320,7 +329,7 @@ const ToursSettings = () => {
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                   />
                   <label className="ml-2 block text-sm text-gray-900">
-                    Requerir asignación de guía
+                    {t('settings.tours.requireGuideAssignment')}
                   </label>
                 </div>
               </div>
@@ -335,7 +344,7 @@ const ToursSettings = () => {
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                   />
                   <label className="ml-2 block text-sm text-gray-900">
-                    Auto-asignar guías disponibles
+                    {t('settings.tours.autoAssignGuides')}
                   </label>
                 </div>
               </div>
@@ -350,7 +359,7 @@ const ToursSettings = () => {
               className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
               disabled={isLoading}
             >
-              Cancelar
+              {t('common.cancel')}
             </button>
             
             <button
@@ -358,7 +367,7 @@ const ToursSettings = () => {
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
               disabled={isLoading}
             >
-              {isLoading ? 'Guardando...' : 'Guardar Cambios'}
+              {isLoading ? t('common.saving') : t('common.saveChanges')}
             </button>
           </div>
         </form>
@@ -366,7 +375,7 @@ const ToursSettings = () => {
         {hasUnsavedChanges && (
           <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
             <p className="text-sm text-yellow-800">
-              Tienes cambios sin guardar. No olvides guardar antes de salir.
+              {t('settings.tours.unsavedChanges')}
             </p>
           </div>
         )}

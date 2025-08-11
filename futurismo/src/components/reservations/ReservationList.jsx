@@ -10,223 +10,42 @@ import exportService from '../../services/exportService';
 import ServiceRatingModal from '../ratings/ServiceRatingModal';
 import ResponsiveTable from '../common/ResponsiveTable';
 import toast from 'react-hot-toast';
+import { mockReservations } from '../../data/mockReservationsData';
+import { useReservationFilters } from '../../hooks/useReservationFilters';
+import { getStatusBadge, getPaymentBadge, canRateService } from '../../utils/reservationHelpers';
 
 const ReservationList = () => {
   const { reservations } = useReservationsStore();
   const { user } = useAuthStore();
   const { t } = useTranslation();
+  // Usar mock data importada
+  const reservationsData = mockReservations;
+  
+  // Hook personalizado para filtros
+  const {
+    searchTerm, setSearchTerm,
+    statusFilter, setStatusFilter,
+    dateFrom, setDateFrom,
+    dateTo, setDateTo,
+    customerFilter, setCustomerFilter,
+    minPassengers, setMinPassengers,
+    maxPassengers, setMaxPassengers,
+    currentPage, setCurrentPage,
+    filteredReservations,
+    paginatedReservations,
+    totalPages,
+    exportStats,
+    resetFilters
+  } = useReservationFilters(reservationsData);
+  
+  // Estados locales para UI
   const [selectedReservation, setSelectedReservation] = useState(null);
   const [showDetail, setShowDetail] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [dateFrom, setDateFrom] = useState('');
-  const [dateTo, setDateTo] = useState('');
-  const [customerFilter, setCustomerFilter] = useState('');
-  const [minPassengers, setMinPassengers] = useState('');
-  const [maxPassengers, setMaxPassengers] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
   const [showActions, setShowActions] = useState(null);
   const [showExportModal, setShowExportModal] = useState(false);
   const [showRatingModal, setShowRatingModal] = useState(false);
   const [selectedService, setSelectedService] = useState(null);
 
-  const itemsPerPage = 10;
-
-  // Mock data para demostración
-  const mockReservations = [
-    {
-      id: 'RES001',
-      tourName: 'City Tour Lima Histórica',
-      clientName: 'Juan Pérez',
-      clientPhone: '+51 987654321',
-      date: new Date('2024-02-15'),
-      time: '09:00',
-      adults: 2,
-      children: 1,
-      total: 105,
-      status: 'confirmada',
-      pickupLocation: 'Hotel Marriott Miraflores',
-      createdAt: new Date('2024-02-01'),
-      paymentStatus: 'pagado',
-      tourists: [
-        {
-          id: '1',
-          name: 'Juan Pérez',
-          documentType: 'DNI',
-          documentNumber: '12345678',
-          phone: '+51 987654321'
-        },
-        {
-          id: '2',
-          name: 'María Pérez',
-          documentType: 'DNI',
-          documentNumber: '87654321',
-          phone: '+51 987654321'
-        },
-        {
-          id: '3',
-          name: 'Carlos García',
-          documentType: 'DNI',
-          documentNumber: '11223344',
-          phone: '+51 987654322'
-        }
-      ],
-      groups: [
-        {
-          representativeName: 'Juan Pérez',
-          representativePhone: '+51 987654321',
-          companionsCount: 2
-        },
-        {
-          representativeName: 'Carlos García',
-          representativePhone: '+51 987654322',
-          companionsCount: 1
-        }
-      ],
-      isRated: false
-    },
-    {
-      id: 'RES002',
-      tourName: 'Tour Gastronómico Miraflores',
-      clientName: 'María García',
-      clientPhone: '+51 976543210',
-      date: new Date('2024-02-16'),
-      time: '12:00',
-      adults: 4,
-      children: 0,
-      total: 260,
-      status: 'pendiente',
-      pickupLocation: 'Parque Kennedy',
-      createdAt: new Date('2024-02-05'),
-      paymentStatus: 'pendiente',
-      tourists: [
-        {
-          id: '4',
-          name: 'María García',
-          documentType: 'DNI',
-          documentNumber: '22334455',
-          phone: '+51 976543210'
-        },
-        {
-          id: '5',
-          name: 'Ana García',
-          documentType: 'DNI',
-          documentNumber: '33445566',
-          phone: '+51 976543210'
-        },
-        {
-          id: '6',
-          name: 'Luis García',
-          documentType: 'DNI',
-          documentNumber: '44556677',
-          phone: '+51 976543210'
-        },
-        {
-          id: '7',
-          name: 'Pedro García',
-          documentType: 'DNI',
-          documentNumber: '55667788',
-          phone: '+51 976543210'
-        }
-      ],
-      isRated: false
-    },
-    {
-      id: 'RES003',
-      tourName: 'Islas Palomino',
-      clientName: 'Carlos Rodríguez',
-      clientPhone: '+51 965432198',
-      date: new Date('2024-02-18'),
-      time: '06:00',
-      adults: 3,
-      children: 2,
-      total: 340,
-      status: 'completada',
-      pickupLocation: 'Hotel Hilton',
-      createdAt: new Date('2024-02-08'),
-      paymentStatus: 'pagado',
-      tourists: [
-        {
-          id: '8',
-          name: 'Carlos Rodríguez',
-          documentType: 'DNI',
-          documentNumber: '66778899',
-          phone: '+51 965432198'
-        },
-        {
-          id: '9',
-          name: 'Sofia Rodríguez',
-          documentType: 'DNI',
-          documentNumber: '77889900',
-          phone: '+51 965432198'
-        },
-        {
-          id: '10',
-          name: 'Miguel Rodríguez',
-          documentType: 'DNI',
-          documentNumber: '88990011',
-          phone: '+51 965432198'
-        },
-        {
-          id: '11',
-          name: 'Elena Rodríguez',
-          documentType: 'DNI',
-          documentNumber: '99001122',
-          phone: '+51 965432198'
-        },
-        {
-          id: '12',
-          name: 'Pablo Rodríguez',
-          documentType: 'DNI',
-          documentNumber: '00112233',
-          phone: '+51 965432198'
-        }
-      ],
-      isRated: false
-    },
-    {
-      id: 'RES004',
-      tourName: 'Pachacámac y Barranco',
-      clientName: 'Ana López',
-      clientPhone: '+51 954321876',
-      date: new Date('2024-02-14'),
-      time: '14:00',
-      adults: 2,
-      children: 0,
-      total: 90,
-      status: 'cancelada',
-      pickupLocation: 'JW Marriott',
-      createdAt: new Date('2024-01-28'),
-      paymentStatus: 'reembolsado',
-      tourists: [
-        {
-          id: '13',
-          name: 'Ana López',
-          documentType: 'DNI',
-          documentNumber: '11223344',
-          phone: '+51 954321876'
-        },
-        {
-          id: '14',
-          name: 'Roberto López',
-          documentType: 'DNI',
-          documentNumber: '22334455',
-          phone: '+51 954321876'
-        }
-      ],
-      isRated: false
-    }
-  ];
-
-  const getStatusBadge = (status) => {
-    const badges = {
-      pendiente: 'badge-yellow',
-      confirmada: 'badge-green',
-      cancelada: 'badge-red',
-      completada: 'badge-blue'
-    };
-    return badges[status] || 'badge-gray';
-  };
   
   const getStatusLabel = (status) => {
     const labels = {
@@ -238,14 +57,6 @@ const ReservationList = () => {
     return labels[status] || status;
   };
 
-  const getPaymentBadge = (status) => {
-    const badges = {
-      pendiente: 'badge-yellow',
-      pagado: 'badge-green',
-      reembolsado: 'badge-blue'
-    };
-    return badges[status] || 'badge-gray';
-  };
   
   const getPaymentLabel = (status) => {
     const labels = {
@@ -256,57 +67,6 @@ const ReservationList = () => {
     return labels[status] || status;
   };
 
-  // Filtrar reservaciones
-  const filteredReservations = mockReservations.filter(reservation => {
-    const matchesSearch = 
-      reservation.tourName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      reservation.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      reservation.id.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesStatus = statusFilter === 'all' || reservation.status === statusFilter;
-    
-    // Filtro por fechas
-    let matchesDate = true;
-    if (dateFrom) {
-      const fromDate = new Date(dateFrom);
-      matchesDate = matchesDate && reservation.date >= fromDate;
-    }
-    if (dateTo) {
-      const toDate = new Date(dateTo);
-      toDate.setHours(23, 59, 59, 999);
-      matchesDate = matchesDate && reservation.date <= toDate;
-    }
-    
-    // Filtro por cliente
-    const matchesCustomer = !customerFilter || 
-      reservation.clientName.toLowerCase().includes(customerFilter.toLowerCase());
-    
-    // Filtro por cantidad de pasajeros
-    const totalPassengers = reservation.adults + reservation.children;
-    let matchesPassengers = true;
-    if (minPassengers) {
-      matchesPassengers = matchesPassengers && totalPassengers >= parseInt(minPassengers);
-    }
-    if (maxPassengers) {
-      matchesPassengers = matchesPassengers && totalPassengers <= parseInt(maxPassengers);
-    }
-    
-    return matchesSearch && matchesStatus && matchesDate && matchesCustomer && matchesPassengers;
-  });
-
-  // Paginación
-  const totalPages = Math.ceil(filteredReservations.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedReservations = filteredReservations.slice(startIndex, startIndex + itemsPerPage);
-
-  // Estadísticas para el modal de exportación
-  const exportStats = {
-    totalReservations: filteredReservations.length,
-    totalTourists: filteredReservations.reduce((sum, res) => sum + res.adults + res.children, 0),
-    totalRevenue: filteredReservations.reduce((sum, res) => sum + res.total, 0),
-    avgTicket: filteredReservations.length > 0 ? 
-      filteredReservations.reduce((sum, res) => sum + res.total, 0) / filteredReservations.length : 0
-  };
 
   const handleViewDetail = (reservation) => {
     setSelectedReservation(reservation);
@@ -315,22 +75,22 @@ const ReservationList = () => {
   };
 
   const handleEdit = (reservation) => {
-    // Implementar edición
-    console.log('Editar reserva:', reservation.id);
+    // TODO: Implementar edición
+    toast.info(t('reservations.editNotImplemented'));
     setShowActions(null);
   };
 
   const handleDelete = (reservation) => {
-    // Implementar eliminación
+    // TODO: Implementar eliminación
     if (window.confirm(t('search.deleteConfirm'))) {
-      console.log('Eliminar reserva:', reservation.id);
+      toast.info(t('reservations.deleteNotImplemented'));
     }
     setShowActions(null);
   };
 
   const handleRateTourists = (reservation) => {
     if (!reservation.tourists || reservation.tourists.length === 0) {
-      toast.error('No hay turistas registrados para valorar');
+      toast.error(t('reservations.noTouristsToRate'));
       return;
     }
     
@@ -345,26 +105,19 @@ const ReservationList = () => {
   };
 
   const handleRatingsCompleted = (allRatings) => {
-    console.log('Valoraciones completadas:', allRatings);
-    
-    // En una implementación real, aquí se guardarían las valoraciones en la base de datos
+    // TODO: En una implementación real, aquí se guardarían las valoraciones en la base de datos
     // y se actualizaría el estado de la reserva como "valorada"
     
     setShowRatingModal(false);
     setSelectedService(null);
-    
-    // Simular actualización del estado (en producción esto vendría del backend)
-    // mockReservations.find(r => r.id === selectedService.id).isRated = true;
+    toast.success(t('ratings.service.allRatingsCompleted'));
   };
 
-  const canRateService = (reservation) => {
-    return reservation.status === 'completada' && !reservation.isRated;
-  };
 
   const handleExport = () => {
     // Verificar si hay datos para exportar
     if (filteredReservations.length === 0) {
-      alert('⚠️ No hay reservas para exportar con el filtro actual.');
+      toast.warning(t('reservations.noDataToExport'));
       return;
     }
     
@@ -391,18 +144,15 @@ const ReservationList = () => {
                          filterStatus === 'cancelada' ? 'Solo canceladas' : 'Reservas filtradas';
       
       // Mostrar mensaje de éxito
-      setTimeout(() => {
-        alert(`✅ ¡Exportación completada exitosamente!\n\n` +
-              `📊 Datos exportados:\n` +
-              `• ${stats.totalReservations} reservas (${statusLabel})\n` +
-              `• ${stats.totalTourists} turistas\n` +
-              `• $${stats.totalRevenue.toLocaleString()} en ingresos\n` +
-              `• Formato: ${format.toUpperCase()}\n\n` +
-              `📁 El archivo se descargó automáticamente.`);
-      }, 300);
+      toast.success(t('reservations.exportSuccess', {
+        count: stats.totalReservations,
+        tourists: stats.totalTourists,
+        revenue: stats.totalRevenue.toLocaleString(),
+        format: format.toUpperCase()
+      }));
       
     } catch (error) {
-      console.error('Error al exportar reservas:', error);
+      toast.error(t('reservations.exportError'));
       throw new Error(`Error al exportar: ${error.message}`);
     }
   };

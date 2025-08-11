@@ -1,7 +1,10 @@
+import { RATING_SCALE } from './sharedConstants';
+
+// Re-export rating scales from shared constants
 export const RATING_SCALES = {
-  MIN: 0,
-  MAX: 5,
-  DEFAULT: 0
+  MIN: RATING_SCALE.MIN,
+  MAX: RATING_SCALE.MAX,
+  DEFAULT: RATING_SCALE.DEFAULT
 };
 
 export const EVALUATION_CRITERIA = {
@@ -21,14 +24,10 @@ export const RECOMMENDATION_TYPES = {
   NOT_RECOMMEND: 'not_recommend'
 };
 
-export const SERVICE_AREAS = {
-  CUSTOMER_SERVICE: 'customerService',
-  OPERATIONS: 'operations',
-  PUNCTUALITY: 'punctuality',
-  COMMUNICATION: 'communication',
-  LOGISTICS: 'logistics',
-  SAFETY: 'safety'
-};
+import { SERVICE_AREAS as SHARED_SERVICE_AREAS } from './sharedConstants';
+
+// Re-export service areas from shared constants
+export const SERVICE_AREAS = SHARED_SERVICE_AREAS;
 
 export const RATING_PERIODS = {
   WEEK: 'week',
@@ -85,4 +84,50 @@ export const DEFAULT_FEEDBACK = {
   [FEEDBACK_TYPES.STRENGTHS]: '',
   [FEEDBACK_TYPES.IMPROVEMENTS]: '',
   [FEEDBACK_TYPES.GENERAL_COMMENTS]: ''
+};
+
+export const TOURIST_RATING_VALUES = {
+  EXCELLENT: 'excellent',
+  GOOD: 'good',
+  POOR: 'poor'
+};
+
+export const RATING_STEPS = {
+  RATING: 'rating',
+  SUMMARY: 'summary'
+};
+
+export const UI_DELAYS = {
+  API_SIMULATION: 1000,
+  STEP_TRANSITION: 1000
+};
+
+export const RATING_ICONS = {
+  EXCELLENT: '😊',
+  GOOD: '👍',
+  POOR: '😞'
+};
+
+export const RATING_COLORS = {
+  EXCELLENT: {
+    text: 'text-green-600',
+    bg: 'bg-green-50 border-green-200 hover:bg-green-100',
+    selected: 'bg-green-500 border-green-500 text-white'
+  },
+  GOOD: {
+    text: 'text-blue-600',
+    bg: 'bg-blue-50 border-blue-200 hover:bg-blue-100',
+    selected: 'bg-blue-500 border-blue-500 text-white'
+  },
+  POOR: {
+    text: 'text-red-600',
+    bg: 'bg-red-50 border-red-200 hover:bg-red-100',
+    selected: 'bg-red-500 border-red-500 text-white'
+  }
+};
+
+export const RATED_BY_TYPES = {
+  AGENCY: 'agency',
+  TOURIST: 'tourist',
+  SYSTEM: 'system'
 };

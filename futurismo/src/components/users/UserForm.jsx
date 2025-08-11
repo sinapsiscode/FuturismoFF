@@ -2,73 +2,74 @@ import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
-import {
-  UserIcon,
-  EnvelopeIcon,
-  PhoneIcon,
-  IdentificationIcon,
-  BuildingOfficeIcon,
-  KeyIcon,
-  CheckIcon,
-  XMarkIcon,
-  EyeIcon,
-  EyeSlashIcon
-} from '@heroicons/react/24/outline';
+import { CheckIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { useUsersStore } from '../../stores/usersStore';
+import { useTranslation } from 'react-i18next';
+import { 
+  FORM_LIMITS, 
+  VALIDATION_PATTERNS, 
+  DEFAULT_PERMISSIONS,
+  USER_STATUS,
+  DEFAULT_PREFERENCES
+} from '../../constants/usersConstants';
+import UserFormTabs from './UserFormTabs';
+import UserBasicInfoForm from './UserBasicInfoForm';
+import UserPermissionsForm from './UserPermissionsForm';
 
 // Esquema de validación
-const userSchema = yup.object({
+const createUserSchema = (t) => yup.object({
   username: yup
     .string()
-    .required('El nombre de usuario es requerido')
-    .min(3, 'Mínimo 3 caracteres')
-    .matches(/^[a-zA-Z0-9_]+$/, 'Solo letras, números y guión bajo'),
+    .required(t('users.form.errors.usernameRequired'))
+    .min(FORM_LIMITS.USERNAME_MIN, t('users.form.errors.usernameMin'))
+    .matches(VALIDATION_PATTERNS.USERNAME, t('users.form.errors.usernamePattern')),
   email: yup
     .string()
-    .required('El email es requerido')
-    .email('Email inválido'),
+    .required(t('users.form.errors.emailRequired'))
+    .email(t('users.form.errors.emailInvalid')),
   firstName: yup
     .string()
-    .required('El nombre es requerido')
-    .min(2, 'Mínimo 2 caracteres'),
+    .required(t('users.form.errors.firstNameRequired'))
+    .min(FORM_LIMITS.NAME_MIN, t('users.form.errors.firstNameMin')),
   lastName: yup
     .string()
-    .required('El apellido es requerido')
-    .min(2, 'Mínimo 2 caracteres'),
+    .required(t('users.form.errors.lastNameRequired'))
+    .min(FORM_LIMITS.NAME_MIN, t('users.form.errors.lastNameMin')),
   phone: yup
     .string()
-    .required('El teléfono es requerido')
-    .matches(/^\+?[1-9]\d{1,14}$/, 'Formato de teléfono inválido'),
+    .required(t('users.form.errors.phoneRequired'))
+    .matches(VALIDATION_PATTERNS.PHONE, t('users.form.errors.phoneInvalid')),
   role: yup
     .string()
-    .required('El rol es requerido'),
+    .required(t('users.form.errors.roleRequired')),
   department: yup
     .string()
-    .required('El departamento es requerido'),
+    .required(t('users.form.errors.departmentRequired')),
   position: yup
     .string()
-    .required('El cargo es requerido'),
+    .required(t('users.form.errors.positionRequired')),
   status: yup
     .string()
-    .required('El estado es requerido'),
+    .required(t('users.form.errors.statusRequired')),
   password: yup
     .string()
     .when('isEdit', {
       is: false,
-      then: (schema) => schema.required('La contraseña es requerida').min(6, 'Mínimo 6 caracteres'),
-      otherwise: (schema) => schema.min(6, 'Mínimo 6 caracteres')
+      then: (schema) => schema.required(t('users.form.errors.passwordRequired')).min(FORM_LIMITS.PASSWORD_MIN, t('users.form.errors.passwordMin')),
+      otherwise: (schema) => schema.min(FORM_LIMITS.PASSWORD_MIN, t('users.form.errors.passwordMin'))
     }),
   confirmPassword: yup
     .string()
     .when('password', {
       is: (password) => password && password.length > 0,
       then: (schema) => schema
-        .required('Confirme la contraseña')
-        .oneOf([yup.ref('password')], 'Las contraseñas no coinciden')
+        .required(t('users.form.errors.confirmPasswordRequired'))
+        .oneOf([yup.ref('password')], t('users.form.errors.passwordMismatch'))
     })
 });
 
 const UserForm = ({ user = null, onSubmit, onCancel, isLoading = false }) => {
+  const { t } = useTranslation();
   const {
     getRoles,
     getPermissionsByModule,
@@ -85,6 +86,7 @@ const UserForm = ({ user = null, onSubmit, onCancel, isLoading = false }) => {
   const [activeTab, setActiveTab] = useState('basic');
 
   const isEdit = !!user;
+  const userSchema = createUserSchema(t);
 
   const {
     register,
@@ -104,7 +106,7 @@ const UserForm = ({ user = null, onSubmit, onCancel, isLoading = false }) => {
       role: user?.role || '',
       department: user?.department || '',
       position: user?.position || '',
-      status: user?.status || 'activo',
+      status: user?.status || USER_STATUS.ACTIVE,
       avatar: user?.avatar || '',
       isEdit
     }
@@ -132,31 +134,7 @@ const UserForm = ({ user = null, onSubmit, onCancel, isLoading = false }) => {
   }, [selectedRole, isEdit]);
 
   const getRoleDefaultPermissions = (roleId) => {
-    const defaultPermissions = {
-      admin: [
-        'users.create', 'users.read', 'users.update', 'users.delete',
-        'reservations.manage', 'guides.manage', 'reports.view', 'system.admin'
-      ],
-      supervisor: [
-        'users.read', 'reservations.manage', 'guides.read', 'guides.assign',
-        'monitoring.view', 'reports.view'
-      ],
-      ventas: [
-        'reservations.create', 'reservations.read', 'reservations.update',
-        'clients.manage', 'reports.basic'
-      ],
-      contador: [
-        'reports.financial', 'reservations.read', 'clients.read', 'payments.manage'
-      ],
-      recepcionista: [
-        'reservations.read', 'clients.read', 'guides.read', 'chat.access'
-      ],
-      marketing: [
-        'reports.marketing', 'clients.read', 'reservations.read'
-      ]
-    };
-    
-    return defaultPermissions[roleId] || [];
+    return DEFAULT_PERMISSIONS[roleId] || [];
   };
 
   const handlePermissionChange = (permissionId, checked) => {
@@ -171,15 +149,7 @@ const UserForm = ({ user = null, onSubmit, onCancel, isLoading = false }) => {
     const userData = {
       ...data,
       permissions: selectedPermissions,
-      preferences: user?.preferences || {
-        language: 'es',
-        timezone: 'America/Lima',
-        notifications: {
-          email: true,
-          push: true,
-          sms: false
-        }
-      }
+      preferences: user?.preferences || DEFAULT_PREFERENCES
     };
 
     // Validar datos del usuario
@@ -203,362 +173,39 @@ const UserForm = ({ user = null, onSubmit, onCancel, isLoading = false }) => {
         onSubmit(userData);
       }
     } catch (error) {
-      console.error('Error al guardar usuario:', error);
+      // Error handling is done in the store
     }
   };
 
-  const departments = [
-    'Administración',
-    'Operaciones',
-    'Ventas',
-    'Finanzas',
-    'Atención al Cliente',
-    'Marketing',
-    'Recursos Humanos',
-    'TI'
-  ];
-
-  const tabs = [
-    { id: 'basic', name: 'Información Básica', icon: UserIcon },
-    { id: 'permissions', name: 'Permisos', icon: KeyIcon }
-  ];
 
   return (
     <div className="max-w-4xl mx-auto">
       <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
         {/* Tabs */}
-        <div className="border-b border-gray-200">
-          <nav className="-mb-px flex space-x-8">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center py-4 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === tab.id
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
-              >
-                <tab.icon className="h-5 w-5 mr-2" />
-                {tab.name}
-              </button>
-            ))}
-          </nav>
-        </div>
+        <UserFormTabs activeTab={activeTab} setActiveTab={setActiveTab} />
 
-        {/* Información Básica */}
+        {/* Basic Information */}
         {activeTab === 'basic' && (
-          <div className="bg-white p-6 rounded-lg shadow-sm border space-y-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              {isEdit ? 'Editar Usuario' : 'Nuevo Usuario'}
-            </h3>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Nombre de usuario */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Nombre de Usuario *
-                </label>
-                <div className="relative">
-                  <UserIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <input
-                    type="text"
-                    {...register('username')}
-                    className={`pl-10 pr-4 py-2 w-full border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                      errors.username ? 'border-red-300' : 'border-gray-300'
-                    }`}
-                    placeholder="usuario123"
-                  />
-                </div>
-                {errors.username && (
-                  <p className="mt-1 text-sm text-red-600">{errors.username.message}</p>
-                )}
-              </div>
-
-              {/* Email */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Email *
-                </label>
-                <div className="relative">
-                  <EnvelopeIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <input
-                    type="email"
-                    {...register('email')}
-                    className={`pl-10 pr-4 py-2 w-full border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                      errors.email ? 'border-red-300' : 'border-gray-300'
-                    }`}
-                    placeholder="usuario@empresa.com"
-                  />
-                </div>
-                {errors.email && (
-                  <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
-                )}
-              </div>
-
-              {/* Nombre */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Nombre *
-                </label>
-                <input
-                  type="text"
-                  {...register('firstName')}
-                  className={`px-4 py-2 w-full border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                    errors.firstName ? 'border-red-300' : 'border-gray-300'
-                  }`}
-                  placeholder="Juan"
-                />
-                {errors.firstName && (
-                  <p className="mt-1 text-sm text-red-600">{errors.firstName.message}</p>
-                )}
-              </div>
-
-              {/* Apellido */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Apellido *
-                </label>
-                <input
-                  type="text"
-                  {...register('lastName')}
-                  className={`px-4 py-2 w-full border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                    errors.lastName ? 'border-red-300' : 'border-gray-300'
-                  }`}
-                  placeholder="Pérez"
-                />
-                {errors.lastName && (
-                  <p className="mt-1 text-sm text-red-600">{errors.lastName.message}</p>
-                )}
-              </div>
-
-              {/* Teléfono */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Teléfono *
-                </label>
-                <div className="relative">
-                  <PhoneIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <input
-                    type="tel"
-                    {...register('phone')}
-                    className={`pl-10 pr-4 py-2 w-full border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                      errors.phone ? 'border-red-300' : 'border-gray-300'
-                    }`}
-                    placeholder="+51 999999999"
-                  />
-                </div>
-                {errors.phone && (
-                  <p className="mt-1 text-sm text-red-600">{errors.phone.message}</p>
-                )}
-              </div>
-
-              {/* Rol */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Rol *
-                </label>
-                <select
-                  {...register('role')}
-                  className={`px-4 py-2 w-full border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                    errors.role ? 'border-red-300' : 'border-gray-300'
-                  }`}
-                >
-                  <option value="">Seleccionar rol</option>
-                  {roles.map(role => (
-                    <option key={role.id} value={role.id}>
-                      {role.name} - {role.description}
-                    </option>
-                  ))}
-                </select>
-                {errors.role && (
-                  <p className="mt-1 text-sm text-red-600">{errors.role.message}</p>
-                )}
-              </div>
-
-              {/* Departamento */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Departamento *
-                </label>
-                <div className="relative">
-                  <BuildingOfficeIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <select
-                    {...register('department')}
-                    className={`pl-10 pr-4 py-2 w-full border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                      errors.department ? 'border-red-300' : 'border-gray-300'
-                    }`}
-                  >
-                    <option value="">Seleccionar departamento</option>
-                    {departments.map(dept => (
-                      <option key={dept} value={dept}>{dept}</option>
-                    ))}
-                  </select>
-                </div>
-                {errors.department && (
-                  <p className="mt-1 text-sm text-red-600">{errors.department.message}</p>
-                )}
-              </div>
-
-              {/* Cargo */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Cargo *
-                </label>
-                <div className="relative">
-                  <IdentificationIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <input
-                    type="text"
-                    {...register('position')}
-                    className={`pl-10 pr-4 py-2 w-full border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                      errors.position ? 'border-red-300' : 'border-gray-300'
-                    }`}
-                    placeholder="Ejecutivo de Ventas"
-                  />
-                </div>
-                {errors.position && (
-                  <p className="mt-1 text-sm text-red-600">{errors.position.message}</p>
-                )}
-              </div>
-
-              {/* Estado */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Estado *
-                </label>
-                <select
-                  {...register('status')}
-                  className={`px-4 py-2 w-full border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                    errors.status ? 'border-red-300' : 'border-gray-300'
-                  }`}
-                >
-                  <option value="activo">Activo</option>
-                  <option value="inactivo">Inactivo</option>
-                </select>
-                {errors.status && (
-                  <p className="mt-1 text-sm text-red-600">{errors.status.message}</p>
-                )}
-              </div>
-            </div>
-
-            {/* Contraseña (solo para nuevo usuario o si se quiere cambiar) */}
-            {(!isEdit || showPassword) && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Contraseña {!isEdit && '*'}
-                  </label>
-                  <div className="relative">
-                    <KeyIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                    <input
-                      type={showPassword ? 'text' : 'password'}
-                      {...register('password')}
-                      className={`pl-10 pr-10 py-2 w-full border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                        errors.password ? 'border-red-300' : 'border-gray-300'
-                      }`}
-                      placeholder="••••••••"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                    >
-                      {showPassword ? (
-                        <EyeSlashIcon className="h-4 w-4" />
-                      ) : (
-                        <EyeIcon className="h-4 w-4" />
-                      )}
-                    </button>
-                  </div>
-                  {errors.password && (
-                    <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Confirmar Contraseña {!isEdit && '*'}
-                  </label>
-                  <div className="relative">
-                    <KeyIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                    <input
-                      type={showConfirmPassword ? 'text' : 'password'}
-                      {...register('confirmPassword')}
-                      className={`pl-10 pr-10 py-2 w-full border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                        errors.confirmPassword ? 'border-red-300' : 'border-gray-300'
-                      }`}
-                      placeholder="••••••••"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                    >
-                      {showConfirmPassword ? (
-                        <EyeSlashIcon className="h-4 w-4" />
-                      ) : (
-                        <EyeIcon className="h-4 w-4" />
-                      )}
-                    </button>
-                  </div>
-                  {errors.confirmPassword && (
-                    <p className="mt-1 text-sm text-red-600">{errors.confirmPassword.message}</p>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Botón para mostrar campos de contraseña en edición */}
-            {isEdit && !showPassword && (
-              <div>
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(true)}
-                  className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-                >
-                  Cambiar contraseña
-                </button>
-              </div>
-            )}
-          </div>
+          <UserBasicInfoForm
+            register={register}
+            errors={errors}
+            watch={watch}
+            roles={roles}
+            isEdit={isEdit}
+            showPassword={showPassword}
+            setShowPassword={setShowPassword}
+            showConfirmPassword={showConfirmPassword}
+            setShowConfirmPassword={setShowConfirmPassword}
+          />
         )}
 
-        {/* Permisos */}
+        {/* Permissions */}
         {activeTab === 'permissions' && (
-          <div className="bg-white p-6 rounded-lg shadow-sm border space-y-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              Permisos del Usuario
-            </h3>
-
-            {Object.entries(permissionsByModule).map(([module, permissions]) => (
-              <div key={module} className="space-y-3">
-                <h4 className="font-medium text-gray-900 border-b pb-2">{module}</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {permissions.map((permission) => (
-                    <label
-                      key={permission.id}
-                      className="flex items-center space-x-3 p-2 rounded hover:bg-gray-50"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={selectedPermissions.includes(permission.id)}
-                        onChange={(e) => handlePermissionChange(permission.id, e.target.checked)}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                      />
-                      <span className="text-sm text-gray-700">{permission.name}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-            ))}
-
-            {selectedPermissions.length === 0 && (
-              <p className="text-sm text-gray-500 text-center py-4">
-                No hay permisos seleccionados. El usuario tendrá acceso muy limitado al sistema.
-              </p>
-            )}
-          </div>
+          <UserPermissionsForm
+            permissionsByModule={permissionsByModule}
+            selectedPermissions={selectedPermissions}
+            handlePermissionChange={handlePermissionChange}
+          />
         )}
 
         {/* Botones de acción */}
@@ -570,7 +217,7 @@ const UserForm = ({ user = null, onSubmit, onCancel, isLoading = false }) => {
             disabled={isLoading}
           >
             <XMarkIcon className="h-4 w-4 mr-2 inline" />
-            Cancelar
+            {t('common.cancel')}
           </button>
           
           <button
@@ -579,7 +226,7 @@ const UserForm = ({ user = null, onSubmit, onCancel, isLoading = false }) => {
             disabled={isLoading}
           >
             <CheckIcon className="h-4 w-4 mr-2 inline" />
-            {isLoading ? 'Guardando...' : (isEdit ? 'Actualizar' : 'Crear Usuario')}
+            {isLoading ? t('users.form.saving') : (isEdit ? t('users.form.update') : t('users.form.create'))}
           </button>
         </div>
       </form>

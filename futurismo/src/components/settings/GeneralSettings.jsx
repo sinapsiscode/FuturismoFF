@@ -8,8 +8,22 @@ import {
   CurrencyDollarIcon
 } from '@heroicons/react/24/outline';
 import { useSettingsStore } from '../../stores/settingsStore';
+import { useTranslation } from 'react-i18next';
+import { VALIDATION_PATTERNS, FORM_LIMITS } from '../../constants/settingsConstants';
+import { 
+  getCurrencyOptions, 
+  getTimezoneOptions, 
+  getLanguageOptions, 
+  getDateFormatOptions,
+  getTimeFormatOptions,
+  validateEmail,
+  validatePhone,
+  validateCompanyName,
+  validateUrl
+} from '../../utils/settingsHelpers';
 
 const GeneralSettings = () => {
+  const { t } = useTranslation();
   const { 
     settings,
     updateGeneralSettings,
@@ -43,46 +57,36 @@ const GeneralSettings = () => {
     const newErrors = {};
 
     if (!formData.companyName.trim()) {
-      newErrors.companyName = 'El nombre de la empresa es requerido';
+      newErrors.companyName = t('settings.general.errors.companyNameRequired');
+    } else if (!validateCompanyName(formData.companyName)) {
+      newErrors.companyName = t('settings.general.errors.companyNameInvalid');
     }
 
     if (!formData.companyEmail.trim()) {
-      newErrors.companyEmail = 'El email es requerido';
-    } else if (!/\S+@\S+\.\S+/.test(formData.companyEmail)) {
-      newErrors.companyEmail = 'Email inválido';
+      newErrors.companyEmail = t('settings.general.errors.emailRequired');
+    } else if (!validateEmail(formData.companyEmail)) {
+      newErrors.companyEmail = t('settings.general.errors.emailInvalid');
     }
 
     if (!formData.companyPhone.trim()) {
-      newErrors.companyPhone = 'El teléfono es requerido';
+      newErrors.companyPhone = t('settings.general.errors.phoneRequired');
+    } else if (!validatePhone(formData.companyPhone)) {
+      newErrors.companyPhone = t('settings.general.errors.phoneInvalid');
+    }
+
+    if (formData.companyWebsite && !validateUrl(formData.companyWebsite)) {
+      newErrors.companyWebsite = t('settings.general.errors.urlInvalid');
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const currencyOptions = [
-    { value: 'USD', label: 'Dólar Americano (USD)' },
-    { value: 'PEN', label: 'Sol Peruano (PEN)' },
-    { value: 'EUR', label: 'Euro (EUR)' }
-  ];
-
-  const timezoneOptions = [
-    { value: 'America/Lima', label: 'Lima, Perú (UTC-5)' },
-    { value: 'America/New_York', label: 'Nueva York (UTC-5/UTC-4)' },
-    { value: 'Europe/London', label: 'Londres (UTC+0/UTC+1)' }
-  ];
-
-  const languageOptions = [
-    { value: 'es', label: 'Español' },
-    { value: 'en', label: 'English' },
-    { value: 'pt', label: 'Português' }
-  ];
-
-  const dateFormatOptions = [
-    { value: 'DD/MM/YYYY', label: 'DD/MM/YYYY' },
-    { value: 'MM/DD/YYYY', label: 'MM/DD/YYYY' },
-    { value: 'YYYY-MM-DD', label: 'YYYY-MM-DD' }
-  ];
+  const currencyOptions = getCurrencyOptions();
+  const timezoneOptions = getTimezoneOptions();
+  const languageOptions = getLanguageOptions();
+  const dateFormatOptions = getDateFormatOptions();
+  const timeFormatOptions = getTimeFormatOptions();
 
   return (
     <div className="space-y-6">
@@ -90,7 +94,7 @@ const GeneralSettings = () => {
         <div className="flex items-center mb-6">
           <BuildingOfficeIcon className="h-6 w-6 text-blue-600 mr-3" />
           <h3 className="text-lg font-semibold text-gray-900">
-            Configuración General
+            {t('settings.general.title')}
           </h3>
         </div>
 
@@ -99,13 +103,13 @@ const GeneralSettings = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="col-span-2">
               <h4 className="text-md font-medium text-gray-900 mb-4 border-b pb-2">
-                Información de la Empresa
+                {t('settings.general.companyInfo')}
               </h4>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Nombre de la Empresa *
+                {t('settings.general.companyName')} *
               </label>
               <div className="relative">
                 <BuildingOfficeIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -117,7 +121,8 @@ const GeneralSettings = () => {
                   className={`pl-10 pr-4 py-2 w-full border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                     errors.companyName ? 'border-red-300' : 'border-gray-300'
                   }`}
-                  placeholder="Futurismo Tours"
+                  placeholder={t('settings.general.placeholders.companyName')}
+                  maxLength={FORM_LIMITS.COMPANY_NAME_MAX}
                 />
               </div>
               {errors.companyName && (
@@ -127,7 +132,7 @@ const GeneralSettings = () => {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Teléfono de la Empresa *
+                {t('settings.general.companyPhone')} *
               </label>
               <div className="relative">
                 <PhoneIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -139,7 +144,8 @@ const GeneralSettings = () => {
                   className={`pl-10 pr-4 py-2 w-full border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                     errors.companyPhone ? 'border-red-300' : 'border-gray-300'
                   }`}
-                  placeholder="+51 999 999 999"
+                  placeholder={t('settings.general.placeholders.phone')}
+                  maxLength={FORM_LIMITS.PHONE_MAX}
                 />
               </div>
               {errors.companyPhone && (
@@ -149,7 +155,7 @@ const GeneralSettings = () => {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Email de la Empresa *
+                {t('settings.general.companyEmail')} *
               </label>
               <div className="relative">
                 <EnvelopeIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -161,7 +167,7 @@ const GeneralSettings = () => {
                   className={`pl-10 pr-4 py-2 w-full border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                     errors.companyEmail ? 'border-red-300' : 'border-gray-300'
                   }`}
-                  placeholder="info@futurismo.com"
+                  placeholder={t('settings.general.placeholders.email')}
                 />
               </div>
               {errors.companyEmail && (
@@ -171,7 +177,7 @@ const GeneralSettings = () => {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Sitio Web
+                {t('settings.general.companyWebsite')}
               </label>
               <div className="relative">
                 <GlobeAltIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -181,14 +187,15 @@ const GeneralSettings = () => {
                   value={formData.companyWebsite}
                   onChange={handleChange}
                   className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="https://futurismo.com"
+                  placeholder={t('settings.general.placeholders.website')}
+                  maxLength={FORM_LIMITS.URL_MAX}
                 />
               </div>
             </div>
 
             <div className="col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Dirección de la Empresa
+                {t('settings.general.companyAddress')}
               </label>
               <input
                 type="text"
@@ -196,7 +203,8 @@ const GeneralSettings = () => {
                 value={formData.companyAddress}
                 onChange={handleChange}
                 className="px-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Av. Larco 123, Miraflores, Lima"
+                placeholder={t('settings.general.placeholders.address')}
+                maxLength={FORM_LIMITS.ADDRESS_MAX}
               />
             </div>
           </div>
@@ -205,13 +213,13 @@ const GeneralSettings = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="col-span-2">
               <h4 className="text-md font-medium text-gray-900 mb-4 border-b pb-2">
-                Configuraciones Regionales
+                {t('settings.general.regionalSettings')}
               </h4>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Moneda por Defecto
+                {t('settings.general.defaultCurrency')}
               </label>
               <div className="relative">
                 <CurrencyDollarIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -232,7 +240,7 @@ const GeneralSettings = () => {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Zona Horaria
+                {t('settings.general.timezone')}
               </label>
               <div className="relative">
                 <ClockIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -253,7 +261,7 @@ const GeneralSettings = () => {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Idioma del Sistema
+                {t('settings.general.systemLanguage')}
               </label>
               <select
                 name="language"
@@ -271,7 +279,7 @@ const GeneralSettings = () => {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Formato de Fecha
+                {t('settings.general.dateFormat')}
               </label>
               <select
                 name="dateFormat"
@@ -289,7 +297,7 @@ const GeneralSettings = () => {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Formato de Hora
+                {t('settings.general.timeFormat')}
               </label>
               <select
                 name="timeFormat"
@@ -297,8 +305,11 @@ const GeneralSettings = () => {
                 onChange={handleChange}
                 className="px-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
-                <option value="12h">12 horas (AM/PM)</option>
-                <option value="24h">24 horas</option>
+                {timeFormatOptions.map(option => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
               </select>
             </div>
           </div>
@@ -311,7 +322,7 @@ const GeneralSettings = () => {
               className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
               disabled={isLoading}
             >
-              Cancelar
+              {t('common.cancel')}
             </button>
             
             <button
@@ -319,7 +330,7 @@ const GeneralSettings = () => {
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
               disabled={isLoading}
             >
-              {isLoading ? 'Guardando...' : 'Guardar Cambios'}
+              {isLoading ? t('common.saving') : t('common.saveChanges')}
             </button>
           </div>
         </form>
@@ -327,7 +338,7 @@ const GeneralSettings = () => {
         {hasUnsavedChanges && (
           <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
             <p className="text-sm text-yellow-800">
-              Tienes cambios sin guardar. No olvides guardar antes de salir.
+              {t('settings.general.unsavedChanges')}
             </p>
           </div>
         )}

@@ -1,6 +1,6 @@
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 
 class ExportService {
   // Obtener datos mock de reservas con diferentes estados para demostrar filtros
@@ -211,7 +211,7 @@ class ExportService {
       item.paymentStatus
     ]);
 
-    doc.autoTable({
+    autoTable(doc, {
       head: [headers],
       body: rows,
       startY: 40,
@@ -234,7 +234,7 @@ class ExportService {
     });
 
     // Agregar estadísticas al final
-    const finalY = doc.lastAutoTable.finalY + 20;
+    const finalY = doc.previousAutoTable.finalY + 20;
     doc.setFontSize(12);
     doc.text('Resumen:', 15, finalY);
     

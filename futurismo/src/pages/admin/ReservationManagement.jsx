@@ -13,9 +13,17 @@ import {
   ArrowTrendingUpIcon as TrendingUp,
   ChartBarIcon as BarChart3
 } from '@heroicons/react/24/outline';
+import useReservationsStore from '../../stores/reservationsStore';
+import useClientsStore from '../../stores/clientsStore';
+import useToursStore from '../../stores/toursStore';
+import useGuidesStore from '../../stores/guidesStore';
 
 const ReservationManagement = () => {
-  const [reservations, setReservations] = useState([]);
+  // Hooks de stores
+  const { reservations, fetchReservations, isLoading } = useReservationsStore();
+  const { clients, initialize: initializeClients } = useClientsStore();
+  const { tours, initialize: initializeTours } = useToursStore();
+  const { guides, fetchGuides } = useGuidesStore();
   const [filters, setFilters] = useState({
     dateFrom: '',
     dateTo: '',
@@ -41,15 +49,26 @@ const ReservationManagement = () => {
   });
   const [loading, setLoading] = useState(false);
 
-  // Agencias disponibles
-  const mockAgencies = [
-    { id: 'ag001', name: 'Viajes El Dorado SAC' },
-    { id: 'ag002', name: 'Turismo Aventura S.A.C.' },
-    { id: 'ag003', name: 'Explorar Mundo Ltda.' },
-    { id: 'ag004', name: 'Destinos Plus S.A.C.' },
-    { id: 'ag005', name: 'Viajeros Únicos E.I.R.L.' },
-    { id: 'ag006', name: 'Reserva Directa' }
-  ];
+  // Cargar datos al montar el componente
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        await Promise.all([
+          fetchReservations(),
+          initializeClients(),
+          initializeTours(),
+          fetchGuides()
+        ]);
+      } catch (error) {
+        console.error('Error cargando datos:', error);
+      }
+    };
+    
+    loadData();
+  }, []);
+
+  // Agencias disponibles desde el store
+  const agencies = clients.filter(client => client.type === 'agency');
 
   // Opciones de filtro de fecha
   const dateFilterOptions = [
@@ -62,176 +81,36 @@ const ReservationManagement = () => {
     { value: 'year', label: 'Este año' }
   ];
 
-  // Mock data para demostración
-  const mockReservations = [
-    {
-      id: 'RES-001',
-      clientName: 'Juan Pérez',
-      clientEmail: 'juan@email.com',
-      clientPhone: '+51 987 654 321',
-      tourName: 'City Tour Lima Centro',
-      destination: 'Centro de Lima',
-      guide: 'Carlos Mendez',
-      tourDate: '2024-01-15',
-      tourists: 4,
-      totalAmount: 1080,
-      status: 'completed',
-      bookingDate: '2024-01-10',
-      paymentStatus: 'paid',
-      tourType: 'cultural',
-      agencyId: 'ag001',
-      agencyName: 'Viajes El Dorado SAC'
-    },
-    {
-      id: 'RES-002',
-      clientName: 'María García',
-      clientEmail: 'maria@email.com',
-      clientPhone: '+51 976 543 210',
-      tourName: 'Tour Miraflores y Barranco',
-      destination: 'Miraflores',
-      guide: 'Ana López',
-      tourDate: '2024-01-14',
-      tourists: 2,
-      totalAmount: 680,
-      status: 'completed',
-      bookingDate: '2024-01-08',
-      paymentStatus: 'paid',
-      tourType: 'adventure',
-      agencyId: 'ag006',
-      agencyName: 'Reserva Directa'
-    },
-    {
-      id: 'RES-003',
-      clientName: 'Carlos Rodríguez',
-      clientEmail: 'carlos@email.com',
-      clientPhone: '+57 302 345 6789',
-      tourName: 'Coffee Tour',
-      destination: 'Jardín',
-      guide: 'Luis Torres',
-      tourDate: '2024-01-13',
-      tourists: 6,
-      totalAmount: 600000,
-      status: 'completed',
-      bookingDate: '2024-01-07',
-      paymentStatus: 'paid',
-      tourType: 'cultural',
-      agencyId: 'ag002',
-      agencyName: 'Turismo Aventura S.A.C.'
-    },
-    {
-      id: 'RES-004',
-      clientName: 'Laura Martínez',
-      clientEmail: 'laura@email.com',
-      clientPhone: '+57 303 456 7890',
-      tourName: 'Nature Hike',
-      destination: 'El Retiro',
-      guide: 'Pedro Gómez',
-      tourDate: '2024-01-12',
-      tourists: 3,
-      totalAmount: 300000,
-      status: 'completed',
-      bookingDate: '2024-01-05',
-      paymentStatus: 'paid',
-      tourType: 'nature',
-      agencyId: 'ag003',
-      agencyName: 'Exploradores Colombia'
-    },
-    {
-      id: 'RES-005',
-      clientName: 'Roberto Silva',
-      clientEmail: 'roberto@email.com',
-      clientPhone: '+57 304 567 8901',
-      tourName: 'Historical Tour',
-      destination: 'Santa Fe de Antioquia',
-      guide: 'Carmen Díaz',
-      tourDate: '2024-01-11',
-      tourists: 5,
-      totalAmount: 500000,
-      status: 'completed',
-      bookingDate: '2024-01-04',
-      paymentStatus: 'paid',
-      tourType: 'cultural',
-      agencyId: 'ag004',
-      agencyName: 'Antioquia Tours'
-    },
-    {
-      id: 'RES-006',
-      clientName: 'Patricia Vélez',
-      clientEmail: 'patricia@email.com',
-      clientPhone: '+57 305 678 9012',
-      tourName: 'Solo Adventure',
-      destination: 'Medellín',
-      guide: 'Carlos Mendez',
-      tourDate: '2024-01-10',
-      tourists: 1,
-      totalAmount: 150000,
-      status: 'completed',
-      bookingDate: '2024-01-05',
-      paymentStatus: 'paid',
-      tourType: 'adventure',
-      agencyId: 'ag005',
-      agencyName: 'Eco Viajes Medellín'
-    },
-    {
-      id: 'RES-007',
-      clientName: 'Empresa XYZ',
-      clientEmail: 'contacto@empresaxyz.com',
-      clientPhone: '+57 306 789 0123',
-      tourName: 'Corporate Team Building',
-      destination: 'Guatapé',
-      guide: 'Luis Torres',
-      tourDate: '2024-01-09',
-      tourists: 12,
-      totalAmount: 1800000,
-      status: 'completed',
-      bookingDate: '2024-01-01',
-      paymentStatus: 'paid',
-      tourType: 'adventure',
-      agencyId: 'ag001',
-      agencyName: 'Viajes El Dorado SAC'
-    },
-    {
-      id: 'RES-008',
-      clientName: 'Familia González',
-      clientEmail: 'familia@gonzalez.com',
-      clientPhone: '+57 307 890 1234',
-      tourName: 'Family Nature Tour',
-      destination: 'El Retiro',
-      guide: 'Ana López',
-      tourDate: '2024-01-08',
-      tourists: 7,
-      totalAmount: 875000,
-      status: 'completed',
-      bookingDate: '2023-12-28',
-      paymentStatus: 'paid',
-      tourType: 'nature',
-      agencyId: 'ag002',
-      agencyName: 'Turismo Aventura S.A.C.'
-    },
-    {
-      id: 'RES-009',
-      clientName: 'Convention Group',
-      clientEmail: 'events@convention.com',
-      clientPhone: '+57 308 901 2345',
-      tourName: 'Large Group Cultural Experience',
-      destination: 'Jardín',
-      guide: 'Pedro Gómez',
-      tourDate: '2024-01-07',
-      tourists: 18,
-      totalAmount: 2700000,
-      status: 'completed',
-      bookingDate: '2023-12-20',
-      paymentStatus: 'paid',
-      tourType: 'cultural',
-      agencyId: 'ag003',
-      agencyName: 'Exploradores Colombia'
-    }
-  ];
 
-  const destinations = ['Centro de Lima', 'Miraflores', 'San Isidro', 'Barranco', 'Pachacamac', 'Callao'];
-  const guides = ['Carlos Mendez', 'Ana López', 'Luis Torres', 'Pedro Gómez', 'Carmen Díaz'];
-  const tourTypes = ['cultural', 'adventure', 'nature', 'gastronomic'];
+  // Opciones dinámicas basadas en datos reales
+  const destinations = [...new Set(tours.map(tour => tour.destination).filter(Boolean))];
+  const guidesOptions = guides.map(guide => guide.name);
+  const tourTypes = [...new Set(tours.map(tour => tour.category).filter(Boolean))];
   const statusOptions = ['all', 'completed', 'confirmed', 'pending', 'cancelled'];
+  
+  // Enriquecer reservas con datos relacionados
+  const enrichedReservations = reservations.map(reservation => {
+    const client = clients.find(c => c.id === reservation.clientId);
+    const tour = tours.find(t => t.id === reservation.tourId);
+    const guide = guides.find(g => g.id === reservation.guideId);
+    
+    return {
+      ...reservation,
+      clientName: client?.name || 'Cliente desconocido',
+      clientEmail: client?.email || '',
+      clientPhone: client?.phone || '',
+      tourName: tour?.name || reservation.tourName || 'Tour sin nombre',
+      destination: tour?.destination || 'Destino desconocido',
+      guide: guide?.name || 'Guía sin asignar',
+      tourists: (reservation.adults || 0) + (reservation.children || 0),
+      totalAmount: reservation.total || 0,
+      tourType: tour?.category || 'cultural',
+      agencyId: client?.id || '',
+      agencyName: client?.name || 'Reserva Directa',
+      tourDate: reservation.date,
+      bookingDate: reservation.createdAt
+    };
+  });
   
   // Categorías por cantidad de clientes
   const clientCategories = [
@@ -243,14 +122,7 @@ const ReservationManagement = () => {
     { value: 'extra_large', label: 'Grupo Extra Grande (16+)', range: [16, 999] }
   ];
 
-  useEffect(() => {
-    // Simular carga de datos
-    setLoading(true);
-    setTimeout(() => {
-      setReservations(mockReservations);
-      setLoading(false);
-    }, 1000);
-  }, []);
+  // Este useEffect ya no es necesario ya que tenemos otro que carga los datos reales
 
   // Función para manejar cambios en los filtros
   const handleFilterChange = (key, value) => {
@@ -262,7 +134,7 @@ const ReservationManagement = () => {
 
   // Filtrar reservas basado en los filtros aplicados
   const filteredReservations = useMemo(() => {
-    let filtered = reservations;
+    let filtered = enrichedReservations;
 
     // Filtro por estado (por defecto solo completados)
     if (filters.status !== 'all') {
@@ -384,7 +256,7 @@ const ReservationManagement = () => {
     }
 
     return filtered;
-  }, [reservations, filters]);
+  }, [enrichedReservations, filters]);
 
   // Calcular estadísticas basadas en reservas filtradas
   const stats = useMemo(() => {
@@ -416,7 +288,7 @@ const ReservationManagement = () => {
       avgGroupSize,
       groupSizeDistribution
     };
-  }, [filteredReservations, clientCategories]);
+  }, [filteredReservations]);
 
   const handleExport = () => {
     // Simular exportación de datos
@@ -539,7 +411,7 @@ const ReservationManagement = () => {
                 onChange={(e) => handleFilterChange('destination', e.target.value)}
                 className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
-                <option value="all">Todos los destinos</option>
+                <option key="all" value="all">Todos los destinos</option>
                 {destinations.map(dest => (
                   <option key={dest} value={dest}>{dest}</option>
                 ))}
@@ -556,8 +428,8 @@ const ReservationManagement = () => {
                 onChange={(e) => handleFilterChange('guide', e.target.value)}
                 className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
-                <option value="all">Todos los guías</option>
-                {guides.map(guide => (
+                <option key="all" value="all">Todos los guías</option>
+                {guidesOptions.map(guide => (
                   <option key={guide} value={guide}>{guide}</option>
                 ))}
               </select>
@@ -575,7 +447,7 @@ const ReservationManagement = () => {
                 onChange={(e) => handleFilterChange('tourType', e.target.value)}
                 className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
-                <option value="all">Todos los tipos</option>
+                <option key="all" value="all">Todos los tipos</option>
                 {tourTypes.map(type => (
                   <option key={type} value={type}>
                     {type.charAt(0).toUpperCase() + type.slice(1)}
@@ -637,8 +509,8 @@ const ReservationManagement = () => {
                   onChange={(e) => handleFilterChange('agency', e.target.value)}
                   className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
-                  <option value="all">Todas las agencias</option>
-                  {mockAgencies.map(agency => (
+                  <option key="all" value="all">Todas las agencias</option>
+                  {agencies.map(agency => (
                     <option key={agency.id} value={agency.id}>
                       {agency.name}
                     </option>
@@ -688,7 +560,7 @@ const ReservationManagement = () => {
               <div className="mt-3 flex flex-wrap gap-2">
                 {filters.agency !== 'all' && (
                   <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
-                    Agencia: {mockAgencies.find(a => a.id === filters.agency)?.name}
+                    Agencia: {agencies.find(a => a.id === filters.agency)?.name}
                     <button
                       onClick={() => handleFilterChange('agency', 'all')}
                       className="text-blue-600 hover:text-blue-800"
@@ -740,9 +612,9 @@ const ReservationManagement = () => {
                   }}
                   className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
-                  <option value="all">Sin filtro</option>
-                  <option value="range">Rango personalizado</option>
-                  <option value="category">Categorías predefinidas</option>
+                  <option key="all" value="all">Sin filtro</option>
+                  <option key="range" value="range">Rango personalizado</option>
+                  <option key="category" value="category">Categorías predefinidas</option>
                 </select>
               </div>
 
@@ -889,7 +761,7 @@ const ReservationManagement = () => {
         {/* Acciones */}
         <div className="flex justify-between items-center mb-6">
           <div className="text-sm text-gray-600">
-            Mostrando {filteredReservations.length} de {reservations.length} reservas
+            Mostrando {filteredReservations.length} de {enrichedReservations.length} reservas
             {(filters.clientQuantityType === 'range' && (filters.minClients || filters.maxClients)) && (
               <span className="ml-2 text-blue-600 font-medium">
                 • Filtrado por: {filters.minClients || 1}-{filters.maxClients || '999+'} clientes

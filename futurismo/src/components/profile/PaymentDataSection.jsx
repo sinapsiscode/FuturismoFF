@@ -101,7 +101,7 @@ const PaymentDataSection = () => {
                 key={method.id}
                 method={method}
                 isEditing={isEditing}
-                showCardNumber={showCardNumbers[method.id]}
+                showCardNumber={showCardNumbers[method.id] || false}
                 onToggleShowCard={toggleShowCardNumber}
                 onSetAsMain={handleSetAsMain}
                 onDelete={handleDeletePaymentMethod}

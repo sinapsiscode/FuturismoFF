@@ -1,35 +1,49 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
+import {
+  PHOTO_CONFIG,
+  UPLOAD_STATUS,
+  PHOTO_ERROR_KEYS,
+  PHOTO_SUCCESS_KEYS
+} from '../constants/photoUploadConstants';
 
-const usePhotoUpload = (photos = [], onPhotosChange, maxPhotos = 5) => {
+/**
+ * Hook para manejar la carga y gestión de fotos
+ * @param {Array} photos - Lista actual de fotos
+ * @param {Function} onPhotosChange - Callback cuando cambian las fotos
+ * @param {number} maxPhotos - Número máximo de fotos permitidas
+ * @returns {Object} Estado y funciones para manejo de fotos
+ */
+const usePhotoUpload = (photos = [], onPhotosChange, maxPhotos = PHOTO_CONFIG.DEFAULT_MAX_PHOTOS) => {
   const [uploading, setUploading] = useState(false);
   const [previewPhoto, setPreviewPhoto] = useState(null);
   const fileInputRef = useRef(null);
   const { t } = useTranslation();
 
-  const PHOTO_CONFIG = {
-    maxSize: 5 * 1024 * 1024, // 5MB
-    acceptedTypes: ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
-  };
+  // Configuración memoizada
+  const acceptedTypesString = useMemo(
+    () => PHOTO_CONFIG.ACCEPTED_EXTENSIONS.join(','),
+    []
+  );
 
-  const validateFile = (file) => {
+  const validateFile = useCallback((file) => {
     if (!file.type.startsWith('image/')) {
-      return { valid: false, error: t('upload.photos.invalidType', { name: file.name }) };
+      return { valid: false, error: t(PHOTO_ERROR_KEYS.INVALID_TYPE, { name: file.name }) };
     }
 
     if (file.size > PHOTO_CONFIG.maxSize) {
-      return { valid: false, error: t('upload.photos.tooLarge', { name: file.name }) };
+      return { valid: false, error: t(PHOTO_ERROR_KEYS.TOO_LARGE, { name: file.name }) };
     }
 
     return { valid: true };
-  };
+  }, [t]);
 
-  const handleFileSelect = async (event) => {
+  const handleFileSelect = useCallback(async (event) => {
     const files = Array.from(event.target.files);
     
     if (photos.length + files.length > maxPhotos) {
-      toast.error(t('upload.photos.maxExceeded', { max: maxPhotos }));
+      toast.error(t(PHOTO_ERROR_KEYS.MAX_EXCEEDED, { max: maxPhotos }));
       return;
     }
 
@@ -56,7 +70,7 @@ const usePhotoUpload = (photos = [], onPhotosChange, maxPhotos = 5) => {
           name: file.name,
           size: file.size,
           uploadedAt: new Date(),
-          status: 'uploaded'
+          status: UPLOAD_STATUS.UPLOADED
         };
 
         newPhotos.push(photoData);
@@ -66,12 +80,11 @@ const usePhotoUpload = (photos = [], onPhotosChange, maxPhotos = 5) => {
       onPhotosChange(updatedPhotos);
       
       if (newPhotos.length > 0) {
-        toast.success(t('upload.photos.success', { count: newPhotos.length }));
+        toast.success(t(PHOTO_SUCCESS_KEYS.UPLOAD_SUCCESS, { count: newPhotos.length }));
       }
       
     } catch (error) {
-      toast.error(t('upload.photos.error'));
-      console.error(error);
+      toast.error(t(PHOTO_ERROR_KEYS.UPLOAD_ERROR));
     } finally {
       setUploading(false);
       // Clear input
@@ -79,9 +92,9 @@ const usePhotoUpload = (photos = [], onPhotosChange, maxPhotos = 5) => {
         fileInputRef.current.value = '';
       }
     }
-  };
+  }, [photos, onPhotosChange, maxPhotos, t, validateFile]);
 
-  const removePhoto = (photoId) => {
+  const removePhoto = useCallback((photoId) => {
     const updatedPhotos = photos.filter(photo => photo.id !== photoId);
     onPhotosChange(updatedPhotos);
     
@@ -91,24 +104,24 @@ const usePhotoUpload = (photos = [], onPhotosChange, maxPhotos = 5) => {
       URL.revokeObjectURL(photoToRemove.url);
     }
     
-    toast.success(t('upload.photos.removed'));
-  };
+    toast.success(t(PHOTO_SUCCESS_KEYS.REMOVED));
+  }, [photos, onPhotosChange, t]);
 
-  const openPreview = (photo) => {
+  const openPreview = useCallback((photo) => {
     setPreviewPhoto(photo);
-  };
+  }, []);
 
-  const closePreview = () => {
+  const closePreview = useCallback(() => {
     setPreviewPhoto(null);
-  };
+  }, []);
 
-  const openFileSelector = () => {
+  const openFileSelector = useCallback(() => {
     fileInputRef.current?.click();
-  };
+  }, []);
 
-  const formatFileSize = (size) => {
+  const formatFileSize = useCallback((size) => {
     return (size / 1024 / 1024).toFixed(1);
-  };
+  }, []);
 
   return {
     // State
@@ -125,7 +138,16 @@ const usePhotoUpload = (photos = [], onPhotosChange, maxPhotos = 5) => {
     
     // Utilities
     formatFileSize,
-    canAddMore: photos.length < maxPhotos
+    canAddMore: photos.length < maxPhotos,
+    
+    // Configuración
+    acceptedTypes: acceptedTypesString,
+    maxPhotos,
+    maxSize: PHOTO_CONFIG.MAX_SIZE,
+    
+    // Constantes
+    UPLOAD_STATUS,
+    PHOTO_CONFIG
   };
 };
 

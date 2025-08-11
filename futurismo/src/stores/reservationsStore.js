@@ -1,36 +1,42 @@
-import { create } from 'zustand';
-import { SERVICE_TYPES, FORM_STATES } from '../utils/constants';
+/**
+ * Store de reservaciones
+ * Maneja el estado global de reservaciones
+ */
 
-const initialFormData = {
-  serviceType: '',
-  date: '',
-  time: '',
-  touristsCount: 1,
-  tourists: [],
-  // Campos específicos por tipo de servicio
-  origin: '',
-  destination: '',
-  flightNumber: '',
-  tourName: '',
-  duration: 1,
-  pickupLocation: '',
-  includesLunch: false,
-  packageName: '',
-  days: 2,
-  accommodation: '',
-  mealPlan: '',
-  specialRequirements: ''
-};
+import { create } from 'zustand';
+import { reservationsService } from '../services/reservationsService';
+import { SERVICE_TYPES, FORM_STATES } from '../utils/constants';
+import {
+  INITIAL_FORM_DATA,
+  FORM_STEPS,
+  RESERVATION_STATUS,
+  VALIDATION_MESSAGES
+} from '../constants/reservationsConstants';
 
 const useReservationsStore = create((set, get) => ({
   // Estado
-  formData: initialFormData,
-  currentStep: 1, // 1: servicio, 2: turistas, 3: confirmación
+  formData: INITIAL_FORM_DATA,
+  currentStep: FORM_STEPS.SERVICE,
   formState: FORM_STATES.IDLE,
   validationErrors: {},
   isSubmitting: false,
   reservations: [],
-  draftReservation: null,
+  currentReservation: null,
+  isLoading: false,
+  error: null,
+  filters: {
+    status: '',
+    serviceType: '',
+    dateFrom: '',
+    dateTo: '',
+    search: ''
+  },
+  pagination: {
+    page: 1,
+    pageSize: 20,
+    total: 0,
+    totalPages: 0
+  },
 
   // Acciones del formulario
   updateFormData: (data) => {
@@ -42,7 +48,7 @@ const useReservationsStore = create((set, get) => ({
   setServiceType: (serviceType) => {
     set((state) => ({
       formData: { 
-        ...initialFormData, // Reset form but keep common fields
+        ...INITIAL_FORM_DATA,
         serviceType,
         date: state.formData.date,
         time: state.formData.time,
@@ -86,7 +92,7 @@ const useReservationsStore = create((set, get) => ({
     const { currentStep, validateCurrentStep } = get();
     
     if (validateCurrentStep()) {
-      set({ currentStep: Math.min(currentStep + 1, 3) });
+      set({ currentStep: Math.min(currentStep + 1, FORM_STEPS.MAX_STEP) });
       return true;
     }
     
@@ -95,7 +101,7 @@ const useReservationsStore = create((set, get) => ({
 
   previousStep: () => {
     set((state) => ({
-      currentStep: Math.max(state.currentStep - 1, 1)
+      currentStep: Math.max(state.currentStep - 1, FORM_STEPS.MIN_STEP)
     }));
   },
 
@@ -104,47 +110,47 @@ const useReservationsStore = create((set, get) => ({
     const errors = {};
     
     switch (currentStep) {
-      case 1: // Validar información del servicio
+      case FORM_STEPS.SERVICE:
         if (!formData.serviceType) {
-          errors.serviceType = 'Selecciona un tipo de servicio';
+          errors.serviceType = VALIDATION_MESSAGES.SERVICE_TYPE_REQUIRED;
         }
         if (!formData.date) {
-          errors.date = 'La fecha es requerida';
+          errors.date = VALIDATION_MESSAGES.DATE_REQUIRED;
         }
         if (!formData.time) {
-          errors.time = 'La hora es requerida';
+          errors.time = VALIDATION_MESSAGES.TIME_REQUIRED;
         }
         
         // Validaciones específicas por tipo
         if (formData.serviceType === SERVICE_TYPES.TRANSFER) {
-          if (!formData.origin) errors.origin = 'El origen es requerido';
-          if (!formData.destination) errors.destination = 'El destino es requerido';
+          if (!formData.origin) errors.origin = VALIDATION_MESSAGES.ORIGIN_REQUIRED;
+          if (!formData.destination) errors.destination = VALIDATION_MESSAGES.DESTINATION_REQUIRED;
         } else if (formData.serviceType === SERVICE_TYPES.TOUR) {
-          if (!formData.tourName) errors.tourName = 'El nombre del tour es requerido';
-          if (!formData.pickupLocation) errors.pickupLocation = 'El lugar de recojo es requerido';
+          if (!formData.tourName) errors.tourName = VALIDATION_MESSAGES.TOUR_NAME_REQUIRED;
+          if (!formData.pickupLocation) errors.pickupLocation = VALIDATION_MESSAGES.PICKUP_LOCATION_REQUIRED;
         } else if (formData.serviceType === SERVICE_TYPES.PACKAGE) {
-          if (!formData.packageName) errors.packageName = 'El nombre del paquete es requerido';
-          if (!formData.accommodation) errors.accommodation = 'El alojamiento es requerido';
+          if (!formData.packageName) errors.packageName = VALIDATION_MESSAGES.PACKAGE_NAME_REQUIRED;
+          if (!formData.accommodation) errors.accommodation = VALIDATION_MESSAGES.ACCOMMODATION_REQUIRED;
         }
         break;
         
-      case 2: // Validar turistas
+      case FORM_STEPS.TOURISTS:
         if (formData.tourists.length === 0) {
-          errors.tourists = 'Agrega al menos un turista';
+          errors.tourists = VALIDATION_MESSAGES.TOURISTS_REQUIRED;
         } else if (formData.tourists.length !== formData.touristsCount) {
-          errors.tourists = `Debes agregar ${formData.touristsCount} turista(s)`;
+          errors.tourists = VALIDATION_MESSAGES.TOURISTS_COUNT_MISMATCH.replace('{count}', formData.touristsCount);
         }
         
         // Validar cada turista
         formData.tourists.forEach((tourist, index) => {
           if (!tourist.name) {
-            errors[`tourist_${index}_name`] = 'El nombre es requerido';
+            errors[`tourist_${index}_name`] = VALIDATION_MESSAGES.TOURIST_NAME_REQUIRED;
           }
           if (!tourist.passport) {
-            errors[`tourist_${index}_passport`] = 'El pasaporte es requerido';
+            errors[`tourist_${index}_passport`] = VALIDATION_MESSAGES.TOURIST_PASSPORT_REQUIRED;
           }
           if (!tourist.email) {
-            errors[`tourist_${index}_email`] = 'El email es requerido';
+            errors[`tourist_${index}_email`] = VALIDATION_MESSAGES.TOURIST_EMAIL_REQUIRED;
           }
         });
         break;
@@ -154,51 +160,35 @@ const useReservationsStore = create((set, get) => ({
     return Object.keys(errors).length === 0;
   },
 
-  createDraftReservation: () => {
-    const { formData } = get();
-    
-    const draft = {
-      id: `DRAFT-${Date.now()}`,
-      code: `FT${Math.random().toString(36).substr(2, 6).toUpperCase()}`,
-      ...formData,
-      createdAt: new Date().toISOString(),
-      status: 'draft'
-    };
-    
-    set({ draftReservation: draft });
-    return draft;
-  },
-
   submitReservation: async () => {
-    set({ isSubmitting: true, formState: FORM_STATES.LOADING });
+    set({ isSubmitting: true, formState: FORM_STATES.LOADING, error: null });
     
     try {
-      const { draftReservation } = get();
+      const { formData } = get();
+      const result = await reservationsService.createReservation(formData);
       
-      // Simulación de envío - En producción sería una llamada a la API
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      if (!result.success) {
+        throw new Error(result.error || 'Error al crear la reservación');
+      }
       
-      // Agregar a las reservas
       set((state) => ({
-        reservations: [...state.reservations, {
-          ...draftReservation,
-          status: 'confirmed',
-          confirmedAt: new Date().toISOString()
-        }],
+        reservations: [result.data, ...state.reservations],
         formState: FORM_STATES.SUCCESS,
-        isSubmitting: false
+        isSubmitting: false,
+        currentReservation: result.data
       }));
       
       // Limpiar formulario después de éxito
       setTimeout(() => {
         get().resetForm();
-      }, 3000);
+      }, 2000);
       
-      return { success: true, reservation: draftReservation };
+      return { success: true, reservation: result.data };
     } catch (error) {
       set({ 
         formState: FORM_STATES.ERROR,
-        isSubmitting: false
+        isSubmitting: false,
+        error: error.message
       });
       
       return { success: false, error: error.message };
@@ -207,11 +197,11 @@ const useReservationsStore = create((set, get) => ({
 
   resetForm: () => {
     set({
-      formData: initialFormData,
-      currentStep: 1,
+      formData: INITIAL_FORM_DATA,
+      currentStep: FORM_STEPS.SERVICE,
       formState: FORM_STATES.IDLE,
       validationErrors: {},
-      draftReservation: null
+      error: null
     });
   },
 
@@ -219,16 +209,257 @@ const useReservationsStore = create((set, get) => ({
 
   clearValidationErrors: () => set({ validationErrors: {} }),
 
-  // Obtener reservaciones
-  getReservationsByStatus: (status) => {
-    const { reservations } = get();
-    return reservations.filter(r => r.status === status);
+  // Acciones CRUD
+  fetchReservations: async (filters = {}) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const { pagination } = get();
+      const params = {
+        ...filters,
+        page: pagination.page,
+        pageSize: pagination.pageSize
+      };
+      
+      const result = await reservationsService.getReservations(params);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al cargar reservaciones');
+      }
+      
+      set({
+        reservations: result.data.reservations,
+        pagination: {
+          page: result.data.page,
+          pageSize: result.data.pageSize,
+          total: result.data.total,
+          totalPages: result.data.totalPages
+        },
+        isLoading: false
+      });
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
   },
 
-  getReservationById: (id) => {
-    const { reservations } = get();
-    return reservations.find(r => r.id === id);
-  }
+  fetchReservationById: async (id) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await reservationsService.getReservationById(id);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Reservación no encontrada');
+      }
+      
+      set({
+        currentReservation: result.data,
+        isLoading: false
+      });
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
+  },
+
+  updateReservation: async (id, updateData) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await reservationsService.updateReservation(id, updateData);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al actualizar la reservación');
+      }
+      
+      set((state) => ({
+        reservations: state.reservations.map(r => 
+          r.id === id ? result.data : r
+        ),
+        currentReservation: state.currentReservation?.id === id 
+          ? result.data 
+          : state.currentReservation,
+        isLoading: false
+      }));
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
+  },
+
+  updateReservationStatus: async (id, status, reason = null) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await reservationsService.updateReservationStatus(id, status, reason);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al actualizar el estado');
+      }
+      
+      set((state) => ({
+        reservations: state.reservations.map(r => 
+          r.id === id ? result.data : r
+        ),
+        currentReservation: state.currentReservation?.id === id 
+          ? result.data 
+          : state.currentReservation,
+        isLoading: false
+      }));
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
+  },
+
+  cancelReservation: async (id, reason) => {
+    return get().updateReservationStatus(id, RESERVATION_STATUS.CANCELLED, reason);
+  },
+
+  assignGuide: async (reservationId, guideId) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await reservationsService.assignGuide(reservationId, guideId);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al asignar guía');
+      }
+      
+      set((state) => ({
+        reservations: state.reservations.map(r => 
+          r.id === reservationId ? result.data : r
+        ),
+        currentReservation: state.currentReservation?.id === reservationId 
+          ? result.data 
+          : state.currentReservation,
+        isLoading: false
+      }));
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
+  },
+
+  // Filtros y búsqueda
+  setFilters: (filters) => {
+    set((state) => ({
+      filters: { ...state.filters, ...filters },
+      pagination: { ...state.pagination, page: 1 } // Reset página al filtrar
+    }));
+  },
+
+  clearFilters: () => {
+    set({
+      filters: {
+        status: '',
+        serviceType: '',
+        dateFrom: '',
+        dateTo: '',
+        search: ''
+      },
+      pagination: { ...get().pagination, page: 1 }
+    });
+  },
+
+  setPage: (page) => {
+    set((state) => ({
+      pagination: { ...state.pagination, page }
+    }));
+  },
+
+  setPageSize: (pageSize) => {
+    set((state) => ({
+      pagination: { ...state.pagination, pageSize, page: 1 }
+    }));
+  },
+
+  // Búsqueda
+  searchReservations: async (query) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await reservationsService.searchReservations(query, get().filters);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error en la búsqueda');
+      }
+      
+      set({
+        reservations: result.data.results,
+        isLoading: false
+      });
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
+  },
+
+  // Validación de disponibilidad
+  checkAvailability: async (params) => {
+    try {
+      const result = await reservationsService.checkAvailability(params);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al verificar disponibilidad');
+      }
+      
+      return result.data;
+    } catch (error) {
+      set({ error: error.message });
+      throw error;
+    }
+  },
+
+  // Estadísticas
+  fetchStats: async (params = {}) => {
+    try {
+      const result = await reservationsService.getReservationStats(params);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al cargar estadísticas');
+      }
+      
+      return result.data;
+    } catch (error) {
+      set({ error: error.message });
+      throw error;
+    }
+  },
+
+  // Limpiar errores
+  clearError: () => set({ error: null })
 }));
 
 export { useReservationsStore };

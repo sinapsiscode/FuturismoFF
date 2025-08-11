@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { MapPinIcon, UserGroupIcon, PhoneIcon, ClockIcon, ExclamationTriangleIcon, PlusIcon, MinusIcon, ViewfinderCircleIcon } from '@heroicons/react/24/outline';
-import { useServicesStore } from '../../stores/servicesStore';
+import useServicesStore from '../../stores/servicesStore';
 import { useLayout } from '../../contexts/LayoutContext';
 
 const LiveMapResponsive = ({ filters, onServiceSelect }) => {
-  const { activeServices, initializeMockData } = useServicesStore();
+  const { activeServices, loadServices } = useServicesStore();
   const { viewport, sidebarOpen } = useLayout();
   const [selectedService, setSelectedService] = useState(null);
   const mapRef = useRef(null);
@@ -87,9 +87,9 @@ const LiveMapResponsive = ({ filters, onServiceSelect }) => {
 
     leafletMapRef.current = map;
 
-    // Inicializar datos mock si es necesario
+    // Cargar servicios si es necesario
     if (activeServices.length === 0) {
-      initializeMockData();
+      loadServices();
     }
   };
 
@@ -195,19 +195,12 @@ const LiveMapResponsive = ({ filters, onServiceSelect }) => {
       markersRef.current[service.id] = marker;
     });
 
-    // Auto-ajustar vista si hay marcadores
-    if (activeServices.length > 0) {
-      const bounds = window.L.latLngBounds(
-        activeServices
-          .filter(s => s.currentLocation?.lat && s.currentLocation?.lng)
-          .map(s => [s.currentLocation.lat, s.currentLocation.lng])
-      );
-      
-      if (bounds.isValid()) {
-        leafletMapRef.current.fitBounds(bounds, { 
-          padding: viewport.isMobile ? [20, 20] : [50, 50],
-          maxZoom: 14
-        });
+    // Auto-ajustar vista si hay marcadores - Deshabilitado temporalmente por problemas de bounds
+    // El mapa se mantendrá centrado en Lima por defecto
+    if (leafletMapRef.current && leafletMapRef.current._loaded) {
+      // Solo centrar si no hay servicios o en caso de error
+      if (activeServices.length === 0) {
+        leafletMapRef.current.setView([-12.0464, -77.0428], viewport.isMobile ? 11 : 12);
       }
     }
   }, [activeServices, viewport]);

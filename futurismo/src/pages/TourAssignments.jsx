@@ -8,414 +8,229 @@ import {
   MagnifyingGlassIcon,
   FunnelIcon
 } from '@heroicons/react/24/outline';
-import AssignmentManager from '../components/assignments/AssignmentManager';
+import useReservationsStore from '../stores/reservationsStore';
+import useClientsStore from '../stores/clientsStore';
+import { formatters } from '../utils/formatters';
 
 const TourAssignments = () => {
   const [selectedReservation, setSelectedReservation] = useState(null);
-  const [reservations, setReservations] = useState([]);
-  const [filter, setFilter] = useState('pending'); // 'all', 'pending', 'assigned', 'tomorrow'
+  const [filter, setFilter] = useState('pending');
   const [searchTerm, setSearchTerm] = useState('');
+  
+  // Obtener datos de los stores
+  const { reservations, fetchReservations, isLoading } = useReservationsStore();
+  const { clients, initialize: initializeClients } = useClientsStore();
 
-  // Datos mock de reservas pendientes de asignación
+  // Cargar datos al montar el componente
   useEffect(() => {
-    const mockReservations = [
-      {
-        id: 'RES-001',
-        tourName: 'City Tour Lima Centro Histórico',
-        date: '2024-02-20',
-        time: '09:00',
-        groupSize: 8,
-        agency: {
-          id: 'AG-001',
-          name: 'Viajes El Dorado SAC',
-          contact: 'Ana López',
-          phone: '+51 912 345 678',
-          whatsapp: '+51912345678',
-          email: 'ventas@viajeseldorado.com'
-        },
-        pickupLocation: {
-          name: 'Hotel Costa del Sol Wyndham',
-          address: 'Av. Salaverry 3060, San Isidro',
-          reference: 'Recepción principal'
-        },
-        status: 'pending',
-        createdAt: '2024-02-19T10:00:00',
-        priority: 'high'
-      },
-      {
-        id: 'RES-002',
-        tourName: 'Tour Islas Ballestas y Paracas',
-        date: '2024-02-20',
-        time: '07:00',
-        groupSize: 12,
-        agency: {
-          id: 'AG-002',
-          name: 'Peru Travel Experience',
-          contact: 'Roberto Díaz',
-          phone: '+51 923 456 789',
-          whatsapp: '+51923456789',
-          email: 'roberto@perutravel.com'
-        },
-        pickupLocation: {
-          name: 'Hotel Sheraton Lima',
-          address: 'Av. Paseo de la República 170, Lima',
-          reference: 'Lobby principal'
-        },
-        status: 'assigned',
-        assignedAt: '2024-02-19T15:30:00',
-        priority: 'medium'
-      },
-      {
-        id: 'RES-003',
-        tourName: 'Tour Gastronómico por Barranco',
-        date: '2024-02-21',
-        time: '18:00',
-        groupSize: 6,
-        agency: {
-          id: 'AG-003',
-          name: 'Lima Discovery Tours',
-          contact: 'María González',
-          phone: '+51 934 567 890',
-          whatsapp: '+51934567890',
-          email: 'maria@limadiscovery.com'
-        },
-        pickupLocation: {
-          name: 'Plaza San Martín',
-          address: 'Jirón de la Unión, Cercado de Lima',
-          reference: 'Monumento central'
-        },
-        status: 'pending',
-        createdAt: '2024-02-19T14:15:00',
-        priority: 'low'
-      },
-      {
-        id: 'RES-004',
-        tourName: 'Cusco y Machu Picchu 3D/2N',
-        date: '2024-02-20',
-        time: '06:00',
-        groupSize: 4,
-        agency: {
-          id: 'AG-004',
-          name: 'Andes Explorer',
-          contact: 'Carlos Mendoza',
-          phone: '+51 945 678 901',
-          whatsapp: '+51945678901',
-          email: 'carlos@andesexplorer.com'
-        },
-        pickupLocation: {
-          name: 'Aeropuerto Jorge Chávez',
-          address: 'Av. Elmer Faucett s/n, Callao',
-          reference: 'Terminal de llegadas nacionales'
-        },
-        status: 'urgent',
-        createdAt: '2024-02-19T16:45:00',
-        priority: 'urgent'
+    const loadData = async () => {
+      try {
+        await fetchReservations({ status: ['pending', 'urgent', 'assigned'] });
+        await initializeClients();
+      } catch (error) {
+        console.error('Error cargando datos:', error);
       }
-    ];
-    setReservations(mockReservations);
+    };
+    
+    loadData();
   }, []);
+  
+  // Enriquecer reservaciones con datos de cliente
+  const enrichedReservations = reservations.map(reservation => {
+    const client = clients.find(c => c.id === reservation.clientId) || {};
+    return {
+      ...reservation,
+      agency: {
+        id: client.id,
+        name: client.name || 'Cliente desconocido',
+        contact: client.contact || '',
+        phone: client.phone || '',
+        email: client.email || ''
+      },
+      groupSize: (reservation.adults || 0) + (reservation.children || 0),
+      priority: reservation.status === 'urgent' ? 'urgent' : 
+                reservation.status === 'confirmed' ? 'high' : 'medium'
+    };
+  });
 
-  const filteredReservations = reservations.filter(reservation => {
-    // Filtrar por estado
-    if (filter === 'pending' && reservation.status !== 'pending' && reservation.status !== 'urgent') return false;
+  // Filtrar reservaciones
+  const filteredReservations = enrichedReservations.filter(reservation => {
+    if (filter === 'pending' && reservation.status !== 'pending') return false;
     if (filter === 'assigned' && reservation.status !== 'assigned') return false;
-    if (filter === 'tomorrow') {
-      const tomorrow = new Date();
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      const reservationDate = new Date(reservation.date);
-      if (reservationDate.toDateString() !== tomorrow.toDateString()) return false;
-    }
-
-    // Filtrar por búsqueda
     if (searchTerm) {
-      const search = searchTerm.toLowerCase();
-      return (
-        reservation.tourName.toLowerCase().includes(search) ||
-        reservation.agency.name.toLowerCase().includes(search) ||
-        reservation.agency.contact.toLowerCase().includes(search)
-      );
+      const term = searchTerm.toLowerCase();
+      return reservation.agency.name.toLowerCase().includes(term) ||
+             reservation.tourName?.toLowerCase().includes(term);
     }
-
     return true;
   });
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'pending': return 'bg-yellow-100 text-yellow-800 border-yellow-300';
-      case 'assigned': return 'bg-green-100 text-green-800 border-green-300';
-      case 'urgent': return 'bg-red-100 text-red-800 border-red-300';
-      default: return 'bg-gray-100 text-gray-800 border-gray-300';
-    }
-  };
-
-  const getStatusIcon = (status) => {
-    switch (status) {
-      case 'pending': return <ClockIcon className="h-4 w-4" />;
-      case 'assigned': return <CheckCircleIcon className="h-4 w-4" />;
-      case 'urgent': return <ExclamationTriangleIcon className="h-4 w-4" />;
-      default: return <ClockIcon className="h-4 w-4" />;
-    }
-  };
-
-  const getPriorityColor = (priority) => {
-    switch (priority) {
-      case 'urgent': return 'bg-red-500';
-      case 'high': return 'bg-orange-500';
-      case 'medium': return 'bg-yellow-500';
-      case 'low': return 'bg-green-500';
-      default: return 'bg-gray-500';
-    }
-  };
-
-  const handleAssignmentComplete = (assignment) => {
-    // Actualizar el estado de la reserva a 'assigned'
-    setReservations(prev => 
-      prev.map(res => 
-        res.id === selectedReservation.id 
-          ? { ...res, status: 'assigned', assignedAt: new Date().toISOString() }
-          : res
-      )
-    );
-    setSelectedReservation(null);
-  };
-
   const getFilteredCount = (filterType) => {
-    return reservations.filter(res => {
-      switch (filterType) {
-        case 'pending': return res.status === 'pending' || res.status === 'urgent';
-        case 'assigned': return res.status === 'assigned';
-        case 'tomorrow': {
-          const tomorrow = new Date();
-          tomorrow.setDate(tomorrow.getDate() + 1);
-          const reservationDate = new Date(res.date);
-          return reservationDate.toDateString() === tomorrow.toDateString();
-        }
-        default: return true;
+    return enrichedReservations.filter(r => {
+      if (filterType === 'pending') return r.status === 'pending';
+      if (filterType === 'assigned') return r.status === 'assigned';
+      if (filterType === 'tomorrow') {
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        return new Date(r.date).toDateString() === tomorrow.toDateString();
       }
+      return true;
     }).length;
   };
 
-  if (selectedReservation) {
+  if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 p-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex items-center mb-6">
-            <button
-              onClick={() => setSelectedReservation(null)}
-              className="mr-4 p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              ← Volver
-            </button>
-            <h1 className="text-3xl font-bold text-gray-900">
-              Asignar Tour - {selectedReservation.id}
-            </h1>
-          </div>
-          
-          <AssignmentManager 
-            reservation={selectedReservation}
-            onAssignmentComplete={handleAssignmentComplete}
-          />
-        </div>
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+    <div className="space-y-6">
+      {/* Header */}
+      <div>
+        <h1 className="text-2xl font-bold text-gray-900">Asignación de Tours</h1>
+        <p className="text-gray-600">Gestiona las asignaciones de guías y recursos para los tours</p>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="bg-white p-6 rounded-lg shadow-sm border">
           <div className="flex items-center">
-            <CalendarIcon className="h-8 w-8 text-blue-600 mr-3" />
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">
-                Asignación de Tours
-              </h1>
-              <p className="text-gray-600 mt-1">
-                Gestiona las asignaciones de guías, choferes y vehículos
-              </p>
+            <ExclamationTriangleIcon className="h-8 w-8 text-yellow-600" />
+            <div className="ml-3">
+              <p className="text-sm font-medium text-gray-500">Pendientes</p>
+              <p className="text-2xl font-bold text-gray-900">{getFilteredCount('pending')}</p>
             </div>
           </div>
         </div>
-
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          <div className="bg-white p-6 rounded-lg shadow-sm border">
-            <div className="flex items-center">
-              <ClockIcon className="h-8 w-8 text-yellow-600" />
-              <div className="ml-3">
-                <p className="text-sm font-medium text-gray-500">Pendientes</p>
-                <p className="text-2xl font-bold text-gray-900">{getFilteredCount('pending')}</p>
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-white p-6 rounded-lg shadow-sm border">
-            <div className="flex items-center">
-              <CheckCircleIcon className="h-8 w-8 text-green-600" />
-              <div className="ml-3">
-                <p className="text-sm font-medium text-gray-500">Asignados</p>
-                <p className="text-2xl font-bold text-gray-900">{getFilteredCount('assigned')}</p>
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-white p-6 rounded-lg shadow-sm border">
-            <div className="flex items-center">
-              <CalendarIcon className="h-8 w-8 text-blue-600" />
-              <div className="ml-3">
-                <p className="text-sm font-medium text-gray-500">Mañana</p>
-                <p className="text-2xl font-bold text-gray-900">{getFilteredCount('tomorrow')}</p>
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-white p-6 rounded-lg shadow-sm border">
-            <div className="flex items-center">
-              <UserGroupIcon className="h-8 w-8 text-purple-600" />
-              <div className="ml-3">
-                <p className="text-sm font-medium text-gray-500">Total</p>
-                <p className="text-2xl font-bold text-gray-900">{reservations.length}</p>
-              </div>
+        
+        <div className="bg-white p-6 rounded-lg shadow-sm border">
+          <div className="flex items-center">
+            <CheckCircleIcon className="h-8 w-8 text-green-600" />
+            <div className="ml-3">
+              <p className="text-sm font-medium text-gray-500">Asignados</p>
+              <p className="text-2xl font-bold text-gray-900">{getFilteredCount('assigned')}</p>
             </div>
           </div>
         </div>
-
-        {/* Filters and Search */}
-        <div className="bg-white rounded-lg shadow-sm border p-6 mb-8">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            <div className="flex items-center space-x-4">
-              <FunnelIcon className="h-5 w-5 text-gray-400" />
-              <div className="flex items-center space-x-2">
-                {[
-                  { key: 'all', label: 'Todos', count: reservations.length },
-                  { key: 'pending', label: 'Pendientes', count: getFilteredCount('pending') },
-                  { key: 'assigned', label: 'Asignados', count: getFilteredCount('assigned') },
-                  { key: 'tomorrow', label: 'Mañana', count: getFilteredCount('tomorrow') }
-                ].map(({ key, label, count }) => (
-                  <button
-                    key={key}
-                    onClick={() => setFilter(key)}
-                    className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-                      filter === key
-                        ? 'bg-blue-100 text-blue-700'
-                        : 'text-gray-600 hover:text-gray-900'
-                    }`}
-                  >
-                    {label} ({count})
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="relative max-w-md">
-              <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Buscar por tour, agencia o contacto..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
+        
+        <div className="bg-white p-6 rounded-lg shadow-sm border">
+          <div className="flex items-center">
+            <CalendarIcon className="h-8 w-8 text-blue-600" />
+            <div className="ml-3">
+              <p className="text-sm font-medium text-gray-500">Mañana</p>
+              <p className="text-2xl font-bold text-gray-900">{getFilteredCount('tomorrow')}</p>
             </div>
           </div>
         </div>
+        
+        <div className="bg-white p-6 rounded-lg shadow-sm border">
+          <div className="flex items-center">
+            <UserGroupIcon className="h-8 w-8 text-purple-600" />
+            <div className="ml-3">
+              <p className="text-sm font-medium text-gray-500">Total</p>
+              <p className="text-2xl font-bold text-gray-900">{enrichedReservations.length}</p>
+            </div>
+          </div>
+        </div>
+      </div>
 
-        {/* Reservations List */}
-        <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Tour
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Fecha y Hora
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Agencia
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Grupo
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Estado
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Acciones
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {filteredReservations.map((reservation) => (
-                  <tr key={reservation.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className={`w-2 h-2 rounded-full mr-3 ${getPriorityColor(reservation.priority)}`}></div>
-                        <div>
-                          <div className="text-sm font-medium text-gray-900">
-                            {reservation.tourName}
-                          </div>
-                          <div className="text-sm text-gray-500">
-                            {reservation.id}
-                          </div>
+      {/* Filters */}
+      <div className="bg-white rounded-lg shadow-sm border p-6">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <div className="flex items-center space-x-4">
+            <FunnelIcon className="h-5 w-5 text-gray-400" />
+            <div className="flex items-center space-x-2">
+              {[
+                { key: 'all', label: 'Todos' },
+                { key: 'pending', label: 'Pendientes' },
+                { key: 'assigned', label: 'Asignados' }
+              ].map(({ key, label }) => (
+                <button
+                  key={key}
+                  onClick={() => setFilter(key)}
+                  className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+                    filter === key
+                      ? 'bg-blue-100 text-blue-800'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="relative">
+            <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <input
+              type="text"
+              placeholder="Buscar por agencia o tour..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-80"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Reservations List */}
+      <div className="bg-white rounded-lg shadow-sm border">
+        <div className="px-6 py-4 border-b border-gray-200">
+          <h3 className="text-lg font-medium text-gray-900">
+            Reservaciones ({filteredReservations.length})
+          </h3>
+        </div>
+        
+        <div className="p-6">
+          {filteredReservations.length > 0 ? (
+            <div className="space-y-4">
+              {filteredReservations.map((reservation) => (
+                <div key={reservation.id} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-4">
+                      <div className="flex-shrink-0">
+                        <div className="h-10 w-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                          <CalendarIcon className="h-5 w-5 text-blue-600" />
                         </div>
                       </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
-                        {new Date(reservation.date).toLocaleDateString('es-PE', {
-                          weekday: 'short',
-                          month: 'short',
-                          day: 'numeric'
-                        })}
+                      <div>
+                        <h4 className="text-sm font-medium text-gray-900">
+                          {reservation.tourName || 'Tour no especificado'}
+                        </h4>
+                        <p className="text-sm text-gray-500">
+                          {reservation.agency.name} • {reservation.groupSize} personas
+                        </p>
+                        <p className="text-xs text-gray-400">
+                          {formatters.formatDate(reservation.date)} • {reservation.time}
+                        </p>
                       </div>
-                      <div className="text-sm text-gray-500">{reservation.time}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">
-                        {reservation.agency.name}
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        {reservation.agency.contact}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center text-sm text-gray-900">
-                        <UserGroupIcon className="h-4 w-4 mr-1 text-gray-400" />
-                        {reservation.groupSize} personas
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getStatusColor(reservation.status)}`}>
-                        {getStatusIcon(reservation.status)}
-                        <span className="ml-1">
-                          {reservation.status === 'pending' && 'Pendiente'}
-                          {reservation.status === 'assigned' && 'Asignado'}
-                          {reservation.status === 'urgent' && 'Urgente'}
-                        </span>
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                        reservation.status === 'pending' 
+                          ? 'bg-yellow-100 text-yellow-800'
+                          : reservation.status === 'assigned'
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-gray-100 text-gray-800'
+                      }`}>
+                        {reservation.status === 'pending' ? 'Pendiente' : 
+                         reservation.status === 'assigned' ? 'Asignado' : reservation.status}
                       </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <button
                         onClick={() => setSelectedReservation(reservation)}
-                        className={`inline-flex items-center px-3 py-1 rounded-md text-sm font-medium transition-colors ${
-                          reservation.status === 'assigned'
-                            ? 'text-gray-600 bg-gray-100 hover:bg-gray-200'
-                            : 'text-blue-600 bg-blue-100 hover:bg-blue-200'
-                        }`}
+                        className="px-3 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700"
                       >
-                        {reservation.status === 'assigned' ? 'Ver Asignación' : 'Asignar'}
+                        Gestionar
                       </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {filteredReservations.length === 0 && (
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
             <div className="text-center py-12">
               <CalendarIcon className="mx-auto h-12 w-12 text-gray-400" />
               <h3 className="mt-2 text-sm font-medium text-gray-900">No hay reservas</h3>
@@ -426,6 +241,26 @@ const TourAssignments = () => {
           )}
         </div>
       </div>
+
+      {/* Modal placeholder para AssignmentManager */}
+      {selectedReservation && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">
+              Gestionar Asignación
+            </h3>
+            <p className="text-sm text-gray-600 mb-4">
+              Funcionalidad de asignación en desarrollo para: {selectedReservation.tourName}
+            </p>
+            <button
+              onClick={() => setSelectedReservation(null)}
+              className="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200"
+            >
+              Cerrar
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

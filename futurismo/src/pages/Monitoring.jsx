@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import LiveMapResponsive from '../components/monitoring/LiveMapResponsive';
 import GuideTracker from '../components/monitoring/GuideTracker';
 import TourProgress from '../components/monitoring/TourProgress';
-import { useAuthStore } from '../stores/authStore';
+import useAuthStore from '../stores/authStore';
 
 const Monitoring = () => {
   const { user } = useAuthStore();
@@ -155,7 +155,7 @@ const Monitoring = () => {
             {/* Progreso del tour seleccionado */}
             <div className="overflow-y-auto">
               {selectedTour ? (
-                <TourProgress tourId={selectedTour} />
+                <TourProgress tourId={String(selectedTour)} />
               ) : (
                 <div className="bg-white rounded-lg shadow-lg p-6 h-full flex items-center justify-center">
                   <p className="text-gray-500">{t('monitoring.selectTour')}</p>

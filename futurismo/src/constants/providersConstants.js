@@ -16,10 +16,13 @@ export const PRICING_TYPES = {
   FIXED: 'fixed'
 };
 
+import { CURRENCIES as SHARED_CURRENCIES } from './sharedConstants';
+
+// Re-export currencies from shared constants (values only)
 export const CURRENCIES = {
-  PEN: 'PEN',
-  USD: 'USD',
-  EUR: 'EUR'
+  PEN: SHARED_CURRENCIES.PEN.value,
+  USD: SHARED_CURRENCIES.USD.value,
+  EUR: SHARED_CURRENCIES.EUR.value
 };
 
 export const PROVIDER_STATUS = {
@@ -87,16 +90,15 @@ export const DEFAULT_LOCATION_TREE = {
   }
 };
 
-export const DEFAULT_LANGUAGES = [
-  { code: 'es', name: 'providers.languages.spanish' },
-  { code: 'en', name: 'providers.languages.english' },
-  { code: 'fr', name: 'providers.languages.french' },
-  { code: 'de', name: 'providers.languages.german' },
-  { code: 'it', name: 'providers.languages.italian' },
-  { code: 'pt', name: 'providers.languages.portuguese' },
-  { code: 'ja', name: 'providers.languages.japanese' },
-  { code: 'zh', name: 'providers.languages.chinese' }
-];
+import { LANGUAGES as SHARED_LANGUAGES } from './sharedConstants';
+
+// Provider-specific language format
+export const DEFAULT_LANGUAGES = SHARED_LANGUAGES
+  .filter(lang => ['es', 'en', 'fr', 'de', 'it', 'pt', 'ja', 'zh'].includes(lang.code))
+  .map(lang => ({
+    code: lang.code,
+    name: `providers.languages.${lang.name.toLowerCase()}`
+  }));
 
 export const SERVICE_TYPES = {
   TRANSPORT: [

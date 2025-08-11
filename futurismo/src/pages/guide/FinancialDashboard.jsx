@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   CurrencyDollarIcon,
   PlusIcon,
@@ -16,8 +16,29 @@ import {
   ReceiptPercentIcon,
   UsersIcon
 } from '@heroicons/react/24/outline';
+import { useFinancialStore } from '../../stores/financialStore';
+import toast from 'react-hot-toast';
 
 const FinancialDashboard = () => {
+  // Store hooks
+  const {
+    expenses,
+    income,
+    categories: expenseCategories,
+    incomeTypes,
+    financialStats,
+    isLoading,
+    initialize,
+    createExpense,
+    updateExpense,
+    deleteExpense,
+    createIncome,
+    updateIncome,
+    deleteIncome,
+    saveCalculation,
+    getCategoryInfo
+  } = useFinancialStore();
+
   const [activeTab, setActiveTab] = useState('dashboard');
   
   // Estados para la calculadora
@@ -27,70 +48,21 @@ const FinancialDashboard = () => {
     foodExpenses: '',
     otherExpenses: ''
   });
-  
-  const [expenses, setExpenses] = useState([
-    {
-      id: 1,
-      category: 'transport',
-      description: 'Gasolina para tour Miraflores',
-      amount: 120,
-      date: '2024-01-15',
-      tourId: 'TOUR-001'
-    },
-    {
-      id: 2,
-      category: 'food',
-      description: 'Almuerzo durante tour',
-      amount: 85,
-      date: '2024-01-15',
-      tourId: 'TOUR-001'
-    },
-    {
-      id: 3,
-      category: 'materials',
-      description: 'Folletos informativos',
-      amount: 45,
-      date: '2024-01-14',
-      tourId: null
-    }
-  ]);
-
-  const [income, setIncome] = useState([
-    {
-      id: 1,
-      description: 'Tour Miraflores - Familia González',
-      amount: 680,
-      date: '2024-01-15',
-      tourId: 'TOUR-001',
-      type: 'tour'
-    },
-    {
-      id: 2,
-      description: 'Tour Centro de Lima - Empresa ABC',
-      amount: 490,
-      date: '2024-01-14',
-      tourId: 'TOUR-002',
-      type: 'tour'
-    }
-  ]);
 
   const [showExpenseForm, setShowExpenseForm] = useState(false);
   const [showIncomeForm, setShowIncomeForm] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
 
-  const expenseCategories = [
-    { value: 'transport', label: 'Transporte', icon: '🚗', color: 'bg-blue-100 text-blue-800' },
-    { value: 'food', label: 'Alimentación', icon: '🍽️', color: 'bg-green-100 text-green-800' },
-    { value: 'materials', label: 'Materiales', icon: '📋', color: 'bg-purple-100 text-purple-800' },
-    { value: 'accommodation', label: 'Hospedaje', icon: '🏨', color: 'bg-yellow-100 text-yellow-800' },
-    { value: 'equipment', label: 'Equipamiento', icon: '🎒', color: 'bg-red-100 text-red-800' },
-    { value: 'communication', label: 'Comunicación', icon: '📱', color: 'bg-indigo-100 text-indigo-800' },
-    { value: 'insurance', label: 'Seguros', icon: '🛡️', color: 'bg-gray-100 text-gray-800' },
-    { value: 'other', label: 'Otros', icon: '💼', color: 'bg-pink-100 text-pink-800' }
-  ];
+  // Inicializar datos al montar el componente
+  useEffect(() => {
+    const guideId = 'guide-1'; // En una implementación real, obtener del auth
+    initialize(guideId);
+  }, [initialize]);
 
-  // Cálculos financieros
-  const financialStats = useMemo(() => {
+  // Calcular estadísticas locales si no están disponibles del store
+  const localStats = useMemo(() => {
+    if (financialStats) return financialStats;
+    
     const totalIncome = income.reduce((sum, item) => sum + item.amount, 0);
     const totalExpenses = expenses.reduce((sum, item) => sum + item.amount, 0);
     const netProfit = totalIncome - totalExpenses;
@@ -104,23 +76,15 @@ const FinancialDashboard = () => {
       return acc;
     }, {});
 
-    // Estadísticas mensuales (mock para enero 2024)
-    const monthlyData = {
-      income: totalIncome,
-      expenses: totalExpenses,
-      profit: netProfit,
-      toursCount: income.length
-    };
-
     return {
       totalIncome,
       totalExpenses,
       netProfit,
-      profitMargin,
+      profitMargin: parseFloat(profitMargin),
       expensesByCategory,
-      monthlyData
+      toursCount: income.filter(i => i.type === 'tour').length
     };
-  }, [income, expenses, expenseCategories]);
+  }, [income, expenses, expenseCategories, financialStats]);
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('es-PE', {
@@ -169,80 +133,63 @@ const FinancialDashboard = () => {
   }, [calculatorData]);
 
   // Función para guardar el cálculo como transacciones
-  const saveCalculationAsTransactions = () => {
+  const saveCalculationAsTransactions = async () => {
     if (calculatorResults.income <= 0) {
-      alert('Por favor, ingresa un monto de ingresos válido.');
+      toast.error('Por favor, ingresa un monto de ingresos válido.');
       return;
     }
 
-    const today = new Date().toISOString().split('T')[0];
-    const tourId = `CALC-${Date.now()}`;
+    try {
+      const expenses = [];
+      
+      if (calculatorResults.transportExpenses > 0) {
+        expenses.push({
+          category: 'transport',
+          description: 'Gastos de transporte (calculadora)',
+          amount: calculatorResults.transportExpenses
+        });
+      }
 
-    // Agregar ingreso
-    const newIncome = {
-      id: Date.now(),
-      description: `Tour calculado - ${new Date().toLocaleDateString()}`,
-      amount: calculatorResults.income,
-      date: today,
-      tourId: tourId,
-      type: 'tour'
-    };
-    setIncome(prev => [...prev, newIncome]);
+      if (calculatorResults.foodExpenses > 0) {
+        expenses.push({
+          category: 'food',
+          description: 'Gastos de alimentación (calculadora)',
+          amount: calculatorResults.foodExpenses
+        });
+      }
 
-    // Agregar gastos si existen
-    const newExpenses = [];
-    
-    if (calculatorResults.transportExpenses > 0) {
-      newExpenses.push({
-        id: Date.now() + 1,
-        category: 'transport',
-        description: 'Gastos de transporte (calculadora)',
-        amount: calculatorResults.transportExpenses,
-        date: today,
-        tourId: tourId
+      if (calculatorResults.otherExpenses > 0) {
+        expenses.push({
+          category: 'other',
+          description: 'Otros gastos (calculadora)',
+          amount: calculatorResults.otherExpenses
+        });
+      }
+
+      await saveCalculation({
+        income: calculatorResults.income,
+        expenses,
+        description: `Tour calculado - ${new Date().toLocaleDateString()}`
       });
-    }
 
-    if (calculatorResults.foodExpenses > 0) {
-      newExpenses.push({
-        id: Date.now() + 2,
-        category: 'food',
-        description: 'Gastos de alimentación (calculadora)',
-        amount: calculatorResults.foodExpenses,
-        date: today,
-        tourId: tourId
+      // Limpiar calculadora y cambiar a tab de transacciones
+      setCalculatorData({
+        income: '',
+        transportExpenses: '',
+        foodExpenses: '',
+        otherExpenses: ''
       });
+      
+      setActiveTab('transactions');
+      toast.success('¡Cálculo guardado exitosamente en tus transacciones!');
+    } catch (error) {
+      toast.error('Error al guardar el cálculo');
+      console.error('Error:', error);
     }
-
-    if (calculatorResults.otherExpenses > 0) {
-      newExpenses.push({
-        id: Date.now() + 3,
-        category: 'other',
-        description: 'Otros gastos (calculadora)',
-        amount: calculatorResults.otherExpenses,
-        date: today,
-        tourId: tourId
-      });
-    }
-
-    if (newExpenses.length > 0) {
-      setExpenses(prev => [...prev, ...newExpenses]);
-    }
-
-    // Limpiar calculadora y cambiar a tab de transacciones
-    setCalculatorData({
-      income: '',
-      transportExpenses: '',
-      foodExpenses: '',
-      otherExpenses: ''
-    });
-    
-    setActiveTab('transactions');
-    alert('¡Cálculo guardado exitosamente en tus transacciones!');
   };
 
-  const getCategoryInfo = (categoryValue) => {
-    return expenseCategories.find(cat => cat.value === categoryValue) || expenseCategories[expenseCategories.length - 1];
+  const getCategoryInfoLocal = (categoryValue) => {
+    return getCategoryInfo(categoryValue) || (expenseCategories.length > 0 ? expenseCategories[expenseCategories.length - 1] : { label: 'Otros', icon: '💼', color: 'bg-gray-100 text-gray-800' });
   };
 
   const StatCard = ({ title, value, subtitle, icon: Icon, color = "blue", trend = null }) => (
@@ -272,22 +219,27 @@ const FinancialDashboard = () => {
       date: item?.date || new Date().toISOString().split('T')[0],
       tourId: item?.tourId || ''
     });
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
       e.preventDefault();
-      if (item) {
-        setExpenses(prev => prev.map(exp => 
-          exp.id === item.id ? { ...exp, ...formData } : exp
-        ));
-      } else {
-        const newExpense = {
-          id: Date.now(),
-          ...formData,
-          amount: parseFloat(formData.amount)
-        };
-        setExpenses(prev => [...prev, newExpense]);
+      setIsSubmitting(true);
+      
+      try {
+        if (item) {
+          await updateExpense(item.id, formData);
+          toast.success('Gasto actualizado exitosamente');
+        } else {
+          await createExpense(formData);
+          toast.success('Gasto registrado exitosamente');
+        }
+        onClose();
+      } catch (error) {
+        toast.error('Error al guardar el gasto');
+        console.error('Error:', error);
+      } finally {
+        setIsSubmitting(false);
       }
-      onClose();
     };
 
     return (
@@ -372,9 +324,14 @@ const FinancialDashboard = () => {
             <div className="flex gap-3 pt-4">
               <button
                 type="submit"
-                className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700"
+                disabled={isSubmitting}
+                className={`flex-1 py-2 px-4 rounded-md text-white transition-colors ${
+                  isSubmitting 
+                    ? 'bg-gray-400 cursor-not-allowed' 
+                    : 'bg-blue-600 hover:bg-blue-700'
+                }`}
               >
-                {item ? 'Actualizar' : 'Registrar'}
+                {isSubmitting ? 'Guardando...' : (item ? 'Actualizar' : 'Registrar')}
               </button>
               <button
                 type="button"
@@ -398,22 +355,27 @@ const FinancialDashboard = () => {
       tourId: item?.tourId || '',
       type: item?.type || 'tour'
     });
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
       e.preventDefault();
-      if (item) {
-        setIncome(prev => prev.map(inc => 
-          inc.id === item.id ? { ...inc, ...formData } : inc
-        ));
-      } else {
-        const newIncome = {
-          id: Date.now(),
-          ...formData,
-          amount: parseFloat(formData.amount)
-        };
-        setIncome(prev => [...prev, newIncome]);
+      setIsSubmitting(true);
+      
+      try {
+        if (item) {
+          await updateIncome(item.id, formData);
+          toast.success('Ingreso actualizado exitosamente');
+        } else {
+          await createIncome(formData);
+          toast.success('Ingreso registrado exitosamente');
+        }
+        onClose();
+      } catch (error) {
+        toast.error('Error al guardar el ingreso');
+        console.error('Error:', error);
+      } finally {
+        setIsSubmitting(false);
       }
-      onClose();
     };
 
     return (
@@ -497,9 +459,14 @@ const FinancialDashboard = () => {
             <div className="flex gap-3 pt-4">
               <button
                 type="submit"
-                className="flex-1 bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700"
+                disabled={isSubmitting}
+                className={`flex-1 py-2 px-4 rounded-md text-white transition-colors ${
+                  isSubmitting 
+                    ? 'bg-gray-400 cursor-not-allowed' 
+                    : 'bg-green-600 hover:bg-green-700'
+                }`}
               >
-                {item ? 'Actualizar' : 'Registrar'}
+                {isSubmitting ? 'Guardando...' : (item ? 'Actualizar' : 'Registrar')}
               </button>
               <button
                 type="button"
@@ -514,6 +481,22 @@ const FinancialDashboard = () => {
       </div>
     );
   };
+
+  // Mostrar loading si está cargando y no hay datos
+  if (isLoading && expenses.length === 0 && income.length === 0) {
+    return (
+      <div className="p-6 bg-gray-50 min-h-screen">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center justify-center h-64">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+              <p className="mt-4 text-gray-600">Cargando datos financieros...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
@@ -585,7 +568,7 @@ const FinancialDashboard = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <StatCard
                 title="Ingresos Totales"
-                value={formatCurrency(financialStats.totalIncome)}
+                value={formatCurrency(localStats.totalIncome)}
                 subtitle="Este mes"
                 icon={ArrowTrendingUpIcon}
                 color="green"
@@ -593,7 +576,7 @@ const FinancialDashboard = () => {
               />
               <StatCard
                 title="Gastos Totales"
-                value={formatCurrency(financialStats.totalExpenses)}
+                value={formatCurrency(localStats.totalExpenses)}
                 subtitle="Este mes"
                 icon={ArrowTrendingDownIcon}
                 color="red"
@@ -601,14 +584,14 @@ const FinancialDashboard = () => {
               />
               <StatCard
                 title="Ganancia Neta"
-                value={formatCurrency(financialStats.netProfit)}
-                subtitle={`Margen: ${financialStats.profitMargin}%`}
+                value={formatCurrency(localStats.netProfit)}
+                subtitle={`Margen: ${localStats.profitMargin}%`}
                 icon={CurrencyDollarIcon}
-                color={financialStats.netProfit >= 0 ? "green" : "red"}
+                color={localStats.netProfit >= 0 ? "green" : "red"}
               />
               <StatCard
                 title="Tours Realizados"
-                value={financialStats.monthlyData.toursCount}
+                value={localStats.toursCount || 0}
                 subtitle="Este mes"
                 icon={CalendarIcon}
                 color="blue"
@@ -621,7 +604,7 @@ const FinancialDashboard = () => {
                 Gastos por Categoría
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {Object.entries(financialStats.expensesByCategory).map(([category, amount]) => {
+                {Object.entries(localStats.expensesByCategory || {}).map(([category, amount]) => {
                   const categoryInfo = expenseCategories.find(cat => cat.label === category);
                   return (
                     <div key={category} className="flex items-center justify-between p-3 border rounded-lg">
@@ -849,7 +832,16 @@ const FinancialDashboard = () => {
                               <PencilIcon className="w-4 h-4" />
                             </button>
                             <button
-                              onClick={() => setIncome(prev => prev.filter(i => i.id !== item.id))}
+                              onClick={async () => {
+                                if (confirm('¿Estás seguro de que deseas eliminar este ingreso?')) {
+                                  try {
+                                    await deleteIncome(item.id);
+                                    toast.success('Ingreso eliminado exitosamente');
+                                  } catch (error) {
+                                    toast.error('Error al eliminar el ingreso');
+                                  }
+                                }
+                              }}
                               className="text-red-600 hover:text-red-800"
                             >
                               <TrashIcon className="w-4 h-4" />
@@ -888,7 +880,7 @@ const FinancialDashboard = () => {
                   </thead>
                   <tbody>
                     {expenses.map(expense => {
-                      const categoryInfo = getCategoryInfo(expense.category);
+                      const categoryInfo = getCategoryInfoLocal(expense.category);
                       return (
                         <tr key={expense.id} className="bg-white border-b hover:bg-gray-50">
                           <td className="px-4 py-3">{formatDate(expense.date)}</td>
@@ -922,7 +914,16 @@ const FinancialDashboard = () => {
                                 <PencilIcon className="w-4 h-4" />
                               </button>
                               <button
-                                onClick={() => setExpenses(prev => prev.filter(e => e.id !== expense.id))}
+                                onClick={async () => {
+                                  if (confirm('¿Estás seguro de que deseas eliminar este gasto?')) {
+                                    try {
+                                      await deleteExpense(expense.id);
+                                      toast.success('Gasto eliminado exitosamente');
+                                    } catch (error) {
+                                      toast.error('Error al eliminar el gasto');
+                                    }
+                                  }
+                                }}
                                 className="text-red-600 hover:text-red-800"
                               >
                                 <TrashIcon className="w-4 h-4" />
@@ -954,21 +955,21 @@ const FinancialDashboard = () => {
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between py-2 border-b">
                     <span>Total de Ingresos:</span>
-                    <span className="font-medium text-green-600">{formatCurrency(financialStats.totalIncome)}</span>
+                    <span className="font-medium text-green-600">{formatCurrency(localStats.totalIncome)}</span>
                   </div>
                   <div className="flex justify-between py-2 border-b">
                     <span>Total de Gastos:</span>
-                    <span className="font-medium text-red-600">{formatCurrency(financialStats.totalExpenses)}</span>
+                    <span className="font-medium text-red-600">{formatCurrency(localStats.totalExpenses)}</span>
                   </div>
                   <div className="flex justify-between py-2 border-b font-bold">
                     <span>Ganancia Neta:</span>
-                    <span className={financialStats.netProfit >= 0 ? 'text-green-600' : 'text-red-600'}>
-                      {formatCurrency(financialStats.netProfit)}
+                    <span className={localStats.netProfit >= 0 ? 'text-green-600' : 'text-red-600'}>
+                      {formatCurrency(localStats.netProfit)}
                     </span>
                   </div>
                   <div className="flex justify-between py-2">
                     <span>Margen de Ganancia:</span>
-                    <span className="font-medium">{financialStats.profitMargin}%</span>
+                    <span className="font-medium">{localStats.profitMargin}%</span>
                   </div>
                 </div>
               </div>
@@ -982,19 +983,19 @@ const FinancialDashboard = () => {
                   <div className="flex justify-between py-2 border-b">
                     <span>Ingreso Promedio por Tour:</span>
                     <span className="font-medium">
-                      {formatCurrency(income.length > 0 ? financialStats.totalIncome / income.length : 0)}
+                      {formatCurrency(income.length > 0 ? localStats.totalIncome / income.length : 0)}
                     </span>
                   </div>
                   <div className="flex justify-between py-2 border-b">
                     <span>Gasto Promedio por Tour:</span>
                     <span className="font-medium">
-                      {formatCurrency(income.length > 0 ? financialStats.totalExpenses / income.length : 0)}
+                      {formatCurrency(income.length > 0 ? localStats.totalExpenses / income.length : 0)}
                     </span>
                   </div>
                   <div className="flex justify-between py-2">
                     <span>Ganancia Promedio por Tour:</span>
                     <span className="font-medium">
-                      {formatCurrency(income.length > 0 ? financialStats.netProfit / income.length : 0)}
+                      {formatCurrency(income.length > 0 ? localStats.netProfit / income.length : 0)}
                     </span>
                   </div>
                 </div>

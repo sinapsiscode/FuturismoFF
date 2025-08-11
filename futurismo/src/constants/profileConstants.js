@@ -9,10 +9,13 @@ export const ACCOUNT_TYPES = {
   CTS: 'cts'
 };
 
+import { CURRENCIES as SHARED_CURRENCIES } from './sharedConstants';
+
+// Re-export currencies from shared constants (values only)
 export const CURRENCIES = {
-  PEN: 'PEN',
-  USD: 'USD',
-  EUR: 'EUR'
+  PEN: SHARED_CURRENCIES.PEN.value,
+  USD: SHARED_CURRENCIES.USD.value,
+  EUR: SHARED_CURRENCIES.EUR.value
 };
 
 export const CARD_TYPES = {
@@ -21,13 +24,16 @@ export const CARD_TYPES = {
   AMEX: 'amex'
 };
 
-export const DOCUMENT_TYPES = {
-  RUC: 'ruc',
-  DNI: 'dni',
-  LICENSE: 'license',
-  CERTIFICATE: 'certificate',
-  CONTRACT: 'contract',
-  INSURANCE: 'insurance'
+import { DOCUMENT_TYPES as SHARED_DOCUMENT_TYPES } from './sharedConstants';
+
+// Profile-specific document types
+export const PROFILE_DOCUMENT_TYPES = {
+  RUC: SHARED_DOCUMENT_TYPES.RUC,
+  DNI: SHARED_DOCUMENT_TYPES.DNI,
+  LICENSE: SHARED_DOCUMENT_TYPES.LICENSE,
+  CERTIFICATE: SHARED_DOCUMENT_TYPES.CERTIFICATE,
+  CONTRACT: SHARED_DOCUMENT_TYPES.CONTRACT,
+  INSURANCE: SHARED_DOCUMENT_TYPES.INSURANCE
 };
 
 export const DOCUMENT_STATUS = {
@@ -61,11 +67,14 @@ export const ACCOUNT_STATUS = {
   PENDING: 'pending'
 };
 
+import { CONTACT_TYPES as SHARED_CONTACT_TYPES } from './sharedConstants';
+
+// Re-export contact types from shared constants
 export const CONTACT_TYPES = {
-  MAIN: 'main',
-  BILLING: 'billing',
-  EMERGENCY: 'emergency',
-  OPERATIONS: 'operations'
+  MAIN: SHARED_CONTACT_TYPES.MAIN,
+  BILLING: SHARED_CONTACT_TYPES.BILLING,
+  EMERGENCY: SHARED_CONTACT_TYPES.EMERGENCY,
+  OPERATIONS: SHARED_CONTACT_TYPES.OPERATIONS
 };
 
 export const CARD_NUMBER_MASK_PATTERN = /(\d{4})(\d+)(\d{4})/;
@@ -75,9 +84,15 @@ export const DATE_FORMATS = {
   DOCUMENT: 'DD/MM/YYYY'
 };
 
-export const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+import { FILE_SIZE_LIMITS } from './sharedConstants';
 
+// Re-export file size limit from shared constants
+export const MAX_FILE_SIZE = FILE_SIZE_LIMITS.IMAGE;
+
+import { ACCEPTED_FILE_TYPES as SHARED_FILE_TYPES } from './sharedConstants';
+
+// Profile-specific accepted file types
 export const ACCEPTED_FILE_TYPES = {
-  documents: '.pdf,.doc,.docx,.jpg,.jpeg,.png',
-  images: '.jpg,.jpeg,.png,.webp'
+  documents: SHARED_FILE_TYPES.ALL,
+  images: SHARED_FILE_TYPES.IMAGES
 };

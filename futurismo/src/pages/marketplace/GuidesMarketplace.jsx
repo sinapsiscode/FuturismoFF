@@ -5,235 +5,317 @@ import {
   Squares2X2Icon, 
   ListBulletIcon,
   SparklesIcon,
-  UserGroupIcon
+  UserGroupIcon,
+  StarIcon,
+  MapPinIcon,
+  CurrencyDollarIcon,
+  MagnifyingGlassIcon,
+  FunnelIcon
 } from '@heroicons/react/24/outline';
 import useMarketplaceStore from '../../stores/marketplaceStore';
-import MarketplaceSearch from '../../components/marketplace/MarketplaceSearch';
-import MarketplaceFilters from '../../components/marketplace/MarketplaceFilters';
-import GuideMarketplaceCard from '../../components/marketplace/GuideMarketplaceCard';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 
 const GuidesMarketplace = () => {
   const navigate = useNavigate();
-  const { getFilteredGuides, getMarketplaceStats } = useMarketplaceStore();
-  const [filteredGuides, setFilteredGuides] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [showFilters, setShowFilters] = useState(true);
-  const [viewLayout, setViewLayout] = useState('grid'); // grid or list
-  const [currentPage, setCurrentPage] = useState(1);
-  const guidesPerPage = 12;
-
-  const stats = getMarketplaceStats();
+  const { 
+    freelanceGuides, 
+    isLoading, 
+    fetchFreelanceGuides, 
+    searchGuides, 
+    setFilters,
+    activeFilters,
+    searchQuery
+  } = useMarketplaceStore();
+  
+  const [localSearchQuery, setLocalSearchQuery] = useState('');
+  const [viewLayout, setViewLayout] = useState('grid');
+  const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
     loadGuides();
   }, []);
 
   const loadGuides = async () => {
-    setIsLoading(true);
     try {
-      // Simular carga de datos
-      await new Promise(resolve => setTimeout(resolve, 500));
-      const guides = getFilteredGuides();
-      setFilteredGuides(guides);
+      await fetchFreelanceGuides();
     } catch (error) {
       console.error('Error loading guides:', error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
-  const handleFiltersChange = () => {
-    loadGuides();
-    setCurrentPage(1);
+  const handleSearch = (e) => {
+    e.preventDefault();
+    searchGuides(localSearchQuery);
   };
 
-  const handleSearchChange = () => {
-    loadGuides();
-    setCurrentPage(1);
+  const handleFilterChange = (filterType, value) => {
+    setFilters({ [filterType]: value });
   };
 
-  const handleGuideSelect = (guide) => {
-    navigate(`/marketplace/guide/${guide.id}`);
+  // Stats mock data until we have real stats
+  const stats = {
+    totalGuides: freelanceGuides.length,
+    availableGuides: freelanceGuides.filter(g => g.status === 'available').length,
+    averageRating: freelanceGuides.length > 0 
+      ? (freelanceGuides.reduce((sum, g) => sum + (g.rating || 0), 0) / freelanceGuides.length).toFixed(1)
+      : '0.0',
+    totalReviews: freelanceGuides.reduce((sum, g) => sum + (g.reviewCount || 0), 0)
   };
 
-  // Paginación
-  const indexOfLastGuide = currentPage * guidesPerPage;
-  const indexOfFirstGuide = indexOfLastGuide - guidesPerPage;
-  const currentGuides = filteredGuides.slice(indexOfFirstGuide, indexOfLastGuide);
-  const totalPages = Math.ceil(filteredGuides.length / guidesPerPage);
-
-  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+  if (isLoading) {
+    return <LoadingSpinner fullScreen />;
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header con estadísticas */}
-      <div className="bg-gradient-to-r from-cyan-600 to-blue-600 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="text-center">
-            <h1 className="text-3xl font-bold mb-2">Encuentra tu Guía Turístico Ideal</h1>
-            <p className="text-cyan-100 mb-6">
-              Conecta con guías profesionales verificados para experiencias únicas en Cusco
-            </p>
-            
-            {/* Estadísticas */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto">
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
-                <UserGroupIcon className="h-8 w-8 mx-auto mb-2 text-cyan-200" />
-                <div className="text-2xl font-bold">{stats.activeGuides}</div>
-                <div className="text-sm text-cyan-100">Guías Activos</div>
-              </div>
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
-                <SparklesIcon className="h-8 w-8 mx-auto mb-2 text-cyan-200" />
-                <div className="text-2xl font-bold">{stats.verifiedGuides}</div>
-                <div className="text-sm text-cyan-100">Verificados</div>
-              </div>
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
-                <div className="text-2xl font-bold">{stats.completedRequests}</div>
-                <div className="text-sm text-cyan-100">Tours Completados</div>
-              </div>
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
-                <div className="text-2xl font-bold">{stats.averageRating.toFixed(1)}</div>
-                <div className="text-sm text-cyan-100">Calificación Promedio</div>
-              </div>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 flex items-center">
+            <SparklesIcon className="w-8 h-8 mr-3 text-blue-500" />
+            Marketplace de Guías
+          </h1>
+          <p className="text-gray-600 mt-1">
+            Encuentra y contrata guías freelance especializados
+          </p>
+        </div>
+        
+        <div className="flex items-center space-x-2">
+          <button
+            onClick={() => setViewLayout('grid')}
+            className={`p-2 rounded-lg ${viewLayout === 'grid' 
+              ? 'bg-blue-100 text-blue-600' 
+              : 'text-gray-400 hover:text-gray-600'}`}
+          >
+            <Squares2X2Icon className="w-5 h-5" />
+          </button>
+          <button
+            onClick={() => setViewLayout('list')}
+            className={`p-2 rounded-lg ${viewLayout === 'list' 
+              ? 'bg-blue-100 text-blue-600' 
+              : 'text-gray-400 hover:text-gray-600'}`}
+          >
+            <ListBulletIcon className="w-5 h-5" />
+          </button>
+        </div>
+      </div>
+
+      {/* Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="bg-white p-6 rounded-lg shadow-sm border">
+          <div className="flex items-center">
+            <UserGroupIcon className="w-8 h-8 text-blue-500" />
+            <div className="ml-3">
+              <p className="text-sm font-medium text-gray-500">Total Guías</p>
+              <p className="text-2xl font-bold text-gray-900">{stats.totalGuides}</p>
+            </div>
+          </div>
+        </div>
+        
+        <div className="bg-white p-6 rounded-lg shadow-sm border">
+          <div className="flex items-center">
+            <SparklesIcon className="w-8 h-8 text-green-500" />
+            <div className="ml-3">
+              <p className="text-sm font-medium text-gray-500">Disponibles</p>
+              <p className="text-2xl font-bold text-gray-900">{stats.availableGuides}</p>
+            </div>
+          </div>
+        </div>
+        
+        <div className="bg-white p-6 rounded-lg shadow-sm border">
+          <div className="flex items-center">
+            <StarIcon className="w-8 h-8 text-yellow-500" />
+            <div className="ml-3">
+              <p className="text-sm font-medium text-gray-500">Rating Promedio</p>
+              <p className="text-2xl font-bold text-gray-900">{stats.averageRating}</p>
+            </div>
+          </div>
+        </div>
+        
+        <div className="bg-white p-6 rounded-lg shadow-sm border">
+          <div className="flex items-center">
+            <CurrencyDollarIcon className="w-8 h-8 text-purple-500" />
+            <div className="ml-3">
+              <p className="text-sm font-medium text-gray-500">Total Reviews</p>
+              <p className="text-2xl font-bold text-gray-900">{stats.totalReviews}</p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Contenido principal */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Barra de búsqueda y controles */}
-        <div className="mb-6 space-y-4">
-          <MarketplaceSearch onSearchChange={handleSearchChange} />
+      {/* Search and Filters */}
+      <div className="bg-white rounded-lg shadow-sm border p-6">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
+          <form onSubmit={handleSearch} className="flex-1 max-w-md">
+            <div className="relative">
+              <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <input
+                type="text"
+                placeholder="Buscar guías por nombre, especialidad..."
+                value={localSearchQuery}
+                onChange={(e) => setLocalSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+          </form>
           
-          <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors md:hidden"
+              className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
             >
-              <AdjustmentsHorizontalIcon className="h-5 w-5 mr-2" />
-              Filtros
+              <FunnelIcon className="w-4 h-4" />
+              <span>Filtros</span>
             </button>
             
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-gray-600">
-                {filteredGuides.length} guías encontrados
-              </span>
-              
-              <div className="flex items-center bg-white border border-gray-300 rounded-lg">
-                <button
-                  onClick={() => setViewLayout('grid')}
-                  className={`p-2 ${viewLayout === 'grid' ? 'text-cyan-600 bg-cyan-50' : 'text-gray-500'}`}
-                  title="Vista de cuadrícula"
-                >
-                  <Squares2X2Icon className="h-5 w-5" />
-                </button>
-                <button
-                  onClick={() => setViewLayout('list')}
-                  className={`p-2 ${viewLayout === 'list' ? 'text-cyan-600 bg-cyan-50' : 'text-gray-500'}`}
-                  title="Vista de lista"
-                >
-                  <ListBulletIcon className="h-5 w-5" />
-                </button>
-              </div>
-            </div>
+            <select
+              onChange={(e) => handleFilterChange('availability', e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded-lg"
+            >
+              <option value="">Todos los guías</option>
+              <option value="available">Solo disponibles</option>
+              <option value="busy">Ocupados</option>
+            </select>
           </div>
         </div>
 
-        <div className="flex gap-6">
-          {/* Sidebar de filtros */}
-          <aside className={`${showFilters ? 'block' : 'hidden'} md:block w-full md:w-80 flex-shrink-0`}>
-            <MarketplaceFilters onFiltersChange={handleFiltersChange} />
-          </aside>
+        {/* Expanded Filters */}
+        {showFilters && (
+          <div className="mt-4 pt-4 border-t border-gray-200">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Zona de Trabajo
+                </label>
+                <select
+                  onChange={(e) => handleFilterChange('workZone', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                >
+                  <option value="">Todas las zonas</option>
+                  <option value="lima-centro">Lima Centro</option>
+                  <option value="miraflores">Miraflores</option>
+                  <option value="cusco">Cusco</option>
+                  <option value="arequipa">Arequipa</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Idiomas
+                </label>
+                <select
+                  onChange={(e) => handleFilterChange('language', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                >
+                  <option value="">Todos los idiomas</option>
+                  <option value="english">Inglés</option>
+                  <option value="spanish">Español</option>
+                  <option value="portuguese">Portugués</option>
+                  <option value="french">Francés</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Rating Mínimo
+                </label>
+                <select
+                  onChange={(e) => handleFilterChange('minRating', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                >
+                  <option value="">Cualquier rating</option>
+                  <option value="4.5">4.5+ estrellas</option>
+                  <option value="4.0">4.0+ estrellas</option>
+                  <option value="3.5">3.5+ estrellas</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
 
-          {/* Lista de guías */}
-          <main className="flex-1">
-            {isLoading ? (
-              <div className="flex justify-center items-center h-64">
-                <LoadingSpinner />
-              </div>
-            ) : filteredGuides.length === 0 ? (
-              <div className="bg-white rounded-lg shadow-sm p-12 text-center">
-                <UserGroupIcon className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  No se encontraron guías
-                </h3>
-                <p className="text-gray-500">
-                  Intenta ajustar tus filtros de búsqueda para encontrar más resultados.
-                </p>
-              </div>
-            ) : (
-              <>
-                <div className={`
-                  ${viewLayout === 'grid' 
-                    ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' 
-                    : 'space-y-4'
-                  }
-                `}>
-                  {currentGuides.map(guide => (
-                    <GuideMarketplaceCard
-                      key={guide.id}
-                      guide={guide}
-                      onSelect={handleGuideSelect}
-                      layout={viewLayout}
+      {/* Results */}
+      <div className="bg-white rounded-lg shadow-sm border">
+        <div className="p-6 border-b border-gray-200">
+          <h3 className="text-lg font-medium text-gray-900">
+            Guías Disponibles ({freelanceGuides.length})
+          </h3>
+        </div>
+        
+        <div className="p-6">
+          {freelanceGuides.length > 0 ? (
+            <div className={`grid gap-6 ${
+              viewLayout === 'grid' 
+                ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' 
+                : 'grid-cols-1'
+            }`}>
+              {freelanceGuides.map((guide) => (
+                <div key={guide.id} className="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
+                  <div className="flex items-start space-x-4">
+                    <img
+                      src={guide.profileImage || `https://ui-avatars.com/api/?name=${guide.name}&background=random`}
+                      alt={guide.name}
+                      className="w-16 h-16 rounded-full object-cover"
                     />
-                  ))}
-                </div>
-
-                {/* Paginación */}
-                {totalPages > 1 && (
-                  <div className="mt-8 flex justify-center">
-                    <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
-                      <button
-                        onClick={() => paginate(currentPage - 1)}
-                        disabled={currentPage === 1}
-                        className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        Anterior
-                      </button>
+                    <div className="flex-1">
+                      <h4 className="text-lg font-medium text-gray-900">{guide.name}</h4>
+                      <div className="flex items-center space-x-2 mt-1">
+                        <div className="flex items-center">
+                          <StarIcon className="w-4 h-4 text-yellow-400 fill-current" />
+                          <span className="text-sm text-gray-600 ml-1">
+                            {guide.rating || '0.0'} ({guide.reviewCount || 0} reviews)
+                          </span>
+                        </div>
+                      </div>
                       
-                      {[...Array(totalPages)].map((_, i) => {
-                        const pageNumber = i + 1;
-                        const isCurrentPage = pageNumber === currentPage;
-                        const isNearCurrentPage = Math.abs(pageNumber - currentPage) <= 2;
-                        const isFirstOrLastPage = pageNumber === 1 || pageNumber === totalPages;
+                      <div className="flex items-center text-sm text-gray-500 mt-2">
+                        <MapPinIcon className="w-4 h-4 mr-1" />
+                        {guide.workZones?.join(', ') || 'Lima, Perú'}
+                      </div>
+                      
+                      <div className="mt-2">
+                        <p className="text-sm text-gray-600 line-clamp-2">
+                          {guide.bio || 'Guía profesional especializado en turismo cultural e histórico.'}
+                        </p>
+                      </div>
+                      
+                      <div className="flex items-center justify-between mt-4">
+                        <div className="flex items-center space-x-2">
+                          <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                            guide.status === 'available'
+                              ? 'bg-green-100 text-green-800'
+                              : 'bg-gray-100 text-gray-800'
+                          }`}>
+                            {guide.status === 'available' ? 'Disponible' : 'Ocupado'}
+                          </span>
+                        </div>
                         
-                        if (!isNearCurrentPage && !isFirstOrLastPage) {
-                          if (pageNumber === currentPage - 3 || pageNumber === currentPage + 3) {
-                            return <span key={i} className="px-2 text-gray-500">...</span>;
-                          }
-                          return null;
-                        }
-                        
-                        return (
+                        <div className="flex items-center space-x-2">
+                          <span className="text-lg font-bold text-gray-900">
+                            ${guide.hourlyRate || '25'}/hora
+                          </span>
                           <button
-                            key={i}
-                            onClick={() => paginate(pageNumber)}
-                            className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
-                              isCurrentPage
-                                ? 'z-10 bg-cyan-50 border-cyan-500 text-cyan-600'
-                                : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
-                            }`}
+                            onClick={() => navigate(`/marketplace/guide/${guide.id}`)}
+                            className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700"
                           >
-                            {pageNumber}
+                            Ver Perfil
                           </button>
-                        );
-                      })}
-                      
-                      <button
-                        onClick={() => paginate(currentPage + 1)}
-                        disabled={currentPage === totalPages}
-                        className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        Siguiente
-                      </button>
-                    </nav>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                )}
-              </>
-            )}
-          </main>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <UserGroupIcon className="mx-auto h-12 w-12 text-gray-400" />
+              <h3 className="mt-2 text-sm font-medium text-gray-900">No hay guías disponibles</h3>
+              <p className="mt-1 text-sm text-gray-500">
+                Intenta ajustar los filtros de búsqueda para encontrar más guías.
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>

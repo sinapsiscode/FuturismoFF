@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FreelanceAvailabilityView } from '../components/common/GuideAvailability';
+import FreelanceAvailabilityView from '../components/common/FreelanceAvailabilityView';
 import { UserIcon, CalendarIcon, CogIcon, BuildingOfficeIcon, PhoneIcon, CreditCardIcon, ShieldCheckIcon, DocumentTextIcon, LockClosedIcon, PowerIcon, ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../stores/authStore';

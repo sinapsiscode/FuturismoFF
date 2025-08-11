@@ -2,12 +2,13 @@ import { useState } from 'react';
 import { ClockIcon, UserGroupIcon, MapPinIcon, PhoneIcon, EyeIcon } from '@heroicons/react/24/outline';
 import { format, addHours, startOfDay, isSameHour } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { TIMELINE_CONFIG } from '../../constants/reservationConstants';
 
 const DayTimelineView = ({ date, reservations, onViewReservation }) => {
   const [selectedHour, setSelectedHour] = useState(null);
 
-  // Generar las horas del día (6 AM a 10 PM)
-  const hours = Array.from({ length: 17 }, (_, i) => i + 6);
+  // Generar las horas del día
+  const hours = Array.from({ length: TIMELINE_CONFIG.HOURS_COUNT }, (_, i) => i + TIMELINE_CONFIG.START_HOUR);
   
   // Agrupar reservas por hora
   const reservationsByHour = reservations.reduce((acc, reservation) => {
@@ -23,8 +24,8 @@ const DayTimelineView = ({ date, reservations, onViewReservation }) => {
   const currentHour = new Date().getHours();
 
   const getReservationStyle = (reservation) => {
-    const duration = reservation.duration || 2; // Duración en horas
-    const height = duration * 60; // 60px por hora
+    const duration = reservation.duration || TIMELINE_CONFIG.DEFAULT_DURATION;
+    const height = duration * TIMELINE_CONFIG.HOUR_HEIGHT_PX;
     
     return {
       height: `${height}px`,
@@ -44,7 +45,7 @@ const DayTimelineView = ({ date, reservations, onViewReservation }) => {
           {date && format(date, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd') && (
             <div
               className="absolute left-0 right-0 border-t-2 border-red-500 z-10"
-              style={{ top: `${(currentHour - 6) * 60 + (new Date().getMinutes())}px` }}
+              style={{ top: `${(currentHour - TIMELINE_CONFIG.START_HOUR) * TIMELINE_CONFIG.HOUR_HEIGHT_PX + (new Date().getMinutes())}px` }}
             >
               <div className="absolute -left-2 -top-2 w-4 h-4 bg-red-500 rounded-full" />
             </div>
@@ -59,21 +60,21 @@ const DayTimelineView = ({ date, reservations, onViewReservation }) => {
               <div key={hour} className="relative">
                 <div className="flex border-t border-gray-200">
                   {/* Hora */}
-                  <div className={`w-20 py-2 px-4 text-sm font-medium ${
+                  <div className={`py-2 px-4 text-sm font-medium ${
                     isCurrentHour ? 'text-red-600' : 'text-gray-600'
-                  }`}>
+                  }`} style={{ width: `${TIMELINE_CONFIG.HOUR_WIDTH_PX}px` }}>
                     {format(new Date().setHours(hour, 0, 0, 0), 'HH:mm')}
                   </div>
 
                   {/* Contenido */}
-                  <div className="flex-1 py-2 px-4 min-h-[60px] relative">
+                  <div className="flex-1 py-2 px-4 relative" style={{ minHeight: TIMELINE_CONFIG.MIN_HOUR_HEIGHT }}>
                     {hourReservations.map((reservation, index) => (
                       <div
                         key={reservation.id}
                         className="absolute left-4 right-4 p-3 rounded-lg cursor-pointer hover:shadow-md transition-all"
                         style={{
                           ...getReservationStyle(reservation),
-                          top: `${index * 10}px`, // Offset para reservas múltiples
+                          top: `${index * TIMELINE_CONFIG.RESERVATION_OFFSET_PX}px`, // Offset para reservas múltiples
                           zIndex: hourReservations.length - index
                         }}
                         onClick={() => onViewReservation(reservation)}

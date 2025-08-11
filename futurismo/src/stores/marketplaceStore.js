@@ -1,655 +1,727 @@
+/**
+ * Store de marketplace
+ * Maneja el estado global del marketplace de guías
+ */
+
 import { create } from 'zustand';
-
-// Zonas de trabajo disponibles
-const workZones = [
-  { id: 'cusco-ciudad', name: 'Cusco Ciudad', description: 'Centro histórico y alrededores' },
-  { id: 'valle-sagrado', name: 'Valle Sagrado', description: 'Pisac, Ollantaytambo, Chinchero' },
-  { id: 'machu-picchu', name: 'Machu Picchu', description: 'Ciudadela y Huayna Picchu' },
-  { id: 'sur-valle', name: 'Sur del Valle', description: 'Tipón, Pikillaqta, Andahuaylillas' },
-  { id: 'otros', name: 'Otros destinos', description: 'Otros lugares turísticos' }
-];
-
-// Tipos de tours disponibles
-const tourTypes = [
-  { id: 'cultural', name: 'Cultural', icon: '🏛️' },
-  { id: 'aventura', name: 'Aventura', icon: '🏔️' },
-  { id: 'gastronomico', name: 'Gastronómico', icon: '🍽️' },
-  { id: 'mistico', name: 'Místico', icon: '🔮' },
-  { id: 'fotografico', name: 'Fotográfico', icon: '📸' }
-];
-
-// Tipos de grupos
-const groupTypes = [
-  { id: 'children', name: 'Niños', description: 'Grupos escolares y familiares con niños' },
-  { id: 'schools', name: 'Colegios', description: 'Visitas educativas' },
-  { id: 'elderly', name: 'Adultos mayores', description: 'Grupos de tercera edad' },
-  { id: 'corporate', name: 'Corporativo', description: 'Viajes de empresa' },
-  { id: 'vip', name: 'VIP', description: 'Clientes exclusivos' },
-  { id: 'specialNeeds', name: 'Necesidades especiales', description: 'Grupos con requerimientos especiales' }
-];
-
-// Mock data de guías freelance con marketplace features
-const mockFreelanceGuides = [
-  {
-    id: 'guide001',
-    fullName: 'María Elena Torres Vásquez',
-    dni: '12345678',
-    phone: '+51 987 654 321',
-    email: 'maria.torres@futurismo.com',
-    address: 'Av. Grau 123, Cusco',
-    guideType: 'freelance',
-    
-    profile: {
-      avatar: 'https://ui-avatars.com/api/?name=Maria+Torres&background=0D8ABC&color=fff',
-      bio: 'Guía profesional con 5 años de experiencia en tours culturales y gastronómicos. Especializada en historia Inca y cocina tradicional cusqueña.',
-      photos: [
-        'https://picsum.photos/400/300?random=1',
-        'https://picsum.photos/400/300?random=2',
-        'https://picsum.photos/400/300?random=3'
-      ],
-      videoPresentation: 'https://youtube.com/watch?v=example'
-    },
-    
-    specializations: {
-      languages: [
-        { code: 'es', level: 'nativo', certified: true, certificationDate: '2019-01-15' },
-        { code: 'en', level: 'avanzado', certified: true, certificationDate: '2020-03-20' },
-        { code: 'fr', level: 'intermedio', certified: false }
-      ],
-      tourTypes: ['cultural', 'gastronomico'],
-      workZones: ['cusco-ciudad', 'valle-sagrado'],
-      museums: ['larco', 'national', 'art'],
-      museumRatings: {
-        larco: 5,
-        national: 4,
-        art: 5
-      },
-      museumExperiences: {
-        larco: {
-          es: 'Excelente colección de arte precolombino. Las explicaciones son muy detalladas y el recorrido está muy bien organizado. Perfecto para tours culturales.',
-          en: 'Excellent pre-Columbian art collection. The explanations are very detailed and the tour is very well organized. Perfect for cultural tours.'
-        },
-        national: {
-          es: 'Buena exhibición de la historia peruana. Las salas están bien distribuidas, aunque algunas podrían tener mejor iluminación.',
-          en: 'Good exhibition of Peruvian history. The rooms are well distributed, although some could have better lighting.'
-        },
-        art: {
-          es: 'Increíble variedad de arte contemporáneo peruano. El personal es muy conocedor y siempre dispuesto a explicar las obras.'
-        }
-      },
-      groupExperience: {
-        children: { level: 'experto', yearsExperience: 3 },
-        schools: { level: 'intermedio', yearsExperience: 2 },
-        elderly: { level: 'experto', yearsExperience: 4 },
-        corporate: { level: 'basico', yearsExperience: 1 },
-        vip: { level: 'intermedio', yearsExperience: 2 },
-        specialNeeds: { level: 'basico', yearsExperience: 1 }
-      }
-    },
-    
-    certifications: [
-      {
-        id: 'cert001',
-        name: 'Guía Oficial de Turismo',
-        issuer: 'MINCETUR',
-        issueDate: '2019-01-15',
-        expiryDate: '2025-01-15',
-        documentUrl: '/docs/cert001.pdf',
-        verified: true
-      },
-      {
-        id: 'cert002',
-        name: 'Primeros Auxilios',
-        issuer: 'Cruz Roja',
-        issueDate: '2023-06-10',
-        expiryDate: '2025-06-10',
-        documentUrl: '/docs/cert002.pdf',
-        verified: true
-      }
-    ],
-    
-    availability: {
-      calendar: {},
-      workingDays: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'],
-      advanceBooking: 2
-    },
-    
-    pricing: {
-      hourlyRate: 30,
-      fullDayRate: 200,
-      halfDayRate: 120,
-      specialRates: [
-        { groupType: 'vip', rate: 50 },
-        { groupType: 'children', rate: 25 }
-      ]
-    },
-    
-    marketplaceStats: {
-      totalBookings: 156,
-      completedServices: 150,
-      cancelledServices: 6,
-      responseTime: 30,
-      acceptanceRate: 85,
-      repeatClients: 45,
-      totalEarnings: 25000,
-      joinedDate: '2019-03-15'
-    },
-    
-    ratings: {
-      overall: 4.8,
-      communication: 4.9,
-      knowledge: 4.8,
-      punctuality: 4.7,
-      professionalism: 4.9,
-      valueForMoney: 4.6,
-      totalReviews: 89,
-      reviews: []
-    },
-    
-    preferences: {
-      maxGroupSize: 20,
-      minBookingHours: 2,
-      cancellationPolicy: '24 horas de anticipación',
-      instantBooking: true,
-      requiresDeposit: true,
-      depositPercentage: 30
-    },
-    
-    marketplaceStatus: {
-      active: true,
-      verified: true,
-      featured: true,
-      suspendedUntil: null,
-      verificationDocuments: ['dni', 'carnet', 'certificados']
-    }
-  },
-  {
-    id: 'guide002',
-    fullName: 'Carlos Alberto Mendoza Silva',
-    dni: '87654321',
-    phone: '+51 987 654 322',
-    email: 'carlos.mendoza@gmail.com',
-    address: 'Jr. Lima 456, Cusco',
-    guideType: 'freelance',
-    
-    profile: {
-      avatar: 'https://ui-avatars.com/api/?name=Carlos+Mendoza&background=0D8ABC&color=fff',
-      bio: 'Especialista en turismo de aventura y fotografía. 8 años guiando expediciones a Machu Picchu y rutas alternativas.',
-      photos: [
-        'https://picsum.photos/400/300?random=4',
-        'https://picsum.photos/400/300?random=5'
-      ],
-      videoPresentation: null
-    },
-    
-    specializations: {
-      languages: [
-        { code: 'es', level: 'nativo', certified: true, certificationDate: '2016-01-10' },
-        { code: 'en', level: 'experto', certified: true, certificationDate: '2017-05-15' },
-        { code: 'de', level: 'avanzado', certified: true, certificationDate: '2018-09-20' }
-      ],
-      tourTypes: ['aventura', 'fotografico', 'cultural'],
-      workZones: ['machu-picchu', 'valle-sagrado', 'otros'],
-      museums: ['qorikancha', 'inca', 'chocolate'],
-      museumRatings: {
-        qorikancha: 5,
-        inca: 4,
-        chocolate: 3
-      },
-      museumExperiences: {
-        qorikancha: {
-          es: 'Experiencia excepcional en el Qorikancha. El templo del sol es impresionante y la fusión de arquitectura inca y colonial es fascinante. Perfecto para explicar la historia de la conquista y la religión inca.',
-          en: 'Exceptional experience at Qorikancha. The sun temple is impressive and the fusion of Inca and colonial architecture is fascinating. Perfect for explaining the history of conquest and Inca religion.'
-        },
-        inca: {
-          es: 'Muy buena colección del Museo Inca. Las piezas arqueológicas están bien conservadas y organizadas. Algunas salas podrían beneficiarse de mejor señalización, pero es ideal para tours culturales.',
-          en: 'Very good collection at the Inca Museum. The archaeological pieces are well preserved and organized. Some rooms could benefit from better signage, but it\'s ideal for cultural tours.'
-        },
-        chocolate: {
-          es: 'Museo del Chocolate interesante pero básico. La experiencia es educativa sobre el proceso del cacao, aunque la exhibición es limitada. Funciona bien para complementar otros tours.'
-        }
-      },
-      groupExperience: {
-        children: { level: 'basico', yearsExperience: 1 },
-        schools: { level: 'basico', yearsExperience: 1 },
-        elderly: { level: 'intermedio', yearsExperience: 3 },
-        corporate: { level: 'experto', yearsExperience: 5 },
-        vip: { level: 'experto', yearsExperience: 6 },
-        specialNeeds: { level: 'intermedio', yearsExperience: 2 }
-      }
-    },
-    
-    certifications: [
-      {
-        id: 'cert003',
-        name: 'Guía de Alta Montaña',
-        issuer: 'AGMP',
-        issueDate: '2018-03-20',
-        expiryDate: '2024-03-20',
-        documentUrl: '/docs/cert003.pdf',
-        verified: true
-      }
-    ],
-    
-    availability: {
-      calendar: {},
-      workingDays: ['tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
-      advanceBooking: 3
-    },
-    
-    pricing: {
-      hourlyRate: 40,
-      fullDayRate: 280,
-      halfDayRate: 150,
-      specialRates: [
-        { groupType: 'vip', rate: 60 },
-        { groupType: 'corporate', rate: 50 }
-      ]
-    },
-    
-    marketplaceStats: {
-      totalBookings: 234,
-      completedServices: 230,
-      cancelledServices: 4,
-      responseTime: 45,
-      acceptanceRate: 90,
-      repeatClients: 78,
-      totalEarnings: 45000,
-      joinedDate: '2016-08-20'
-    },
-    
-    ratings: {
-      overall: 4.9,
-      communication: 4.8,
-      knowledge: 5.0,
-      punctuality: 4.9,
-      professionalism: 5.0,
-      valueForMoney: 4.7,
-      totalReviews: 156,
-      reviews: []
-    },
-    
-    preferences: {
-      maxGroupSize: 15,
-      minBookingHours: 4,
-      cancellationPolicy: '48 horas de anticipación',
-      instantBooking: false,
-      requiresDeposit: true,
-      depositPercentage: 50
-    },
-    
-    marketplaceStatus: {
-      active: true,
-      verified: true,
-      featured: false,
-      suspendedUntil: null,
-      verificationDocuments: ['dni', 'carnet', 'certificados', 'seguro']
-    }
-  }
-];
-
-// Mock service requests
-const mockServiceRequests = [
-  {
-    id: 'req001',
-    requestCode: 'SR-2024-001',
-    agencyId: 'agency1',
-    guideId: 'guide001',
-    
-    serviceDetails: {
-      type: 'tour',
-      date: '2024-02-15',
-      startTime: '09:00',
-      endTime: '13:00',
-      duration: 4,
-      location: 'Centro Histórico Cusco',
-      tourName: 'City Tour Cusco',
-      groupSize: 12,
-      groupType: 'mixed',
-      specialRequirements: 'Grupo con 2 personas vegetarianas',
-      languages: ['es', 'en']
-    },
-    
-    pricing: {
-      proposedRate: 120,
-      finalRate: 120,
-      paymentTerms: 'Pago al finalizar el servicio',
-      currency: 'USD'
-    },
-    
-    status: 'completed',
-    
-    timeline: {
-      requestedAt: '2024-02-10T10:00:00Z',
-      respondedAt: '2024-02-10T10:30:00Z',
-      acceptedAt: '2024-02-10T11:00:00Z',
-      completedAt: '2024-02-15T13:30:00Z'
-    },
-    
-    messages: [
-      {
-        from: 'agency',
-        message: 'Necesitamos un guía para city tour mañana',
-        timestamp: '2024-02-10T10:00:00Z'
-      },
-      {
-        from: 'guide',
-        message: 'Disponible, confirmo el servicio',
-        timestamp: '2024-02-10T10:30:00Z'
-      }
-    ],
-    
-    completion: {
-      actualStartTime: '09:00',
-      actualEndTime: '13:15',
-      incidents: [],
-      photos: ['photo1.jpg', 'photo2.jpg']
-    }
-  }
-];
-
-// Mock reviews
-const mockReviews = [
-  {
-    id: 'review001',
-    serviceRequestId: 'req001',
-    guideId: 'guide001',
-    agencyId: 'agency1',
-    
-    ratings: {
-      overall: 5,
-      communication: 5,
-      knowledge: 5,
-      punctuality: 4,
-      professionalism: 5,
-      valueForMoney: 5
-    },
-    
-    review: {
-      title: 'Excelente guía, muy profesional',
-      content: 'María demostró un conocimiento profundo de la historia de Cusco. Fue muy amable con el grupo y manejó perfectamente los dos idiomas. La recomendaremos para futuros tours.',
-      wouldRecommend: true,
-      wouldHireAgain: true
-    },
-    
-    response: {
-      content: 'Gracias por la confianza. Fue un placer guiar a su grupo.',
-      timestamp: '2024-02-16T09:00:00Z'
-    },
-    
-    metadata: {
-      serviceType: 'tour',
-      serviceDate: '2024-02-15',
-      groupSize: 12,
-      verified: true,
-      helpful: 5,
-      createdAt: '2024-02-15T18:00:00Z',
-      updatedAt: '2024-02-15T18:00:00Z'
-    }
-  }
-];
+import { marketplaceService } from '../services/marketplaceService';
+import {
+  WORK_ZONES,
+  TOUR_TYPES,
+  GROUP_TYPES,
+  DEFAULT_FILTERS,
+  MARKETPLACE_VIEWS
+} from '../constants/marketplaceConstants';
 
 const useMarketplaceStore = create((set, get) => ({
   // Estado
-  freelanceGuides: mockFreelanceGuides,
-  serviceRequests: mockServiceRequests,
-  reviews: mockReviews,
-  workZones,
-  tourTypes,
-  groupTypes,
+  freelanceGuides: [],
+  currentGuide: null,
+  serviceRequests: [],
+  currentRequest: null,
+  reviews: [],
+  isLoading: false,
+  error: null,
   
-  // Filtros activos
-  activeFilters: {
-    languages: [],
-    tourTypes: [],
-    workZones: [],
-    groupTypes: [],
-    priceRange: { min: 0, max: 500 },
-    rating: 0,
-    availability: null,
-    instantBooking: false,
-    verified: false
-  },
+  // Configuración
+  workZones: WORK_ZONES,
+  tourTypes: TOUR_TYPES,
+  groupTypes: GROUP_TYPES,
   
-  // Búsqueda
+  // Filtros y búsqueda
+  activeFilters: { ...DEFAULT_FILTERS },
   searchQuery: '',
   sortBy: 'rating', // rating, price, experience, reviews
+  currentView: MARKETPLACE_VIEWS.GRID,
   
-  // Acciones
-  searchGuides: (query) => {
-    set({ searchQuery: query });
+  // Paginación
+  pagination: {
+    page: 1,
+    pageSize: 12,
+    total: 0,
+    totalPages: 0
+  },
+
+  // Estadísticas
+  marketplaceStats: null,
+  guideStats: null,
+
+  // Acciones de búsqueda y filtros
+  searchGuides: async (query) => {
+    set({ searchQuery: query, pagination: { ...get().pagination, page: 1 } });
+    return get().fetchFreelanceGuides();
   },
   
   setFilters: (filters) => {
-    set({ activeFilters: { ...get().activeFilters, ...filters } });
+    set({ 
+      activeFilters: { ...get().activeFilters, ...filters },
+      pagination: { ...get().pagination, page: 1 }
+    });
+    return get().fetchFreelanceGuides();
   },
   
   clearFilters: () => {
     set({
-      activeFilters: {
-        languages: [],
-        tourTypes: [],
-        workZones: [],
-        groupTypes: [],
-        priceRange: { min: 0, max: 500 },
-        rating: 0,
-        availability: null,
-        instantBooking: false,
-        verified: false
-      },
-      searchQuery: ''
+      activeFilters: { ...DEFAULT_FILTERS },
+      searchQuery: '',
+      pagination: { ...get().pagination, page: 1 }
     });
+    return get().fetchFreelanceGuides();
   },
   
   setSortBy: (sortBy) => {
     set({ sortBy });
+    return get().fetchFreelanceGuides();
   },
-  
-  // Obtener guías filtrados
-  getFilteredGuides: () => {
-    const { freelanceGuides, activeFilters, searchQuery, sortBy } = get();
-    
-    let filtered = freelanceGuides.filter(guide => {
-      // Solo guías activos
-      if (!guide.marketplaceStatus.active) return false;
-      
-      // Búsqueda por texto
-      if (searchQuery) {
-        const query = searchQuery.toLowerCase();
-        const matchesSearch = 
-          guide.fullName.toLowerCase().includes(query) ||
-          guide.profile.bio.toLowerCase().includes(query) ||
-          guide.specializations.tourTypes.some(type => type.includes(query));
-        if (!matchesSearch) return false;
-      }
-      
-      // Filtro por idiomas
-      if (activeFilters.languages.length > 0) {
-        const hasLanguage = activeFilters.languages.some(lang =>
-          guide.specializations.languages.some(guideLang => guideLang.code === lang)
-        );
-        if (!hasLanguage) return false;
-      }
-      
-      // Filtro por tipos de tour
-      if (activeFilters.tourTypes.length > 0) {
-        const hasTourType = activeFilters.tourTypes.some(type =>
-          guide.specializations.tourTypes.includes(type)
-        );
-        if (!hasTourType) return false;
-      }
-      
-      // Filtro por zonas de trabajo
-      if (activeFilters.workZones.length > 0) {
-        const hasWorkZone = activeFilters.workZones.some(zone =>
-          guide.specializations.workZones.includes(zone)
-        );
-        if (!hasWorkZone) return false;
-      }
-      
-      // Filtro por tipos de grupo
-      if (activeFilters.groupTypes.length > 0) {
-        const hasGroupExperience = activeFilters.groupTypes.some(type =>
-          guide.specializations.groupExperience[type] &&
-          guide.specializations.groupExperience[type].level !== 'basico'
-        );
-        if (!hasGroupExperience) return false;
-      }
-      
-      // Filtro por rango de precio
-      if (guide.pricing.hourlyRate < activeFilters.priceRange.min ||
-          guide.pricing.hourlyRate > activeFilters.priceRange.max) {
-        return false;
-      }
-      
-      // Filtro por calificación mínima
-      if (guide.ratings.overall < activeFilters.rating) {
-        return false;
-      }
-      
-      // Filtro por reserva instantánea
-      if (activeFilters.instantBooking && !guide.preferences.instantBooking) {
-        return false;
-      }
-      
-      // Filtro por verificado
-      if (activeFilters.verified && !guide.marketplaceStatus.verified) {
-        return false;
-      }
-      
-      return true;
-    });
-    
-    // Ordenar resultados
-    filtered.sort((a, b) => {
-      switch (sortBy) {
-        case 'rating':
-          return b.ratings.overall - a.ratings.overall;
-        case 'price':
-          return a.pricing.hourlyRate - b.pricing.hourlyRate;
-        case 'experience':
-          return b.marketplaceStats.totalBookings - a.marketplaceStats.totalBookings;
-        case 'reviews':
-          return b.ratings.totalReviews - a.ratings.totalReviews;
-        default:
-          return 0;
-      }
-    });
-    
-    return filtered;
+
+  setView: (view) => {
+    set({ currentView: view });
   },
-  
-  // Obtener guía por ID
-  getGuideById: (guideId) => {
-    const { freelanceGuides } = get();
-    return freelanceGuides.find(guide => guide.id === guideId);
-  },
-  
-  // Obtener reseñas de un guía
-  getGuideReviews: (guideId) => {
-    const { reviews } = get();
-    return reviews.filter(review => review.guideId === guideId);
-  },
-  
-  // Crear solicitud de servicio
-  createServiceRequest: (requestData) => {
-    const newRequest = {
-      id: `req${Date.now()}`,
-      requestCode: `SR-2024-${String(get().serviceRequests.length + 1).padStart(3, '0')}`,
-      ...requestData,
-      status: 'pending',
-      timeline: {
-        requestedAt: new Date().toISOString()
-      },
-      messages: []
-    };
-    
-    set(state => ({
-      serviceRequests: [...state.serviceRequests, newRequest]
+
+  setPage: (page) => {
+    set((state) => ({
+      pagination: { ...state.pagination, page }
     }));
-    
-    return newRequest;
+    return get().fetchFreelanceGuides();
   },
-  
-  // Actualizar solicitud de servicio
-  updateServiceRequest: (requestId, updates) => {
-    set(state => ({
-      serviceRequests: state.serviceRequests.map(req =>
-        req.id === requestId ? { ...req, ...updates } : req
-      )
-    }));
-  },
-  
-  // Agregar mensaje a solicitud
-  addMessageToRequest: (requestId, message) => {
-    set(state => ({
-      serviceRequests: state.serviceRequests.map(req =>
-        req.id === requestId
-          ? {
-              ...req,
-              messages: [...req.messages, { ...message, timestamp: new Date().toISOString() }]
-            }
-          : req
-      )
-    }));
-  },
-  
-  // Crear reseña
-  createReview: (reviewData) => {
-    const newReview = {
-      id: `review${Date.now()}`,
-      ...reviewData,
-      metadata: {
-        ...reviewData.metadata,
-        verified: true,
-        helpful: 0,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      }
-    };
+
+  // Acciones CRUD - Guías
+  fetchFreelanceGuides: async () => {
+    set({ isLoading: true, error: null });
     
-    set(state => ({
-      reviews: [...state.reviews, newReview]
-    }));
-    
-    // Actualizar estadísticas del guía
-    const guide = get().getGuideById(reviewData.guideId);
-    if (guide) {
-      const allReviews = [...get().reviews, newReview].filter(r => r.guideId === reviewData.guideId);
-      const avgRating = allReviews.reduce((acc, r) => acc + r.ratings.overall, 0) / allReviews.length;
+    try {
+      const { activeFilters, searchQuery, sortBy, pagination } = get();
       
-      set(state => ({
+      const params = {
+        ...activeFilters,
+        search: searchQuery,
+        sortBy,
+        page: pagination.page,
+        pageSize: pagination.pageSize
+      };
+      
+      const result = await marketplaceService.getFreelanceGuides(params);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al cargar guías');
+      }
+      
+      set({
+        freelanceGuides: result.data.guides,
+        pagination: {
+          page: result.data.page,
+          pageSize: result.data.pageSize,
+          total: result.data.total,
+          totalPages: result.data.totalPages
+        },
+        isLoading: false
+      });
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
+  },
+
+  fetchGuideProfile: async (guideId) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await marketplaceService.getGuideProfile(guideId);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Guía no encontrado');
+      }
+      
+      set({
+        currentGuide: result.data,
+        isLoading: false
+      });
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
+  },
+
+  fetchGuideAvailability: async (guideId, params = {}) => {
+    try {
+      const result = await marketplaceService.getGuideAvailability(guideId, params);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al cargar disponibilidad');
+      }
+      
+      return result.data;
+    } catch (error) {
+      set({ error: error.message });
+      throw error;
+    }
+  },
+
+  updateGuideAvailability: async (guideId, availability) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await marketplaceService.updateGuideAvailability(guideId, availability);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al actualizar disponibilidad');
+      }
+      
+      // Actualizar guía en la lista si existe
+      set((state) => ({
         freelanceGuides: state.freelanceGuides.map(g =>
-          g.id === reviewData.guideId
-            ? {
-                ...g,
-                ratings: {
-                  ...g.ratings,
-                  overall: avgRating,
-                  totalReviews: allReviews.length
-                }
-              }
+          g.id === guideId 
+            ? { ...g, availability: result.data }
             : g
+        ),
+        currentGuide: state.currentGuide?.id === guideId
+          ? { ...state.currentGuide, availability: result.data }
+          : state.currentGuide,
+        isLoading: false
+      }));
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
+  },
+
+  // Acciones CRUD - Solicitudes de servicio
+  createServiceRequest: async (requestData) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await marketplaceService.createServiceRequest(requestData);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al crear solicitud');
+      }
+      
+      set((state) => ({
+        serviceRequests: [result.data, ...state.serviceRequests],
+        currentRequest: result.data,
+        isLoading: false
+      }));
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
+  },
+
+  fetchServiceRequests: async (filters = {}) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await marketplaceService.getServiceRequests(filters);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al cargar solicitudes');
+      }
+      
+      set({
+        serviceRequests: result.data,
+        isLoading: false
+      });
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
+  },
+
+  fetchServiceRequestById: async (requestId) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await marketplaceService.getServiceRequestById(requestId);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Solicitud no encontrada');
+      }
+      
+      set({
+        currentRequest: result.data,
+        isLoading: false
+      });
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
+  },
+
+  updateServiceRequest: async (requestId, updates) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await marketplaceService.updateServiceRequest(requestId, updates);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al actualizar solicitud');
+      }
+      
+      set((state) => ({
+        serviceRequests: state.serviceRequests.map(req =>
+          req.id === requestId ? result.data : req
+        ),
+        currentRequest: state.currentRequest?.id === requestId
+          ? result.data
+          : state.currentRequest,
+        isLoading: false
+      }));
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
+  },
+
+  respondToServiceRequest: async (requestId, response) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await marketplaceService.respondToServiceRequest(requestId, response);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al responder solicitud');
+      }
+      
+      set((state) => ({
+        serviceRequests: state.serviceRequests.map(req =>
+          req.id === requestId ? result.data : req
+        ),
+        currentRequest: state.currentRequest?.id === requestId
+          ? result.data
+          : state.currentRequest,
+        isLoading: false
+      }));
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
+  },
+
+  cancelServiceRequest: async (requestId, reason) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await marketplaceService.cancelServiceRequest(requestId, reason);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al cancelar solicitud');
+      }
+      
+      set((state) => ({
+        serviceRequests: state.serviceRequests.map(req =>
+          req.id === requestId ? result.data : req
+        ),
+        currentRequest: state.currentRequest?.id === requestId
+          ? result.data
+          : state.currentRequest,
+        isLoading: false
+      }));
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
+  },
+
+  completeService: async (requestId, completionData) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await marketplaceService.completeService(requestId, completionData);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al completar servicio');
+      }
+      
+      set((state) => ({
+        serviceRequests: state.serviceRequests.map(req =>
+          req.id === requestId ? result.data : req
+        ),
+        currentRequest: state.currentRequest?.id === requestId
+          ? result.data
+          : state.currentRequest,
+        isLoading: false
+      }));
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
+  },
+
+  // Acciones CRUD - Reseñas
+  fetchGuideReviews: async (guideId, params = {}) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await marketplaceService.getGuideReviews(guideId, params);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al cargar reseñas');
+      }
+      
+      set({
+        reviews: result.data.reviews,
+        isLoading: false
+      });
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
+  },
+
+  createReview: async (reviewData) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await marketplaceService.createReview(reviewData);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al crear reseña');
+      }
+      
+      set((state) => ({
+        reviews: [result.data, ...state.reviews],
+        isLoading: false
+      }));
+      
+      // Actualizar estadísticas del guía si está cargado
+      if (get().currentGuide?.id === reviewData.guideId) {
+        get().fetchGuideProfile(reviewData.guideId);
+      }
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
+  },
+
+  respondToReview: async (reviewId, response) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await marketplaceService.respondToReview(reviewId, response);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al responder reseña');
+      }
+      
+      set((state) => ({
+        reviews: state.reviews.map(review =>
+          review.id === reviewId 
+            ? { ...review, response: { content: response, timestamp: new Date().toISOString() } }
+            : review
+        ),
+        isLoading: false
+      }));
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
+  },
+
+  markReviewHelpful: async (reviewId) => {
+    try {
+      const result = await marketplaceService.markReviewHelpful(reviewId);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al marcar reseña');
+      }
+      
+      set((state) => ({
+        reviews: state.reviews.map(review =>
+          review.id === reviewId 
+            ? { ...review, metadata: { ...review.metadata, helpful: result.data.helpful } }
+            : review
         )
       }));
+      
+      return result.data;
+    } catch (error) {
+      set({ error: error.message });
+      throw error;
     }
-    
-    return newReview;
   },
-  
-  // Obtener estadísticas del marketplace
-  getMarketplaceStats: () => {
-    const { freelanceGuides, serviceRequests, reviews } = get();
+
+  // Estadísticas
+  fetchMarketplaceStats: async () => {
+    set({ isLoading: true, error: null });
     
-    return {
-      totalGuides: freelanceGuides.length,
-      activeGuides: freelanceGuides.filter(g => g.marketplaceStatus.active).length,
-      verifiedGuides: freelanceGuides.filter(g => g.marketplaceStatus.verified).length,
-      totalRequests: serviceRequests.length,
-      completedRequests: serviceRequests.filter(r => r.status === 'completed').length,
-      totalReviews: reviews.length,
-      averageRating: freelanceGuides.reduce((acc, g) => acc + g.ratings.overall, 0) / freelanceGuides.length
-    };
+    try {
+      const result = await marketplaceService.getMarketplaceStats();
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al cargar estadísticas');
+      }
+      
+      set({
+        marketplaceStats: result.data,
+        isLoading: false
+      });
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
+  },
+
+  fetchGuideStats: async (guideId) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await marketplaceService.getGuideStats(guideId);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al cargar estadísticas del guía');
+      }
+      
+      set({
+        guideStats: result.data,
+        isLoading: false
+      });
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
+  },
+
+  // Administración de guías
+  updateGuideMarketplaceProfile: async (guideId, profileData) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await marketplaceService.updateGuideMarketplaceProfile(guideId, profileData);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al actualizar perfil');
+      }
+      
+      set((state) => ({
+        freelanceGuides: state.freelanceGuides.map(g =>
+          g.id === guideId ? result.data : g
+        ),
+        currentGuide: state.currentGuide?.id === guideId
+          ? result.data
+          : state.currentGuide,
+        isLoading: false
+      }));
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
+  },
+
+  updateGuidePricing: async (guideId, pricing) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await marketplaceService.updateGuidePricing(guideId, pricing);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al actualizar tarifas');
+      }
+      
+      set((state) => ({
+        freelanceGuides: state.freelanceGuides.map(g =>
+          g.id === guideId 
+            ? { ...g, pricing: result.data }
+            : g
+        ),
+        currentGuide: state.currentGuide?.id === guideId
+          ? { ...state.currentGuide, pricing: result.data }
+          : state.currentGuide,
+        isLoading: false
+      }));
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
+  },
+
+  verifyGuide: async (guideId, verificationData) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await marketplaceService.verifyGuide(guideId, verificationData);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al verificar guía');
+      }
+      
+      set((state) => ({
+        freelanceGuides: state.freelanceGuides.map(g =>
+          g.id === guideId 
+            ? { ...g, marketplaceStatus: result.data }
+            : g
+        ),
+        currentGuide: state.currentGuide?.id === guideId
+          ? { ...state.currentGuide, marketplaceStatus: result.data }
+          : state.currentGuide,
+        isLoading: false
+      }));
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
+  },
+
+  // Búsqueda avanzada
+  searchGuidesByCompetencies: async (requirements) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await marketplaceService.searchGuidesByCompetencies(requirements);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error en la búsqueda');
+      }
+      
+      set({
+        freelanceGuides: result.data,
+        isLoading: false
+      });
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
+  },
+
+  fetchFeaturedGuides: async () => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await marketplaceService.getFeaturedGuides();
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al cargar guías destacados');
+      }
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
+  },
+
+  // Utilidades
+  clearError: () => set({ error: null }),
+  
+  resetStore: () => {
+    set({
+      freelanceGuides: [],
+      currentGuide: null,
+      serviceRequests: [],
+      currentRequest: null,
+      reviews: [],
+      isLoading: false,
+      error: null,
+      activeFilters: { ...DEFAULT_FILTERS },
+      searchQuery: '',
+      sortBy: 'rating',
+      currentView: MARKETPLACE_VIEWS.GRID,
+      pagination: {
+        page: 1,
+        pageSize: 12,
+        total: 0,
+        totalPages: 0
+      },
+      marketplaceStats: null,
+      guideStats: null
+    });
   }
 }));
 

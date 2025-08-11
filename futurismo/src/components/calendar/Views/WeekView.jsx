@@ -213,8 +213,6 @@ const WeekView = ({ onTimeSlotClick, onDateClick, onEventClick, onEventEdit }) =
   );
 };
 
-};
-
 WeekView.propTypes = {
   onTimeSlotClick: PropTypes.func,
   onDateClick: PropTypes.func,

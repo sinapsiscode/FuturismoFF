@@ -5,7 +5,7 @@ import { getMockDocuments } from '../data/mockProfileData';
 import { DOCUMENT_STATUS } from '../constants/profileConstants';
 
 const useDocuments = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [isUploading, setIsUploading] = useState(false);
@@ -53,7 +53,7 @@ const useDocuments = () => {
   const formatDate = (date) => {
     if (!date) return t('profile.documents.noExpiry');
     const dateObj = date instanceof Date ? date : new Date(date);
-    return dateObj.toLocaleDateString(t('common.locale'), {
+    return dateObj.toLocaleDateString(i18n.language, {
       year: 'numeric',
       month: 'short',
       day: 'numeric'

@@ -32,10 +32,12 @@ const GuidesManagement = lazy(() => import('./pages/GuidesManagement'));
 const AgencyCalendar = lazy(() => import('./pages/AgencyCalendar'));
 const AgencyReports = lazy(() => import('./pages/AgencyReports'));
 const AgencyPoints = lazy(() => import('./pages/AgencyPoints'));
+const AdminEmergency = lazy(() => import('./pages/AdminEmergency'));
 const AdminReservations = lazy(() => import('./pages/AdminReservations'));
 const ReservationManagement = lazy(() => import('./pages/admin/ReservationManagement'));
 const Reports = lazy(() => import('./pages/admin/Reports'));
 const FinancialDashboard = lazy(() => import('./pages/guide/FinancialDashboard'));
+const GuideTourView = lazy(() => import('./pages/guide/GuideTourView'));
 
 // Marketplace pages
 const GuidesMarketplace = lazy(() => import('./pages/marketplace/GuidesMarketplace'));
@@ -224,10 +226,34 @@ function App() {
               } 
             />
             <Route 
+              path="admin/emergency" 
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <AdminEmergency />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="admin/reservations-list" 
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <AdminReservations />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
               path="guide/finances" 
               element={
                 <ProtectedRoute allowedRoles={['guide']} requireGuideType="freelance">
                   <FinancialDashboard />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="guide/tour/:tourId" 
+              element={
+                <ProtectedRoute allowedRoles={['guide']}>
+                  <GuideTourView />
                 </ProtectedRoute>
               } 
             />

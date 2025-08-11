@@ -11,33 +11,44 @@ import {
 } from '@heroicons/react/24/outline';
 import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { reportsAPI } from '../../services/api';
+import useStatisticsStore from '../../stores/statisticsStore';
+import useReservationsStore from '../../stores/reservationsStore';
+import useClientsStore from '../../stores/clientsStore';
+import useProvidersStore from '../../stores/providersStore';
 import toast from 'react-hot-toast';
 
 function Reports() {
-  const [loading, setLoading] = useState(false);
+  // Store hooks
+  const { loadDashboard, kpis, isLoading } = useStatisticsStore();
+  const { reservations, fetchReservations } = useReservationsStore();
+  const { clients, loadClients } = useClientsStore();
+  const { providers, actions } = useProvidersStore();
+  
   const [dateRange, setDateRange] = useState('month');
   const [startDate, setStartDate] = useState(startOfMonth(new Date()));
   const [endDate, setEndDate] = useState(endOfMonth(new Date()));
-  const [reportData, setReportData] = useState({
-    totalBookings: 0,
-    totalRevenue: 0,
-    totalUsers: 0,
-    totalProviders: 0,
-    topDestinations: [],
-    topProviders: [],
-    bookingsByStatus: {
-      pending: 0,
-      confirmed: 0,
-      completed: 0,
-      cancelled: 0
-    },
-    revenueByMonth: []
-  });
 
   useEffect(() => {
     loadReports();
   }, [startDate, endDate]);
+
+  // Cargar datos al montar el componente
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        await Promise.all([
+          loadDashboard(),
+          fetchReservations(),
+          loadClients(),
+          actions.fetchProviders()
+        ]);
+      } catch (error) {
+        console.error('Error cargando datos:', error);
+      }
+    };
+    
+    loadData();
+  }, []);
 
   const handleDateRangeChange = (range) => {
     setDateRange(range);
@@ -61,75 +72,126 @@ function Reports() {
   };
 
   const loadReports = async () => {
-    setLoading(true);
-
-    // Simular una demora para mostrar el loading
-    setTimeout(() => {
-      // Usar datos mock directamente
-      const mockData = {
-        totalBookings: 85,
-        totalRevenue: 32500,
-        totalUsers: 156,
-        totalProviders: 24,
-        bookingsByStatus: {
-          pending: 12,
-          confirmed: 28,
-          completed: 35,
-          cancelled: 10
-        },
-        topDestinations: [
-          { location: 'Machu Picchu', count: 45 },
-          { location: 'Valle Sagrado', count: 32 },
-          { location: 'Cusco City Tour', count: 28 },
-          { location: 'Sacsayhuamán', count: 18 },
-          { location: 'Ollantaytambo', count: 12 }
-        ],
-        topProviders: [
-          { providerId: '1', providerName: 'Inca Rail', count: 25, revenue: 15000 },
-          { providerId: '2', providerName: 'Peru Rail', count: 20, revenue: 12000 },
-          { providerId: '3', providerName: 'Sky Airlines', count: 18, revenue: 9000 },
-          { providerId: '4', providerName: 'Hotel Cusco Plaza', count: 15, revenue: 7500 },
-          { providerId: '5', providerName: 'Restaurante Cicciolina', count: 12, revenue: 3000 }
-        ]
-      };
-      
-      setReportData(mockData);
-      setLoading(false);
-    }, 1000);
+    try {
+      await loadDashboard();
+    } catch (error) {
+      console.error('Error cargando reportes:', error);
+      toast.error('Error al cargar los reportes');
+    }
   };
 
-  const exportToCSV = () => {
-    // Exportar directamente sin usar la API
-    const headers = ['Métrica', 'Valor'];
-    const rows = [
-      ['Total Reservas', reportData.totalBookings],
-      ['Ingresos Totales', `S/. ${(reportData.totalRevenue || 0).toFixed(2)}`],
-      ['Total Usuarios', reportData.totalUsers],
-      ['Total Proveedores', reportData.totalProviders],
-      '',
-      ['Estados de Reservas', ''],
-      ...Object.entries(reportData.bookingsByStatus || {}).map(([status, count]) => [status, count]),
-      '',
-      ['Top Destinos', ''],
-      ...(reportData.topDestinations || []).map(d => [d.location, d.count]),
-      '',
-      ['Top Proveedores', ''],
-      ...(reportData.topProviders || []).map(p => [p.providerName, `S/. ${(p.revenue || 0).toFixed(2)}`])
-    ];
+  // Calcular estadísticas desde los datos de los stores
+  const reportData = {
+    totalBookings: reservations.length,
+    totalRevenue: reservations.reduce((sum, res) => sum + (res.total || 0), 0),
+    totalUsers: clients.length,
+    totalProviders: providers.length,
+    bookingsByStatus: {
+      pending: reservations.filter(r => r.status === 'pending').length,
+      confirmed: reservations.filter(r => r.status === 'confirmed').length,
+      completed: reservations.filter(r => r.status === 'completed').length,
+      cancelled: reservations.filter(r => r.status === 'cancelled').length
+    },
+    topDestinations: getTopDestinations(),
+    topProviders: getTopProviders()
+  };
 
-    const csvContent = [headers, ...rows]
-      .map(row => row.join(','))
-      .join('\n');
-
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `reporte_${format(new Date(), 'yyyy-MM-dd')}.csv`;
-    a.click();
-    window.URL.revokeObjectURL(url);
+  // Función para obtener top destinos
+  function getTopDestinations() {
+    const destinationCounts = {};
+    reservations.forEach(reservation => {
+      const destination = reservation.tourName || 'Destino desconocido';
+      destinationCounts[destination] = (destinationCounts[destination] || 0) + 1;
+    });
     
-    toast.success('Reporte exportado exitosamente');
+    return Object.entries(destinationCounts)
+      .map(([location, count]) => ({ location, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5);
+  }
+
+  // Función para obtener top proveedores
+  function getTopProviders() {
+    const providerStats = {};
+    
+    reservations.forEach(reservation => {
+      const providerId = reservation.providerId || 'unknown';
+      const provider = providers.find(p => p.id === providerId);
+      const providerName = provider?.name || 'Proveedor desconocido';
+      
+      if (!providerStats[providerId]) {
+        providerStats[providerId] = {
+          providerId,
+          providerName,
+          count: 0,
+          revenue: 0
+        };
+      }
+      
+      providerStats[providerId].count += 1;
+      providerStats[providerId].revenue += reservation.total || 0;
+    });
+    
+    return Object.values(providerStats)
+      .sort((a, b) => b.revenue - a.revenue)
+      .slice(0, 5);
+  }
+
+  const exportToCSV = async () => {
+    try {
+      // Usar el servicio de estadísticas para exportar
+      const blob = await useStatisticsStore.getState().exportToExcel({
+        startDate: format(startDate, 'yyyy-MM-dd'),
+        endDate: format(endDate, 'yyyy-MM-dd'),
+        includeDetails: true
+      });
+      
+      if (blob) {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `reporte_${format(new Date(), 'yyyy-MM-dd')}.xlsx`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+        
+        toast.success('Reporte exportado exitosamente');
+      } else {
+        // Fallback: exportar CSV básico
+        const headers = ['Métrica', 'Valor'];
+        const rows = [
+          ['Total Reservas', reportData.totalBookings],
+          ['Ingresos Totales', `S/. ${(reportData.totalRevenue || 0).toFixed(2)}`],
+          ['Total Usuarios', reportData.totalUsers],
+          ['Total Proveedores', reportData.totalProviders],
+          '',
+          ['Estados de Reservas', ''],
+          ...Object.entries(reportData.bookingsByStatus || {}).map(([status, count]) => [status, count]),
+          '',
+          ['Top Destinos', ''],
+          ...(reportData.topDestinations || []).map(d => [d.location, d.count]),
+          '',
+          ['Top Proveedores', ''],
+          ...(reportData.topProviders || []).map(p => [p.providerName, `S/. ${(p.revenue || 0).toFixed(2)}`])
+        ];
+
+        const csvContent = [headers, ...rows]
+          .map(row => row.join(','))
+          .join('\n');
+
+        const csvBlob = new Blob([csvContent], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(csvBlob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `reporte_${format(new Date(), 'yyyy-MM-dd')}.csv`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+        
+        toast.success('Reporte CSV exportado exitosamente');
+      }
+    } catch (error) {
+      console.error('Error al exportar reporte:', error);
+      toast.error('Error al exportar el reporte');
+    }
   };
 
   const StatCard = ({ icon: Icon, title, value, subtitle, color = 'blue' }) => (
@@ -218,7 +280,7 @@ function Reports() {
               className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
             >
               <DocumentArrowDownIcon className="h-5 w-5" />
-              Exportar CSV
+              Exportar Excel
             </button>
           </div>
         </div>
@@ -228,7 +290,7 @@ function Reports() {
         </p>
       </div>
 
-      {loading ? (
+      {isLoading ? (
         <div className="flex justify-center items-center h-64">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
         </div>

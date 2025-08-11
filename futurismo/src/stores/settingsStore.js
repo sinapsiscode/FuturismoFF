@@ -1,163 +1,21 @@
 import { create } from 'zustand';
+import { settingsService } from '../services/settingsService';
+import {
+  VALIDATION_MESSAGES,
+  VALIDATION_MINIMUMS
+} from '../constants/settingsConstants';
 
-// Configuraciones por defecto del sistema
+// Estado inicial vacío - se cargará desde el servicio
 const defaultSettings = {
-  // Configuración general
-  general: {
-    companyName: 'Futurismo Tours',
-    companyPhone: '+51 999 999 999',
-    companyEmail: 'info@futurismo.com',
-    companyAddress: 'Av. Larco 123, Miraflores, Lima',
-    companyWebsite: 'https://futurismo.com',
-    currency: 'USD',
-    timezone: 'America/Lima',
-    language: 'es',
-    dateFormat: 'DD/MM/YYYY',
-    timeFormat: '24h'
-  },
-
-  // Configuración de tours y servicios
-  tours: {
-    maxCapacityPerTour: 20,
-    minAdvanceBooking: 24, // horas
-    maxAdvanceBooking: 365, // días
-    cancellationPolicy: 24, // horas antes para cancelación gratuita
-    defaultDuration: 4, // horas
-    allowPartialPayments: true,
-    requireGuideAssignment: true,
-    autoAssignGuides: false,
-    workingHours: {
-      start: '06:00',
-      end: '20:00'
-    },
-    priceRanges: {
-      budget: { min: 0, max: 50 },
-      standard: { min: 50, max: 100 },
-      premium: { min: 100, max: 200 },
-      luxury: { min: 200, max: 999 }
-    }
-  },
-
-  // Configuración de agencias
-  agencies: {
-    defaultCreditLimit: 5000,
-    requireCreditApproval: true,
-    commissionRate: 10, // porcentaje
-    paymentTerms: 30, // días
-    allowDirectBooking: true,
-    requireContractSigning: true,
-    maxActiveReservations: 50
-  },
-
-  // Configuración de guías
-  guides: {
-    maxToursPerDay: 2,
-    restTimeBetweenTours: 2, // horas
-    allowOverlappingTours: false,
-    requireCertification: true,
-    freelanceRequireAgenda: true,
-    evaluationPeriod: 90, // días
-    minRatingRequired: 4.0,
-    autoSuspendLowRating: false
-  },
-
-  // Configuración de notificaciones
-  notifications: {
-    email: {
-      enabled: true,
-      newReservation: true,
-      cancellation: true,
-      reminder24h: true,
-      reminder2h: true,
-      tourComplete: true,
-      paymentReceived: true,
-      lowCredit: true,
-      systemAlerts: true
-    },
-    sms: {
-      enabled: false,
-      newReservation: false,
-      cancellation: true,
-      reminder2h: true,
-      emergencyOnly: true
-    },
-    push: {
-      enabled: true,
-      newReservation: true,
-      tourUpdates: true,
-      chat: true,
-      systemAlerts: true
-    },
-    whatsapp: {
-      enabled: false,
-      newReservation: false,
-      reminder24h: false,
-      tourComplete: false
-    }
-  },
-
-  // Configuración de monitoreo
-  monitoring: {
-    enableRealTimeTracking: true,
-    updateIntervalSeconds: 30,
-    enableGeofencing: true,
-    alertRadiusMeters: 500,
-    enableEmergencyButton: true,
-    enableOfflineMode: true,
-    batteryAlertThreshold: 20,
-    enableAutoCheckpoints: true
-  },
-
-  // Configuración de reportes
-  reports: {
-    enableAutoGeneration: true,
-    dailyReportTime: '18:00',
-    weeklyReportDay: 'monday',
-    monthlyReportDay: 1,
-    includePhotos: true,
-    includeCustomerFeedback: true,
-    enableDataExport: true,
-    retentionPeriodMonths: 24
-  },
-
-  // Configuración de seguridad
-  security: {
-    sessionTimeoutMinutes: 120,
-    passwordMinLength: 8,
-    passwordRequireSpecial: true,
-    passwordRequireNumbers: true,
-    passwordRequireUppercase: true,
-    enableTwoFactor: false,
-    maxLoginAttempts: 5,
-    lockoutDurationMinutes: 30,
-    enableIPWhitelist: false,
-    enableAuditLog: true
-  },
-
-  // Configuración de integración
-  integrations: {
-    googleMaps: {
-      enabled: true,
-      apiKey: '',
-      enableDirections: true,
-      enablePlaces: true
-    },
-    whatsapp: {
-      enabled: false,
-      businessPhone: '',
-      apiToken: ''
-    },
-    mailchimp: {
-      enabled: false,
-      apiKey: '',
-      listId: ''
-    },
-    stripe: {
-      enabled: false,
-      publicKey: '',
-      secretKey: ''
-    }
-  }
+  general: {},
+  tours: {},
+  agencies: {},
+  guides: {},
+  notifications: {},
+  monitoring: {},
+  reports: {},
+  security: {},
+  integrations: {}
 };
 
 const useSettingsStore = create((set, get) => ({
@@ -166,201 +24,411 @@ const useSettingsStore = create((set, get) => ({
   isLoading: false,
   error: null,
   hasUnsavedChanges: false,
+  history: [],
+  availableOptions: null,
+  systemStatus: null,
+  backups: [],
 
   // Acciones generales
   loadSettings: async () => {
-    set({ isLoading: true });
+    set({ isLoading: true, error: null });
+    
     try {
-      // Simular carga desde API
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      set({ isLoading: false });
+      const result = await settingsService.getSettings();
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al cargar configuraciones');
+      }
+      
+      set({ 
+        settings: result.data,
+        isLoading: false,
+        hasUnsavedChanges: false
+      });
+      
+      return result.data;
     } catch (error) {
-      set({ error: error.message, isLoading: false });
+      set({ 
+        error: error.message, 
+        isLoading: false 
+      });
+      throw error;
     }
   },
 
   saveSettings: async () => {
-    set({ isLoading: true });
+    const { settings } = get();
+    set({ isLoading: true, error: null });
+    
     try {
-      // Simular guardado en API
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      set({ hasUnsavedChanges: false, isLoading: false });
-      return { success: true };
+      const result = await settingsService.updateSettings(settings);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al guardar configuraciones');
+      }
+      
+      set({ 
+        hasUnsavedChanges: false, 
+        isLoading: false 
+      });
+      
+      return result;
     } catch (error) {
-      set({ error: error.message, isLoading: false });
-      return { success: false, error: error.message };
+      set({ 
+        error: error.message, 
+        isLoading: false 
+      });
+      throw error;
     }
   },
 
-  resetSettings: () => {
-    set({ 
-      settings: defaultSettings, 
-      hasUnsavedChanges: true 
-    });
+  resetSettings: async (category = null) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await settingsService.resetSettings(category);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al restablecer configuraciones');
+      }
+      
+      if (category) {
+        set((state) => ({
+          settings: {
+            ...state.settings,
+            [category]: result.data
+          },
+          hasUnsavedChanges: true,
+          isLoading: false
+        }));
+      } else {
+        set({ 
+          settings: result.data,
+          hasUnsavedChanges: true,
+          isLoading: false
+        });
+      }
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        error: error.message, 
+        isLoading: false 
+      });
+      throw error;
+    }
   },
 
   // Acciones específicas por categoría
-  updateGeneralSettings: (updates) => {
+  updateCategorySettings: (category, updates) => {
     set((state) => ({
       settings: {
         ...state.settings,
-        general: { ...state.settings.general, ...updates }
+        [category]: { ...state.settings[category], ...updates }
       },
       hasUnsavedChanges: true
     }));
+  },
+  
+  updateGeneralSettings: (updates) => {
+    get().updateCategorySettings('general', updates);
   },
 
   updateToursSettings: (updates) => {
-    set((state) => ({
-      settings: {
-        ...state.settings,
-        tours: { ...state.settings.tours, ...updates }
-      },
-      hasUnsavedChanges: true
-    }));
+    get().updateCategorySettings('tours', updates);
   },
 
   updateAgenciesSettings: (updates) => {
-    set((state) => ({
-      settings: {
-        ...state.settings,
-        agencies: { ...state.settings.agencies, ...updates }
-      },
-      hasUnsavedChanges: true
-    }));
+    get().updateCategorySettings('agencies', updates);
   },
 
   updateGuidesSettings: (updates) => {
-    set((state) => ({
-      settings: {
-        ...state.settings,
-        guides: { ...state.settings.guides, ...updates }
-      },
-      hasUnsavedChanges: true
-    }));
+    get().updateCategorySettings('guides', updates);
   },
 
   updateNotificationsSettings: (updates) => {
-    set((state) => ({
-      settings: {
-        ...state.settings,
-        notifications: { ...state.settings.notifications, ...updates }
-      },
-      hasUnsavedChanges: true
-    }));
+    get().updateCategorySettings('notifications', updates);
   },
 
   updateMonitoringSettings: (updates) => {
-    set((state) => ({
-      settings: {
-        ...state.settings,
-        monitoring: { ...state.settings.monitoring, ...updates }
-      },
-      hasUnsavedChanges: true
-    }));
+    get().updateCategorySettings('monitoring', updates);
   },
 
   updateReportsSettings: (updates) => {
-    set((state) => ({
-      settings: {
-        ...state.settings,
-        reports: { ...state.settings.reports, ...updates }
-      },
-      hasUnsavedChanges: true
-    }));
+    get().updateCategorySettings('reports', updates);
   },
 
   updateSecuritySettings: (updates) => {
-    set((state) => ({
-      settings: {
-        ...state.settings,
-        security: { ...state.settings.security, ...updates }
-      },
-      hasUnsavedChanges: true
-    }));
+    get().updateCategorySettings('security', updates);
   },
 
   updateIntegrationsSettings: (updates) => {
-    set((state) => ({
-      settings: {
-        ...state.settings,
-        integrations: { ...state.settings.integrations, ...updates }
-      },
-      hasUnsavedChanges: true
-    }));
+    get().updateCategorySettings('integrations', updates);
   },
 
-  // Getters específicos
-  getGeneralSettings: () => {
-    return get().settings.general;
+  // Cargar configuración específica
+  loadCategorySettings: async (category) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await settingsService.getSettingsByCategory(category);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al cargar configuración');
+      }
+      
+      set((state) => ({
+        settings: {
+          ...state.settings,
+          [category]: result.data
+        },
+        isLoading: false
+      }));
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        error: error.message, 
+        isLoading: false 
+      });
+      throw error;
+    }
   },
-
-  getToursSettings: () => {
-    return get().settings.tours;
+  
+  // Historial de cambios
+  loadHistory: async (filters = {}) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await settingsService.getSettingsHistory(filters);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al cargar historial');
+      }
+      
+      set({ 
+        history: result.data.history,
+        isLoading: false
+      });
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        error: error.message, 
+        isLoading: false 
+      });
+      throw error;
+    }
   },
-
-  getNotificationSettings: () => {
-    return get().settings.notifications;
+  
+  // Opciones disponibles
+  loadAvailableOptions: async () => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await settingsService.getAvailableOptions();
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al cargar opciones');
+      }
+      
+      set({ 
+        availableOptions: result.data,
+        isLoading: false
+      });
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        error: error.message, 
+        isLoading: false 
+      });
+      throw error;
+    }
   },
 
   // Validaciones
-  validateSettings: () => {
+  validateSettings: async () => {
     const { settings } = get();
-    const errors = {};
-
-    // Validar configuración general
-    if (!settings.general.companyName.trim()) {
-      errors.companyName = 'El nombre de la empresa es requerido';
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await settingsService.validateSettings(settings);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al validar configuraciones');
+      }
+      
+      set({ isLoading: false });
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        error: error.message, 
+        isLoading: false 
+      });
+      throw error;
     }
-
-    if (!settings.general.companyEmail.trim() || !/\S+@\S+\.\S+/.test(settings.general.companyEmail)) {
-      errors.companyEmail = 'Email de empresa inválido';
-    }
-
-    // Validar configuración de tours
-    if (settings.tours.maxCapacityPerTour < 1) {
-      errors.maxCapacity = 'La capacidad máxima debe ser mayor a 0';
-    }
-
-    if (settings.tours.minAdvanceBooking < 1) {
-      errors.minAdvanceBooking = 'El tiempo mínimo de reserva debe ser mayor a 0';
-    }
-
-    // Validar configuración de seguridad
-    if (settings.security.passwordMinLength < 6) {
-      errors.passwordMinLength = 'La longitud mínima de contraseña debe ser al menos 6';
-    }
-
-    return {
-      isValid: Object.keys(errors).length === 0,
-      errors
-    };
   },
 
   // Funciones de utilidad
-  exportSettings: () => {
-    const { settings } = get();
-    const dataStr = JSON.stringify(settings, null, 2);
-    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+  exportSettings: async (format = 'json') => {
+    set({ isLoading: true, error: null });
     
-    const exportFileDefaultName = `futurismo-settings-${new Date().toISOString().split('T')[0]}.json`;
-    
-    const linkElement = document.createElement('a');
-    linkElement.setAttribute('href', dataUri);
-    linkElement.setAttribute('download', exportFileDefaultName);
-    linkElement.click();
+    try {
+      const result = await settingsService.exportSettings(format);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al exportar configuraciones');
+      }
+      
+      // Descargar archivo
+      if (result.data.content) {
+        const blob = new Blob([result.data.content], { type: result.data.mimeType });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = result.data.filename;
+        link.click();
+        URL.revokeObjectURL(url);
+      }
+      
+      set({ isLoading: false });
+      
+      return result;
+    } catch (error) {
+      set({ 
+        error: error.message, 
+        isLoading: false 
+      });
+      throw error;
+    }
   },
 
-  importSettings: (jsonData) => {
+  importSettings: async (data, format = 'json') => {
+    set({ isLoading: true, error: null });
+    
     try {
-      const importedSettings = JSON.parse(jsonData);
+      const result = await settingsService.importSettings(data, format);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al importar configuraciones');
+      }
+      
       set({ 
-        settings: { ...defaultSettings, ...importedSettings },
-        hasUnsavedChanges: true 
+        settings: result.data.settings,
+        hasUnsavedChanges: true,
+        isLoading: false
       });
-      return { success: true };
+      
+      return result;
     } catch (error) {
-      return { success: false, error: 'Formato de archivo inválido' };
+      set({ 
+        error: error.message, 
+        isLoading: false 
+      });
+      throw error;
+    }
+  },
+  
+  // Sistema y backups
+  checkSystemStatus: async () => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await settingsService.checkSystemStatus();
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al verificar estado del sistema');
+      }
+      
+      set({ 
+        systemStatus: result.data,
+        isLoading: false
+      });
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        error: error.message, 
+        isLoading: false 
+      });
+      throw error;
+    }
+  },
+  
+  loadBackups: async () => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await settingsService.getBackups();
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al cargar backups');
+      }
+      
+      set({ 
+        backups: result.data,
+        isLoading: false
+      });
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        error: error.message, 
+        isLoading: false 
+      });
+      throw error;
+    }
+  },
+  
+  createBackup: async (name) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await settingsService.createBackup(name);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al crear backup');
+      }
+      
+      set((state) => ({
+        backups: [result.data, ...state.backups],
+        isLoading: false
+      }));
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        error: error.message, 
+        isLoading: false 
+      });
+      throw error;
+    }
+  },
+  
+  restoreBackup: async (backupId) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await settingsService.restoreBackup(backupId);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al restaurar backup');
+      }
+      
+      // Recargar configuraciones después de restaurar
+      await get().loadSettings();
+      
+      set({ isLoading: false });
+      
+      return result;
+    } catch (error) {
+      set({ 
+        error: error.message, 
+        isLoading: false 
+      });
+      throw error;
     }
   },
 
@@ -369,12 +437,23 @@ const useSettingsStore = create((set, get) => ({
   setError: (error) => set({ error }),
   clearError: () => set({ error: null }),
 
+  // Getters específicos
+  getGeneralSettings: () => get().settings.general,
+  getToursSettings: () => get().settings.tours,
+  getNotificationSettings: () => get().settings.notifications,
+  getSecuritySettings: () => get().settings.security,
+  getIntegrationsSettings: () => get().settings.integrations,
+
   // Reset
   resetStore: () => set({
     settings: defaultSettings,
     isLoading: false,
     error: null,
-    hasUnsavedChanges: false
+    hasUnsavedChanges: false,
+    history: [],
+    availableOptions: null,
+    systemStatus: null,
+    backups: []
   })
 }));
 

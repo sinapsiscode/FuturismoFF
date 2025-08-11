@@ -1,215 +1,631 @@
+/**
+ * Store de proveedores
+ * Maneja el estado global de proveedores
+ */
+
 import { create } from 'zustand';
 import { persist, devtools } from 'zustand/middleware';
-
-// Datos mock de proveedores para desarrollo
-const mockProviders = {
-  locations: [
-    {
-      id: 'ica',
-      name: 'Ica',
-      region: 'Ica',
-      country: 'Perú',
-      categories: ['hoteles', 'restaurantes', 'transporte', 'actividades', 'guias_locales']
-    },
-    {
-      id: 'cusco',
-      name: 'Cusco',
-      region: 'Cusco',
-      country: 'Perú',
-      categories: ['hoteles', 'restaurantes', 'transporte', 'actividades', 'guias_locales', 'artesanias']
-    },
-    {
-      id: 'arequipa',
-      name: 'Arequipa',
-      region: 'Arequipa',
-      country: 'Perú',
-      categories: ['hoteles', 'restaurantes', 'transporte', 'actividades']
-    },
-    {
-      id: 'lima',
-      name: 'Lima',
-      region: 'Lima',
-      country: 'Perú',
-      categories: ['hoteles', 'restaurantes', 'transporte', 'actividades', 'guias_locales']
-    }
-  ],
-  
-  categories: [
-    { id: 'hoteles', name: 'Hoteles', icon: '🏨', color: 'blue' },
-    { id: 'restaurantes', name: 'Restaurantes', icon: '🍽️', color: 'green' },
-    { id: 'transporte', name: 'Transporte', icon: '🚐', color: 'yellow' },
-    { id: 'actividades', name: 'Actividades', icon: '🎯', color: 'purple' },
-    { id: 'guias_locales', name: 'Guías Locales', icon: '👨‍🦱', color: 'orange' },
-    { id: 'artesanias', name: 'Artesanías', icon: '🎨', color: 'pink' }
-  ],
-
-  providers: [
-    // Ica - Hoteles
-    {
-      id: 'hotel_las_dunas_ica',
-      name: 'Hotel Las Dunas',
-      category: 'hoteles',
-      location: 'ica',
-      contact: {
-        phone: '+51 956 123 456',
-        email: 'reservas@hotellasdunasica.com',
-        address: 'Av. La Angostura 400, Ica',
-        contactPerson: 'María González'
-      },
-      services: ['Hospedaje', 'Desayuno', 'Piscina', 'Spa'],
-      pricing: {
-        type: 'per_night',
-        basePrice: 120,
-        currency: 'PEN'
-      },
-      rating: 4.5,
-      capacity: 80,
-      active: true
-    },
-    {
-      id: 'hotel_viñas_queirolo_ica',
-      name: 'Hotel Viñas Queirolo',
-      category: 'hoteles',
-      location: 'ica',
-      contact: {
-        phone: '+51 956 789 012',
-        email: 'info@vinasqueirolo.com',
-        address: 'Fundo Tres Esquinas s/n, Ica',
-        contactPerson: 'Carlos Mendoza'
-      },
-      services: ['Hospedaje', 'Tour de viñedos', 'Degustación', 'Restaurante'],
-      pricing: {
-        type: 'per_night',
-        basePrice: 180,
-        currency: 'PEN'
-      },
-      rating: 4.8,
-      capacity: 40,
-      active: true
-    },
-
-    // Ica - Restaurantes
-    {
-      id: 'restaurant_el_catador_ica',
-      name: 'El Catador',
-      category: 'restaurantes',
-      location: 'ica',
-      contact: {
-        phone: '+51 956 345 678',
-        email: 'reservas@elcatador.com',
-        address: 'Av. Municipalidad 142, Ica',
-        contactPerson: 'Ana Flores'
-      },
-      services: ['Almuerzo', 'Cena', 'Comida criolla', 'Parrillas'],
-      pricing: {
-        type: 'per_person',
-        basePrice: 35,
-        currency: 'PEN'
-      },
-      rating: 4.3,
-      capacity: 60,
-      active: true
-    },
-
-    // Cusco - Hoteles
-    {
-      id: 'hotel_monasterio_cusco',
-      name: 'Hotel Monasterio',
-      category: 'hoteles',
-      location: 'cusco',
-      contact: {
-        phone: '+51 984 123 456',
-        email: 'reservas@monasterio.com',
-        address: 'Calle Palacios 136, Cusco',
-        contactPerson: 'José Quispe'
-      },
-      services: ['Hospedaje de lujo', 'Spa', 'Oxígeno', 'Restaurante gourmet'],
-      pricing: {
-        type: 'per_night',
-        basePrice: 450,
-        currency: 'PEN'
-      },
-      rating: 4.9,
-      capacity: 120,
-      active: true
-    },
-
-    // Cusco - Guías Locales
-    {
-      id: 'guia_local_cusco_1',
-      name: 'Amaru Quispe',
-      category: 'guias_locales',
-      location: 'cusco',
-      contact: {
-        phone: '+51 984 567 890',
-        email: 'amaru.quispe@gmail.com',
-        address: 'Barrio San Blas, Cusco',
-        contactPerson: 'Amaru Quispe'
-      },
-      services: ['Guía en quechua', 'Historia incaica', 'Sitios arqueológicos'],
-      pricing: {
-        type: 'per_day',
-        basePrice: 150,
-        currency: 'PEN'
-      },
-      rating: 4.7,
-      specialties: ['Machu Picchu', 'Valle Sagrado', 'Ciudad del Cusco'],
-      languages: ['Español', 'Quechua', 'Inglés'],
-      active: true
-    }
-  ],
-
-  assignments: [
-    {
-      id: 'assignment_1',
-      tourId: 'tour_ica_fullday',
-      tourName: 'Ica Full Day',
-      date: '2024-01-15',
-      providers: [
-        {
-          providerId: 'hotel_las_dunas_ica',
-          startTime: '08:00',
-          endTime: '10:00',
-          service: 'Desayuno',
-          notes: 'Desayuno buffet para 25 personas'
-        },
-        {
-          providerId: 'restaurant_el_catador_ica',
-          startTime: '13:00',
-          endTime: '15:00',
-          service: 'Almuerzo',
-          notes: 'Menú especial turistas, incluye bebida'
-        }
-      ],
-      status: 'confirmed',
-      createdAt: '2024-01-10T10:00:00.000Z',
-      createdBy: 'admin_user'
-    }
-  ]
-};
+import { providersService } from '../services/providersService';
 
 const useProvidersStore = create(
   devtools(
     persist(
       (set, get) => ({
-        // Estado inicial
-        locations: mockProviders.locations,
-        categories: mockProviders.categories,
-        providers: mockProviders.providers,
-        assignments: mockProviders.assignments,
+        // Estado
+        locations: [],
+        categories: [],
+        providers: [],
+        assignments: [],
+        currentProvider: null,
+        currentAssignment: null,
         selectedLocation: null,
         selectedCategory: null,
         isLoading: false,
         error: null,
+        
+        // Paginación
+        pagination: {
+          page: 1,
+          pageSize: 20,
+          total: 0,
+          totalPages: 0
+        },
+        
+        assignmentsPagination: {
+          page: 1,
+          pageSize: 20,
+          total: 0,
+          totalPages: 0
+        },
+        
+        // Filtros
+        filters: {
+          search: '',
+          location: '',
+          category: '',
+          minRating: null,
+          status: ''
+        },
+        
+        // Estadísticas
+        stats: null,
 
-        // Acciones para ubicaciones
+        // Acciones
         actions: {
-          // Obtener todas las ubicaciones
-          getLocations: () => {
-            return get().locations;
+          // Inicialización
+          initialize: async () => {
+            set({ isLoading: true, error: null });
+            
+            try {
+              const [locationsResult, categoriesResult] = await Promise.all([
+                providersService.getLocations(),
+                providersService.getCategories()
+              ]);
+              
+              if (!locationsResult.success || !categoriesResult.success) {
+                throw new Error('Error al cargar datos iniciales');
+              }
+              
+              set({
+                locations: locationsResult.data,
+                categories: categoriesResult.data,
+                isLoading: false
+              });
+              
+              return true;
+            } catch (error) {
+              set({
+                isLoading: false,
+                error: error.message
+              });
+              throw error;
+            }
+          },
+          
+          // Acciones de filtros
+          setFilters: (filters) => {
+            set((state) => ({
+              filters: { ...state.filters, ...filters },
+              pagination: { ...state.pagination, page: 1 }
+            }));
+            return get().actions.fetchProviders();
+          },
+          
+          clearFilters: () => {
+            set({
+              filters: {
+                search: '',
+                location: '',
+                category: '',
+                minRating: null,
+                status: ''
+              },
+              pagination: { ...get().pagination, page: 1 }
+            });
+            return get().actions.fetchProviders();
+          },
+          
+          setSearch: (search) => {
+            set((state) => ({
+              filters: { ...state.filters, search },
+              pagination: { ...state.pagination, page: 1 }
+            }));
+            return get().actions.fetchProviders();
+          },
+          
+          setPage: (page) => {
+            set((state) => ({
+              pagination: { ...state.pagination, page }
+            }));
+            return get().actions.fetchProviders();
+          },
+          
+          setSelectedLocation: (locationId) => {
+            set({ selectedLocation: locationId });
+            return get().actions.setFilters({ location: locationId });
+          },
+          
+          setSelectedCategory: (categoryId) => {
+            set({ selectedCategory: categoryId });
+            return get().actions.setFilters({ category: categoryId });
           },
 
-          // Obtener categorías por ubicación
+          // CRUD de proveedores
+          fetchProviders: async () => {
+            set({ isLoading: true, error: null });
+            
+            try {
+              const { filters, pagination } = get();
+              const params = {
+                ...filters,
+                page: pagination.page,
+                pageSize: pagination.pageSize
+              };
+              
+              const result = await providersService.getProviders(params);
+              
+              if (!result.success) {
+                throw new Error(result.error || 'Error al cargar proveedores');
+              }
+              
+              set({
+                providers: result.data.providers,
+                pagination: {
+                  page: result.data.page,
+                  pageSize: result.data.pageSize,
+                  total: result.data.total,
+                  totalPages: result.data.totalPages
+                },
+                isLoading: false
+              });
+              
+              return result.data;
+            } catch (error) {
+              set({ 
+                isLoading: false,
+                error: error.message
+              });
+              throw error;
+            }
+          },
+          
+          fetchProviderById: async (id) => {
+            set({ isLoading: true, error: null });
+            
+            try {
+              const result = await providersService.getProviderById(id);
+              
+              if (!result.success) {
+                throw new Error(result.error || 'Proveedor no encontrado');
+              }
+              
+              set({
+                currentProvider: result.data,
+                isLoading: false
+              });
+              
+              return result.data;
+            } catch (error) {
+              set({ 
+                isLoading: false,
+                error: error.message
+              });
+              throw error;
+            }
+          },
+          
+          createProvider: async (providerData) => {
+            set({ isLoading: true, error: null });
+            
+            try {
+              const result = await providersService.createProvider(providerData);
+              
+              if (!result.success) {
+                throw new Error(result.error || 'Error al crear proveedor');
+              }
+              
+              set((state) => ({
+                providers: [result.data, ...state.providers],
+                isLoading: false
+              }));
+              
+              return result.data;
+            } catch (error) {
+              set({ 
+                isLoading: false,
+                error: error.message
+              });
+              throw error;
+            }
+          },
+
+          updateProvider: async (id, updateData) => {
+            set({ isLoading: true, error: null });
+            
+            try {
+              const result = await providersService.updateProvider(id, updateData);
+              
+              if (!result.success) {
+                throw new Error(result.error || 'Error al actualizar proveedor');
+              }
+              
+              set((state) => ({
+                providers: state.providers.map(p => 
+                  p.id === id ? result.data : p
+                ),
+                currentProvider: state.currentProvider?.id === id 
+                  ? result.data 
+                  : state.currentProvider,
+                isLoading: false
+              }));
+              
+              return result.data;
+            } catch (error) {
+              set({ 
+                isLoading: false,
+                error: error.message
+              });
+              throw error;
+            }
+          },
+
+          deleteProvider: async (id) => {
+            set({ isLoading: true, error: null });
+            
+            try {
+              const result = await providersService.deleteProvider(id);
+              
+              if (!result.success) {
+                throw new Error(result.error || 'Error al eliminar proveedor');
+              }
+              
+              set((state) => ({
+                providers: state.providers.filter(p => p.id !== id),
+                currentProvider: state.currentProvider?.id === id 
+                  ? null 
+                  : state.currentProvider,
+                isLoading: false
+              }));
+              
+              return true;
+            } catch (error) {
+              set({ 
+                isLoading: false,
+                error: error.message
+              });
+              throw error;
+            }
+          },
+          
+          toggleProviderStatus: async (id, status) => {
+            set({ isLoading: true, error: null });
+            
+            try {
+              const result = await providersService.toggleProviderStatus(id, status);
+              
+              if (!result.success) {
+                throw new Error(result.error || 'Error al cambiar estado');
+              }
+              
+              set((state) => ({
+                providers: state.providers.map(p => 
+                  p.id === id ? result.data : p
+                ),
+                currentProvider: state.currentProvider?.id === id 
+                  ? result.data 
+                  : state.currentProvider,
+                isLoading: false
+              }));
+              
+              return result.data;
+            } catch (error) {
+              set({ 
+                isLoading: false,
+                error: error.message
+              });
+              throw error;
+            }
+          },
+
+          // Asignaciones
+          fetchAssignments: async (filters = {}) => {
+            set({ isLoading: true, error: null });
+            
+            try {
+              const { assignmentsPagination } = get();
+              const params = {
+                ...filters,
+                page: assignmentsPagination.page,
+                pageSize: assignmentsPagination.pageSize
+              };
+              
+              const result = await providersService.getAssignments(params);
+              
+              if (!result.success) {
+                throw new Error(result.error || 'Error al cargar asignaciones');
+              }
+              
+              set({
+                assignments: result.data.assignments,
+                assignmentsPagination: {
+                  page: result.data.page,
+                  pageSize: result.data.pageSize,
+                  total: result.data.total,
+                  totalPages: result.data.totalPages
+                },
+                isLoading: false
+              });
+              
+              return result.data;
+            } catch (error) {
+              set({ 
+                isLoading: false,
+                error: error.message
+              });
+              throw error;
+            }
+          },
+          
+          fetchAssignmentById: async (id) => {
+            set({ isLoading: true, error: null });
+            
+            try {
+              const result = await providersService.getAssignmentById(id);
+              
+              if (!result.success) {
+                throw new Error(result.error || 'Asignación no encontrada');
+              }
+              
+              set({
+                currentAssignment: result.data,
+                isLoading: false
+              });
+              
+              return result.data;
+            } catch (error) {
+              set({ 
+                isLoading: false,
+                error: error.message
+              });
+              throw error;
+            }
+          },
+          
+          createAssignment: async (assignmentData) => {
+            set({ isLoading: true, error: null });
+            
+            try {
+              const result = await providersService.createAssignment(assignmentData);
+              
+              if (!result.success) {
+                throw new Error(result.error || 'Error al crear asignación');
+              }
+              
+              set((state) => ({
+                assignments: [result.data, ...state.assignments],
+                isLoading: false
+              }));
+              
+              return result.data;
+            } catch (error) {
+              set({ 
+                isLoading: false,
+                error: error.message
+              });
+              throw error;
+            }
+          },
+
+          updateAssignment: async (id, updateData) => {
+            set({ isLoading: true, error: null });
+            
+            try {
+              const result = await providersService.updateAssignment(id, updateData);
+              
+              if (!result.success) {
+                throw new Error(result.error || 'Error al actualizar asignación');
+              }
+              
+              set((state) => ({
+                assignments: state.assignments.map(a => 
+                  a.id === id ? result.data : a
+                ),
+                currentAssignment: state.currentAssignment?.id === id 
+                  ? result.data 
+                  : state.currentAssignment,
+                isLoading: false
+              }));
+              
+              return result.data;
+            } catch (error) {
+              set({ 
+                isLoading: false,
+                error: error.message
+              });
+              throw error;
+            }
+          },
+
+          confirmAssignment: async (id) => {
+            set({ isLoading: true, error: null });
+            
+            try {
+              const result = await providersService.confirmAssignment(id);
+              
+              if (!result.success) {
+                throw new Error(result.error || 'Error al confirmar asignación');
+              }
+              
+              set((state) => ({
+                assignments: state.assignments.map(a => 
+                  a.id === id ? result.data : a
+                ),
+                currentAssignment: state.currentAssignment?.id === id 
+                  ? result.data 
+                  : state.currentAssignment,
+                isLoading: false
+              }));
+              
+              return result.data;
+            } catch (error) {
+              set({ 
+                isLoading: false,
+                error: error.message
+              });
+              throw error;
+            }
+          },
+          
+          cancelAssignment: async (id, reason = '') => {
+            set({ isLoading: true, error: null });
+            
+            try {
+              const result = await providersService.cancelAssignment(id, reason);
+              
+              if (!result.success) {
+                throw new Error(result.error || 'Error al cancelar asignación');
+              }
+              
+              set((state) => ({
+                assignments: state.assignments.map(a => 
+                  a.id === id ? result.data : a
+                ),
+                currentAssignment: state.currentAssignment?.id === id 
+                  ? result.data 
+                  : state.currentAssignment,
+                isLoading: false
+              }));
+              
+              return result.data;
+            } catch (error) {
+              set({ 
+                isLoading: false,
+                error: error.message
+              });
+              throw error;
+            }
+          },
+
+          // Búsqueda y validación
+          searchProviders: async (query, filters = {}) => {
+            set({ isLoading: true, error: null });
+            
+            try {
+              const result = await providersService.searchProviders(query, filters);
+              
+              if (!result.success) {
+                throw new Error(result.error || 'Error en la búsqueda');
+              }
+              
+              set({
+                providers: result.data.providers,
+                isLoading: false
+              });
+              
+              return result.data;
+            } catch (error) {
+              set({ 
+                isLoading: false,
+                error: error.message
+              });
+              throw error;
+            }
+          },
+          
+          checkProviderAvailability: async (providerId, date, startTime, endTime) => {
+            try {
+              const result = await providersService.checkProviderAvailability(
+                providerId, date, startTime, endTime
+              );
+              
+              if (!result.success) {
+                throw new Error(result.error || 'Error al verificar disponibilidad');
+              }
+              
+              return result.data;
+            } catch (error) {
+              set({ error: error.message });
+              throw error;
+            }
+          },
+          
+          // Estadísticas
+          fetchProvidersStats: async () => {
+            set({ isLoading: true, error: null });
+            
+            try {
+              const result = await providersService.getProvidersStats();
+              
+              if (!result.success) {
+                throw new Error(result.error || 'Error al cargar estadísticas');
+              }
+              
+              set({
+                stats: result.data,
+                isLoading: false
+              });
+              
+              return result.data;
+            } catch (error) {
+              set({ 
+                isLoading: false,
+                error: error.message
+              });
+              throw error;
+            }
+          },
+          
+          // Importación/Exportación
+          importProviders: async (file, onProgress = null) => {
+            set({ isLoading: true, error: null });
+            
+            try {
+              const result = await providersService.importProviders(file, onProgress);
+              
+              if (!result.success) {
+                throw new Error(result.error || 'Error al importar proveedores');
+              }
+              
+              // Recargar lista de proveedores
+              await get().actions.fetchProviders();
+              
+              set({ isLoading: false });
+              
+              return result.data;
+            } catch (error) {
+              set({ 
+                isLoading: false,
+                error: error.message
+              });
+              throw error;
+            }
+          },
+          
+          exportProviders: async (filters = {}, format = 'excel') => {
+            set({ isLoading: true, error: null });
+            
+            try {
+              const result = await providersService.exportProviders(filters, format);
+              
+              if (!result.success) {
+                throw new Error(result.error || 'Error al exportar proveedores');
+              }
+              
+              set({ isLoading: false });
+              
+              return result;
+            } catch (error) {
+              set({ 
+                isLoading: false,
+                error: error.message
+              });
+              throw error;
+            }
+          },
+          
+          exportAssignmentPDF: async (assignmentId) => {
+            set({ isLoading: true, error: null });
+            
+            try {
+              const result = await providersService.exportAssignmentPDF(assignmentId);
+              
+              if (!result.success) {
+                throw new Error(result.error || 'Error al exportar PDF');
+              }
+              
+              set({ isLoading: false });
+              
+              return result;
+            } catch (error) {
+              set({ 
+                isLoading: false,
+                error: error.message
+              });
+              throw error;
+            }
+          },
+          
+          // Utilidades
           getCategoriesByLocation: (locationId) => {
             const location = get().locations.find(loc => loc.id === locationId);
             if (!location) return [];
@@ -219,170 +635,40 @@ const useProvidersStore = create(
               allCategories.find(cat => cat.id === catId)
             ).filter(Boolean);
           },
-
-          // Obtener proveedores por ubicación y categoría
-          getProvidersByLocationAndCategory: (locationId, categoryId = null) => {
-            const providers = get().providers;
-            let filtered = providers.filter(p => p.location === locationId && p.active);
-            
-            if (categoryId) {
-              filtered = filtered.filter(p => p.category === categoryId);
-            }
-            
-            return filtered;
-          },
-
-          // Agregar nuevo proveedor
-          addProvider: (provider) => {
-            const newProvider = {
-              ...provider,
-              id: `provider_${Date.now()}`,
-              active: true,
-              createdAt: new Date().toISOString()
-            };
-
-            set(state => ({
-              providers: [...state.providers, newProvider]
-            }));
-
-            return newProvider;
-          },
-
-          // Actualizar proveedor
-          updateProvider: (providerId, updates) => {
-            set(state => ({
-              providers: state.providers.map(provider =>
-                provider.id === providerId
-                  ? { ...provider, ...updates, updatedAt: new Date().toISOString() }
-                  : provider
-              )
-            }));
-          },
-
-          // Eliminar proveedor (soft delete)
-          deleteProvider: (providerId) => {
-            set(state => ({
-              providers: state.providers.map(provider =>
-                provider.id === providerId
-                  ? { ...provider, active: false, deletedAt: new Date().toISOString() }
-                  : provider
-              )
-            }));
-          },
-
-          // Crear asignación de proveedores para un tour
-          createAssignment: (tourData) => {
-            const newAssignment = {
-              ...tourData,
-              id: `assignment_${Date.now()}`,
-              status: 'draft',
-              createdAt: new Date().toISOString(),
-              createdBy: 'current_user' // TODO: obtener del auth store
-            };
-
-            set(state => ({
-              assignments: [...state.assignments, newAssignment]
-            }));
-
-            return newAssignment;
-          },
-
-          // Actualizar asignación
-          updateAssignment: (assignmentId, updates) => {
-            set(state => ({
-              assignments: state.assignments.map(assignment =>
-                assignment.id === assignmentId
-                  ? { ...assignment, ...updates, updatedAt: new Date().toISOString() }
-                  : assignment
-              )
-            }));
-          },
-
-          // Obtener asignación por ID
-          getAssignmentById: (assignmentId) => {
-            return get().assignments.find(a => a.id === assignmentId);
-          },
-
-          // Obtener asignaciones por tour
-          getAssignmentsByTour: (tourId) => {
-            return get().assignments.filter(a => a.tourId === tourId);
-          },
-
-          // Confirmar asignación
-          confirmAssignment: (assignmentId) => {
-            get().actions.updateAssignment(assignmentId, { 
-              status: 'confirmed',
-              confirmedAt: new Date().toISOString()
-            });
-          },
-
-          // Cancelar asignación
-          cancelAssignment: (assignmentId, reason = '') => {
-            get().actions.updateAssignment(assignmentId, { 
-              status: 'cancelled',
-              cancelledAt: new Date().toISOString(),
-              cancellationReason: reason
-            });
-          },
-
-          // Generar datos para PDF
-          generatePDFData: (assignmentId) => {
-            const assignment = get().actions.getAssignmentById(assignmentId);
-            if (!assignment) return null;
-
-            const providers = get().providers;
-            const locations = get().locations;
-            const categories = get().categories;
-
-            const assignmentData = {
-              ...assignment,
-              providers: assignment.providers.map(ap => {
-                const provider = providers.find(p => p.id === ap.providerId);
-                const category = categories.find(c => c.id === provider?.category);
-                const location = locations.find(l => l.id === provider?.location);
-
-                return {
-                  ...ap,
-                  providerInfo: provider,
-                  categoryInfo: category,
-                  locationInfo: location
-                };
-              })
-            };
-
-            return assignmentData;
-          },
-
-          // Filtros y búsqueda
-          setSelectedLocation: (locationId) => set({ selectedLocation: locationId }),
-          setSelectedCategory: (categoryId) => set({ selectedCategory: categoryId }),
           
-          searchProviders: (query, filters = {}) => {
-            const providers = get().providers.filter(p => p.active);
-            let filtered = providers;
-
-            // Búsqueda por texto
-            if (query) {
-              const searchTerm = query.toLowerCase();
-              filtered = filtered.filter(p => 
-                p.name.toLowerCase().includes(searchTerm) ||
-                p.contact.contactPerson.toLowerCase().includes(searchTerm) ||
-                p.services.some(s => s.toLowerCase().includes(searchTerm))
-              );
-            }
-
-            // Filtros adicionales
-            if (filters.location) {
-              filtered = filtered.filter(p => p.location === filters.location);
-            }
-            if (filters.category) {
-              filtered = filtered.filter(p => p.category === filters.category);
-            }
-            if (filters.minRating) {
-              filtered = filtered.filter(p => p.rating >= filters.minRating);
-            }
-
-            return filtered;
+          clearError: () => set({ error: null }),
+          
+          resetStore: () => {
+            set({
+              providers: [],
+              assignments: [],
+              currentProvider: null,
+              currentAssignment: null,
+              selectedLocation: null,
+              selectedCategory: null,
+              isLoading: false,
+              error: null,
+              pagination: {
+                page: 1,
+                pageSize: 20,
+                total: 0,
+                totalPages: 0
+              },
+              assignmentsPagination: {
+                page: 1,
+                pageSize: 20,
+                total: 0,
+                totalPages: 0
+              },
+              filters: {
+                search: '',
+                location: '',
+                category: '',
+                minRating: null,
+                status: ''
+              },
+              stats: null
+            });
           }
         }
       }),

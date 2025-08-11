@@ -153,8 +153,6 @@ const MonthView = ({ onTimeSlotClick, onDateClick, onEventClick, onEventEdit }) 
   );
 };
 
-};
-
 MonthView.propTypes = {
   onTimeSlotClick: PropTypes.func,
   onDateClick: PropTypes.func,

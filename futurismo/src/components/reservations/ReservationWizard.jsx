@@ -2,13 +2,28 @@ import { useState, useEffect } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
-import { MapPinIcon, CalendarIcon, UserGroupIcon, ClockIcon, CurrencyDollarIcon, ChevronRightIcon, ChevronLeftIcon, CheckIcon, ExclamationTriangleIcon, UserIcon, PhoneIcon, PlusIcon, MinusIcon, UserPlusIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { MapPinIcon, UserGroupIcon, CheckIcon, ChevronRightIcon, ChevronLeftIcon } from '@heroicons/react/24/outline';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useReservationsStore } from '../../stores/reservationsStore';
 import { formatters, canBookDirectly, generateWhatsAppURL } from '../../utils/formatters';
 import { validators } from '../../utils/validators';
 import WhatsAppConsultButton from './WhatsAppConsultButton';
 import toast from 'react-hot-toast';
+import { useToursStore } from '../../stores/toursStore';
+
+// Tour types constants
+const TOUR_TYPES = {
+  REGULAR: 'regular',
+  FULLDAY: 'fullday'
+};
+import { WIZARD_STEPS, SERVICE_TYPES, MAX_COMPANIONS_PER_GROUP } from '../../constants/reservationConstants';
+
+// Componentes del wizard
+import StepIndicator from './wizard/StepIndicator';
+import TourSelectionStep from './wizard/TourSelectionStep';
+import PassengerInfoStep from './wizard/PassengerInfoStep';
+import ConfirmationStep from './wizard/ConfirmationStep';
 
 // Esquemas de validación para cada paso
 const step1Schema = yup.object({
@@ -33,7 +48,7 @@ const step2Schema = yup.object({
       companionsCount: yup.number()
         .required('Número de acompañantes es requerido')
         .min(0, 'No puede ser negativo')
-        .max(50, 'Máximo 50 acompañantes por grupo')
+        .max(MAX_COMPANIONS_PER_GROUP, `Máximo ${MAX_COMPANIONS_PER_GROUP} acompañantes por grupo`)
     })
   ).min(1, 'Debe haber al menos un grupo')
 });
@@ -49,21 +64,21 @@ const step3Schema = yup.object({
 const ReservationWizard = ({ onClose }) => {
   const navigate = useNavigate();
   const { submitReservation } = useReservationsStore();
-  const [currentStep, setCurrentStep] = useState(1);
+  const { t } = useTranslation();
+  const [currentStep, setCurrentStep] = useState(WIZARD_STEPS.SERVICE);
   const [formData, setFormData] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isFulldayTour, setIsFulldayTour] = useState(false);
   const [canBookDirectReservation, setCanBookDirectReservation] = useState(true);
+  
+  // Obtener tours del store
+  const { tours: availableTours, loadTours, isLoading: toursLoading } = useToursStore();
+  
+  // Cargar tours al montar el componente
+  useEffect(() => {
+    loadTours({ status: 'activo' });
+  }, []);
 
-  // Mock data para tours disponibles
-  const availableTours = [
-    { id: '1', name: 'City Tour Lima Histórica', price: 35, duration: 4, type: 'regular' },
-    { id: '2', name: 'Tour Gastronómico Miraflores', price: 65, duration: 5, type: 'regular' },
-    { id: '3', name: 'Pachacámac y Barranco', price: 45, duration: 6, type: 'regular' },
-    { id: '4', name: 'Islas Palomino', price: 85, duration: 8, type: 'fullday' },
-    { id: '5', name: 'Machu Picchu Full Day', price: 180, duration: 12, type: 'fullday' },
-    { id: '6', name: 'Valle Sagrado Full Day', price: 150, duration: 10, type: 'fullday' }
-  ];
 
   const steps = [
     { number: 1, title: 'Servicio', icon: MapPinIcon },
@@ -192,7 +207,6 @@ const ReservationWizard = ({ onClose }) => {
       }
     } catch (error) {
       toast.error('Error al crear la reserva');
-      console.error(error);
     } finally {
       setIsSubmitting(false);
     }

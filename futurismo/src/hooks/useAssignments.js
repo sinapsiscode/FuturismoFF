@@ -1,7 +1,18 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
+import { API_DELAYS } from '../constants/hooksConstants';
+import { 
+  ASSIGNMENT_STATUS,
+  DEFAULT_ASSIGNMENT,
+  TOUR_LANGUAGES,
+  GUIDE_SPECIALTIES
+} from '../constants/assignmentsConstants';
 
+/**
+ * Hook personalizado para gestionar asignaciones de tours
+ * @returns {Object} Estado y funciones para manejar asignaciones
+ */
 const useAssignments = () => {
   const { t } = useTranslation();
   const [assignments, setAssignments] = useState([]);
@@ -9,8 +20,8 @@ const useAssignments = () => {
   const [error, setError] = useState(null);
   const [selectedAssignment, setSelectedAssignment] = useState(null);
 
-  // Mock data - En producción vendría de la API
-  const mockAssignments = [
+  // Mock data - TODO: Mover a archivo separado de mock data
+  const mockAssignments = useMemo(() => [
     {
       id: 'ASG001',
       tourDate: '15/02/2024',
@@ -67,7 +78,7 @@ const useAssignments = () => {
       notes: 'Grupo con niños. Incluir parada extra en el mirador de Vista do Rei.',
       language: 'Español'
     }
-  ];
+  ], []);
 
   useEffect(() => {
     loadAssignments();
@@ -79,11 +90,11 @@ const useAssignments = () => {
       setError(null);
       
       // Simular carga desde API
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, API_DELAYS.NORMAL));
       
       setAssignments(mockAssignments);
     } catch (err) {
-      console.error('Error loading assignments:', err);
+      // Error ya manejado con toast
       setError(err.message);
       toast.error(t('assignments.loadError'));
     } finally {
@@ -94,7 +105,7 @@ const useAssignments = () => {
   const assignGuide = async (assignmentId, guideId) => {
     try {
       // Simular API call
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, API_DELAYS.FAST));
       
       setAssignments(prev => prev.map(assignment => 
         assignment.id === assignmentId 
@@ -105,7 +116,7 @@ const useAssignments = () => {
       toast.success(t('assignments.guideAssigned'));
       return { success: true };
     } catch (err) {
-      console.error('Error assigning guide:', err);
+      // Error ya manejado con toast
       toast.error(t('assignments.assignError'));
       return { success: false, error: err.message };
     }
@@ -114,7 +125,7 @@ const useAssignments = () => {
   const assignDriver = async (assignmentId, driverId) => {
     try {
       // Simular API call
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, API_DELAYS.FAST));
       
       setAssignments(prev => prev.map(assignment => 
         assignment.id === assignmentId 
@@ -125,7 +136,7 @@ const useAssignments = () => {
       toast.success(t('assignments.driverAssigned'));
       return { success: true };
     } catch (err) {
-      console.error('Error assigning driver:', err);
+      // Error ya manejado con toast
       toast.error(t('assignments.assignError'));
       return { success: false, error: err.message };
     }
@@ -134,7 +145,7 @@ const useAssignments = () => {
   const updateAssignment = async (assignmentId, updates) => {
     try {
       // Simular API call
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, API_DELAYS.FAST));
       
       setAssignments(prev => prev.map(assignment => 
         assignment.id === assignmentId 
@@ -145,7 +156,7 @@ const useAssignments = () => {
       toast.success(t('assignments.updateSuccess'));
       return { success: true };
     } catch (err) {
-      console.error('Error updating assignment:', err);
+      // Error ya manejado con toast
       toast.error(t('assignments.updateError'));
       return { success: false, error: err.message };
     }
@@ -161,7 +172,7 @@ const useAssignments = () => {
       setSelectedAssignment(assignment);
       return { success: true, assignment };
     } catch (err) {
-      console.error('Error generating brochure:', err);
+      // Error ya manejado con toast
       toast.error(t('assignments.brochureError'));
       return { success: false, error: err.message };
     }

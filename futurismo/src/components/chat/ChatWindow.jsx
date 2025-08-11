@@ -83,8 +83,6 @@ const ChatWindow = ({ chat, onClose }) => {
   );
 };
 
-};
-
 ChatWindow.propTypes = {
   chat: PropTypes.shape({
     id: PropTypes.string.isRequired,

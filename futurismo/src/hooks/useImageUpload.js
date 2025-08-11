@@ -1,6 +1,18 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import {
+  ACCEPTED_IMAGE_TYPES,
+  FILE_SIZE_LIMITS,
+  UPLOAD_CONFIG,
+  UPLOAD_ERROR_KEYS
+} from '../constants/uploadConstants';
 
+/**
+ * Hook personalizado para manejar la carga de imágenes
+ * @param {Function} onImageSelect - Callback cuando se selecciona una imagen
+ * @param {string|null} initialImage - URL de imagen inicial
+ * @returns {Object} Estado y funciones para manejar upload de imágenes
+ */
 const useImageUpload = (onImageSelect, initialImage = null) => {
   const [dragActive, setDragActive] = useState(false);
   const [preview, setPreview] = useState(initialImage);
@@ -8,20 +20,15 @@ const useImageUpload = (onImageSelect, initialImage = null) => {
   const fileInputRef = useRef(null);
   const { t } = useTranslation();
 
-  const IMAGE_CONFIG = {
-    validTypes: ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'],
-    maxSize: 5 * 1024 * 1024, // 5MB
-    uploadDelay: 1000 // Simulated upload delay
-  };
 
   // Validate image file
   const validateImageFile = (file) => {
-    if (!IMAGE_CONFIG.validTypes.includes(file.type)) {
-      return { valid: false, error: t('upload.invalidFormat') };
+    if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
+      return { valid: false, error: t(UPLOAD_ERROR_KEYS.INVALID_FORMAT) };
     }
 
-    if (file.size > IMAGE_CONFIG.maxSize) {
-      return { valid: false, error: t('upload.fileTooLarge') };
+    if (file.size > FILE_SIZE_LIMITS.IMAGE) {
+      return { valid: false, error: t(UPLOAD_ERROR_KEYS.FILE_TOO_LARGE) };
     }
 
     return { valid: true };
@@ -47,13 +54,13 @@ const useImageUpload = (onImageSelect, initialImage = null) => {
       reader.readAsDataURL(file);
 
       // Simulate upload (in production this would upload to a server)
-      await new Promise(resolve => setTimeout(resolve, IMAGE_CONFIG.uploadDelay));
+      await new Promise(resolve => setTimeout(resolve, UPLOAD_CONFIG.UPLOAD_DELAY));
 
       // Return processed file
       onImageSelect(file, null);
     } catch (error) {
       setUploading(false);
-      onImageSelect(null, t('upload.uploadError'));
+      onImageSelect(null, t(UPLOAD_ERROR_KEYS.UPLOAD_ERROR));
     }
   };
 
@@ -115,7 +122,8 @@ const useImageUpload = (onImageSelect, initialImage = null) => {
     openFileSelector,
 
     // Config
-    acceptedFormats: 'image/*'
+    acceptedFormats: ACCEPTED_IMAGE_TYPES.join(','),
+    maxFileSize: FILE_SIZE_LIMITS.IMAGE
   };
 };
 

@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { SERVICE_STATUS } from '../utils/constants';
+import { servicesService } from '../services/servicesService';
 
 const useServicesStore = create((set, get) => ({
   // Estado
@@ -18,81 +19,193 @@ const useServicesStore = create((set, get) => ({
   mapView: true, // true = vista mapa, false = vista tarjetas
 
   // Acciones
-  setServices: (services) => {
-    const active = services.filter(s => 
-      s.status !== SERVICE_STATUS.FINISHED && 
-      s.status !== SERVICE_STATUS.CANCELLED
-    );
+  loadServices: async (filters = {}) => {
+    set({ isLoading: true, error: null });
     
-    const historical = services.filter(s => 
-      s.status === SERVICE_STATUS.FINISHED || 
-      s.status === SERVICE_STATUS.CANCELLED
-    );
-    
-    set({ 
-      services, 
-      activeServices: active,
-      historicalServices: historical 
-    });
-  },
-
-  addService: (service) => {
-    set((state) => ({
-      services: [...state.services, service],
-      activeServices: service.status !== SERVICE_STATUS.FINISHED && service.status !== SERVICE_STATUS.CANCELLED
-        ? [...state.activeServices, service]
-        : state.activeServices
-    }));
-  },
-
-  updateService: (serviceId, updates) => {
-    set((state) => {
-      const updatedServices = state.services.map(service =>
-        service.id === serviceId ? { ...service, ...updates } : service
+    try {
+      const result = await servicesService.getServices(filters);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al cargar servicios');
+      }
+      
+      const services = result.data;
+      const active = services.filter(s => 
+        s.status !== SERVICE_STATUS.FINISHED && 
+        s.status !== SERVICE_STATUS.CANCELLED
       );
       
-      return {
-        services: updatedServices,
-        activeServices: updatedServices.filter(s => 
-          s.status !== SERVICE_STATUS.FINISHED && 
-          s.status !== SERVICE_STATUS.CANCELLED
+      const historical = services.filter(s => 
+        s.status === SERVICE_STATUS.FINISHED || 
+        s.status === SERVICE_STATUS.CANCELLED
+      );
+      
+      set({ 
+        services, 
+        activeServices: active,
+        historicalServices: historical,
+        isLoading: false
+      });
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
+  },
+  
+  loadActiveServices: async (filters = {}) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await servicesService.getActiveServices(filters);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al cargar servicios activos');
+      }
+      
+      set({ 
+        activeServices: result.data,
+        isLoading: false
+      });
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
+  },
+
+  createService: async (serviceData) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await servicesService.createService(serviceData);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al crear servicio');
+      }
+      
+      set((state) => ({
+        services: [...state.services, result.data],
+        activeServices: result.data.status !== SERVICE_STATUS.FINISHED && 
+                       result.data.status !== SERVICE_STATUS.CANCELLED
+          ? [...state.activeServices, result.data]
+          : state.activeServices,
+        isLoading: false
+      }));
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
+  },
+
+  updateService: async (serviceId, updates) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await servicesService.updateService(serviceId, updates);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al actualizar servicio');
+      }
+      
+      set((state) => {
+        const updatedServices = state.services.map(service =>
+          service.id === serviceId ? result.data : service
+        );
+        
+        return {
+          services: updatedServices,
+          activeServices: updatedServices.filter(s => 
+            s.status !== SERVICE_STATUS.FINISHED && 
+            s.status !== SERVICE_STATUS.CANCELLED
+          ),
+          historicalServices: updatedServices.filter(s => 
+            s.status === SERVICE_STATUS.FINISHED || 
+            s.status === SERVICE_STATUS.CANCELLED
+          ),
+          isLoading: false
+        };
+      });
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
+  },
+
+  updateServiceLocation: async (serviceId, location) => {
+    try {
+      const result = await servicesService.updateServiceLocation(serviceId, location);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al actualizar ubicación');
+      }
+      
+      set((state) => ({
+        services: state.services.map(service =>
+          service.id === serviceId ? result.data : service
         ),
-        historicalServices: updatedServices.filter(s => 
-          s.status === SERVICE_STATUS.FINISHED || 
-          s.status === SERVICE_STATUS.CANCELLED
+        activeServices: state.activeServices.map(service =>
+          service.id === serviceId ? result.data : service
         )
-      };
-    });
+      }));
+      
+      return result.data;
+    } catch (error) {
+      set({ error: error.message });
+      throw error;
+    }
   },
 
-  updateServiceLocation: (serviceId, location) => {
-    set((state) => ({
-      services: state.services.map(service =>
-        service.id === serviceId 
-          ? { ...service, currentLocation: location, lastUpdate: new Date().toISOString() }
-          : service
-      ),
-      activeServices: state.activeServices.map(service =>
-        service.id === serviceId 
-          ? { ...service, currentLocation: location, lastUpdate: new Date().toISOString() }
-          : service
-      )
-    }));
-  },
-
-  updateGuidePosition: (guideId, position) => {
-    set((state) => ({
-      services: state.services.map(service =>
-        service.guideId === guideId 
-          ? { ...service, guideLocation: position, lastUpdate: new Date().toISOString() }
-          : service
-      ),
-      activeServices: state.activeServices.map(service =>
-        service.guideId === guideId 
-          ? { ...service, guideLocation: position, lastUpdate: new Date().toISOString() }
-          : service
-      )
-    }));
+  updateGuidePosition: async (guideId, position) => {
+    try {
+      const result = await servicesService.updateGuideLocation(guideId, position);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al actualizar posición del guía');
+      }
+      
+      // Actualizar todos los servicios afectados
+      set((state) => {
+        const updatedGuideServices = result.data;
+        const updatedServiceIds = new Set(updatedGuideServices.map(s => s.id));
+        
+        return {
+          services: state.services.map(service =>
+            updatedServiceIds.has(service.id) 
+              ? updatedGuideServices.find(s => s.id === service.id)
+              : service
+          ),
+          activeServices: state.activeServices.map(service =>
+            updatedServiceIds.has(service.id) 
+              ? updatedGuideServices.find(s => s.id === service.id)
+              : service
+          )
+        };
+      });
+      
+      return result.data;
+    } catch (error) {
+      set({ error: error.message });
+      throw error;
+    }
   },
 
   setFilters: (filters) => {
@@ -207,89 +320,158 @@ const useServicesStore = create((set, get) => ({
     };
   },
 
-  // Inicializar con datos mock
-  initializeMockData: () => {
-    const mockServices = [
-      {
-        id: 1,
-        code: 'TUR001',
-        status: 'en_curso',
-        client: { name: 'María González', phone: '+51 987654321' },
-        guide: { name: 'Carlos Mendoza', phone: '+51 123456789' },
-        startTime: '09:00',
-        pickupLocation: 'Plaza de Armas',
-        destination: 'Circuito Mágico del Agua',
-        currentLocation: { lat: -12.0464, lng: -77.0428 },
-        lastUpdate: new Date().toISOString(),
-        date: new Date().toISOString().split('T')[0]
-      },
-      {
-        id: 2,
-        code: 'TUR002',
-        status: 'programado',
-        client: { name: 'John Smith', phone: '+1 555-0123' },
-        guide: { name: 'Ana Rivera', phone: '+51 987654321' },
-        startTime: '14:00',
-        pickupLocation: 'Hotel Miraflores',
-        destination: 'Museo Nacional',
-        currentLocation: { lat: -12.1215, lng: -77.0298 },
-        lastUpdate: new Date().toISOString(),
-        date: new Date().toISOString().split('T')[0]
-      },
-      {
-        id: 3,
-        code: 'TUR003',
-        status: 'en_curso',
-        client: { name: 'Sophie Dubois', phone: '+33 123456789' },
-        guide: { name: 'Miguel Torres', phone: '+51 876543210' },
-        startTime: '11:30',
-        pickupLocation: 'Barranco',
-        destination: 'Centro Histórico',
-        currentLocation: { lat: -12.1533, lng: -77.0244 },
-        lastUpdate: new Date().toISOString(),
-        date: new Date().toISOString().split('T')[0]
-      },
-      {
-        id: 4,
-        code: 'TUR004',
-        status: 'pausado',
-        client: { name: 'Roberto Silva', phone: '+51 555-9876' },
-        guide: { name: 'Lucia Fernandez', phone: '+51 765432109' },
-        startTime: '16:00',
-        pickupLocation: 'San Isidro',
-        destination: 'Larco Mar',
-        currentLocation: { lat: -12.0956, lng: -77.0364 },
-        lastUpdate: new Date().toISOString(),
-        date: new Date().toISOString().split('T')[0]
-      },
-      {
-        id: 5,
-        code: 'TUR005',
-        status: 'programado',
-        client: { name: 'Emma Johnson', phone: '+44 20 7946 0958' },
-        guide: { name: 'Pedro Ramirez', phone: '+51 654321098' },
-        startTime: '18:30',
-        pickupLocation: 'Callao',
-        destination: 'Fortaleza del Real Felipe',
-        currentLocation: { lat: -12.0735, lng: -77.0826 },
-        lastUpdate: new Date().toISOString(),
-        date: new Date().toISOString().split('T')[0]
-      }
-    ];
-
-    set((state) => {
-      const active = mockServices.filter(s => 
-        s.status !== 'completado' && s.status !== 'cancelado'
-      );
+  // Acciones de estado del servicio
+  startService: async (serviceId) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await servicesService.startService(serviceId);
       
-      return {
-        services: mockServices,
-        activeServices: active,
-        historicalServices: []
-      };
-    });
+      if (!result.success) {
+        throw new Error(result.error || 'Error al iniciar servicio');
+      }
+      
+      // Actualizar estado local
+      get().updateService(serviceId, result.data);
+      
+      set({ isLoading: false });
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
+  },
+  
+  pauseService: async (serviceId, reason = '') => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await servicesService.pauseService(serviceId, reason);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al pausar servicio');
+      }
+      
+      // Actualizar estado local
+      get().updateService(serviceId, result.data);
+      
+      set({ isLoading: false });
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
+  },
+  
+  resumeService: async (serviceId) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await servicesService.resumeService(serviceId);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al reanudar servicio');
+      }
+      
+      // Actualizar estado local
+      get().updateService(serviceId, result.data);
+      
+      set({ isLoading: false });
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
+  },
+  
+  finishService: async (serviceId, completionData = {}) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await servicesService.finishService(serviceId, completionData);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al finalizar servicio');
+      }
+      
+      // Actualizar estado local
+      get().updateService(serviceId, result.data);
+      
+      set({ isLoading: false });
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
+  },
+  
+  cancelService: async (serviceId, reason) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await servicesService.cancelService(serviceId, reason);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al cancelar servicio');
+      }
+      
+      // Actualizar estado local
+      get().updateService(serviceId, result.data);
+      
+      set({ isLoading: false });
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
+  },
+  
+  // Estadísticas
+  loadStatistics: async (filters = {}) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await servicesService.getStatistics(filters);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al cargar estadísticas');
+      }
+      
+      set({ isLoading: false });
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
   },
 
+  // Utilidades
+  clearError: () => set({ error: null }),
+  
   // Limpiar store
   clearStore: () => {
     set({
@@ -303,8 +485,39 @@ const useServicesStore = create((set, get) => ({
         search: ''
       },
       selectedService: null,
-      error: null
+      error: null,
+      isLoading: false
     });
+  },
+  
+  // Actualizaciones en tiempo real
+  realtimeInterval: null,
+  
+  startRealtimeUpdates: () => {
+    const interval = servicesService.startRealtimeUpdates((updatedServices) => {
+      // Actualizar servicios con nuevas ubicaciones
+      set((state) => {
+        const updatedServiceIds = new Set(updatedServices.map(s => s.id));
+        
+        return {
+          activeServices: state.activeServices.map(service =>
+            updatedServiceIds.has(service.id) 
+              ? updatedServices.find(s => s.id === service.id)
+              : service
+          )
+        };
+      });
+    });
+    
+    set({ realtimeInterval: interval });
+  },
+  
+  stopRealtimeUpdates: () => {
+    const { realtimeInterval } = get();
+    if (realtimeInterval) {
+      servicesService.stopRealtimeUpdates();
+      set({ realtimeInterval: null });
+    }
   }
 }));
 

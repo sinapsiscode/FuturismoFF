@@ -7,8 +7,11 @@ import {
   ChatBubbleLeftRightIcon
 } from '@heroicons/react/24/outline';
 import { useSettingsStore } from '../../stores/settingsStore';
+import { useTranslation } from 'react-i18next';
+import { NOTIFICATION_CHANNELS, NOTIFICATION_TYPES, CHANNEL_COLORS } from '../../constants/settingsConstants';
 
 const NotificationsSettings = () => {
+  const { t } = useTranslation();
   const { 
     settings,
     updateNotificationsSettings,
@@ -46,44 +49,44 @@ const NotificationsSettings = () => {
   };
 
   const notificationTypes = [
-    { key: 'newReservation', label: 'Nueva Reserva', description: 'Cuando se crea una nueva reserva' },
-    { key: 'cancellation', label: 'Cancelación', description: 'Cuando se cancela una reserva' },
-    { key: 'reminder24h', label: 'Recordatorio 24h', description: 'Recordatorio 24 horas antes del tour' },
-    { key: 'reminder2h', label: 'Recordatorio 2h', description: 'Recordatorio 2 horas antes del tour' },
-    { key: 'tourComplete', label: 'Tour Completado', description: 'Cuando se completa un tour' },
-    { key: 'paymentReceived', label: 'Pago Recibido', description: 'Cuando se recibe un pago' },
-    { key: 'lowCredit', label: 'Crédito Bajo', description: 'Cuando el crédito de agencia es bajo' },
-    { key: 'systemAlerts', label: 'Alertas del Sistema', description: 'Alertas importantes del sistema' }
+    { key: NOTIFICATION_TYPES.NEW_RESERVATION, label: t('settings.notifications.types.newReservation'), description: t('settings.notifications.types.newReservationDesc') },
+    { key: NOTIFICATION_TYPES.CANCELLATION, label: t('settings.notifications.types.cancellation'), description: t('settings.notifications.types.cancellationDesc') },
+    { key: NOTIFICATION_TYPES.REMINDER_24H, label: t('settings.notifications.types.reminder24h'), description: t('settings.notifications.types.reminder24hDesc') },
+    { key: NOTIFICATION_TYPES.REMINDER_2H, label: t('settings.notifications.types.reminder2h'), description: t('settings.notifications.types.reminder2hDesc') },
+    { key: NOTIFICATION_TYPES.TOUR_COMPLETE, label: t('settings.notifications.types.tourComplete'), description: t('settings.notifications.types.tourCompleteDesc') },
+    { key: NOTIFICATION_TYPES.PAYMENT_RECEIVED, label: t('settings.notifications.types.paymentReceived'), description: t('settings.notifications.types.paymentReceivedDesc') },
+    { key: NOTIFICATION_TYPES.LOW_CREDIT, label: t('settings.notifications.types.lowCredit'), description: t('settings.notifications.types.lowCreditDesc') },
+    { key: NOTIFICATION_TYPES.SYSTEM_ALERTS, label: t('settings.notifications.types.systemAlerts'), description: t('settings.notifications.types.systemAlertsDesc') }
   ];
 
   const channels = [
     {
-      key: 'email',
-      label: 'Email',
+      key: NOTIFICATION_CHANNELS.EMAIL,
+      label: t('settings.notifications.channels.email'),
       icon: EnvelopeIcon,
-      color: 'blue',
-      description: 'Notificaciones por correo electrónico'
+      color: CHANNEL_COLORS.EMAIL,
+      description: t('settings.notifications.channels.emailDesc')
     },
     {
-      key: 'sms',
-      label: 'SMS',
+      key: NOTIFICATION_CHANNELS.SMS,
+      label: t('settings.notifications.channels.sms'),
       icon: PhoneIcon,
-      color: 'green',
-      description: 'Notificaciones por mensaje de texto'
+      color: CHANNEL_COLORS.SMS,
+      description: t('settings.notifications.channels.smsDesc')
     },
     {
-      key: 'push',
-      label: 'Push',
+      key: NOTIFICATION_CHANNELS.PUSH,
+      label: t('settings.notifications.channels.push'),
       icon: DevicePhoneMobileIcon,
-      color: 'purple',
-      description: 'Notificaciones push en dispositivos móviles'
+      color: CHANNEL_COLORS.PUSH,
+      description: t('settings.notifications.channels.pushDesc')
     },
     {
-      key: 'whatsapp',
-      label: 'WhatsApp',
+      key: NOTIFICATION_CHANNELS.WHATSAPP,
+      label: t('settings.notifications.channels.whatsapp'),
       icon: ChatBubbleLeftRightIcon,
-      color: 'green',
-      description: 'Notificaciones por WhatsApp Business'
+      color: CHANNEL_COLORS.WHATSAPP,
+      description: t('settings.notifications.channels.whatsappDesc')
     }
   ];
 
@@ -93,7 +96,7 @@ const NotificationsSettings = () => {
         <div className="flex items-center mb-6">
           <BellIcon className="h-6 w-6 text-blue-600 mr-3" />
           <h3 className="text-lg font-semibold text-gray-900">
-            Configuración de Notificaciones
+            {t('settings.notifications.title')}
           </h3>
         </div>
 
@@ -131,31 +134,33 @@ const NotificationsSettings = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 pt-4 border-t border-gray-100">
                   {notificationTypes.map((notificationType) => {
                     // Solo mostrar notificaciones específicas para SMS
-                    if (channel.key === 'sms' && !['cancellation', 'reminder2h', 'emergencyOnly'].includes(notificationType.key)) {
+                    if (channel.key === NOTIFICATION_CHANNELS.SMS && 
+                        ![NOTIFICATION_TYPES.CANCELLATION, NOTIFICATION_TYPES.REMINDER_2H, NOTIFICATION_TYPES.EMERGENCY_ONLY].includes(notificationType.key)) {
                       return null;
                     }
                     
                     // Solo mostrar notificaciones específicas para WhatsApp
-                    if (channel.key === 'whatsapp' && !['newReservation', 'reminder24h', 'tourComplete'].includes(notificationType.key)) {
+                    if (channel.key === NOTIFICATION_CHANNELS.WHATSAPP && 
+                        ![NOTIFICATION_TYPES.NEW_RESERVATION, NOTIFICATION_TYPES.REMINDER_24H, NOTIFICATION_TYPES.TOUR_COMPLETE].includes(notificationType.key)) {
                       return null;
                     }
 
                     // Agregar emergencyOnly solo para SMS
-                    if (channel.key === 'sms' && notificationType.key === 'emergencyOnly') {
+                    if (channel.key === NOTIFICATION_CHANNELS.SMS && notificationType.key === NOTIFICATION_TYPES.EMERGENCY_ONLY) {
                       return (
-                        <div key="emergencyOnly" className="flex items-center justify-between">
+                        <div key={NOTIFICATION_TYPES.EMERGENCY_ONLY} className="flex items-center justify-between">
                           <div>
                             <label className="text-sm font-medium text-gray-700">
-                              Solo Emergencias
+                              {t('settings.notifications.types.emergencyOnly')}
                             </label>
                             <p className="text-xs text-gray-500">
-                              Enviar SMS solo en caso de emergencias
+                              {t('settings.notifications.types.emergencyOnlyDesc')}
                             </p>
                           </div>
                           <input
                             type="checkbox"
                             checked={formData[channel.key].emergencyOnly || false}
-                            onChange={(e) => handleNotificationToggle(channel.key, 'emergencyOnly', e.target.checked)}
+                            onChange={(e) => handleNotificationToggle(channel.key, NOTIFICATION_TYPES.EMERGENCY_ONLY, e.target.checked)}
                             className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                           />
                         </div>
@@ -190,7 +195,7 @@ const NotificationsSettings = () => {
               {!formData[channel.key].enabled && (
                 <div className="mt-4 pt-4 border-t border-gray-100">
                   <p className="text-sm text-gray-500 text-center py-4">
-                    Las notificaciones por {channel.label.toLowerCase()} están deshabilitadas
+                    {t('settings.notifications.channelDisabled', { channel: channel.label.toLowerCase() })}
                   </p>
                 </div>
               )}
@@ -202,12 +207,12 @@ const NotificationsSettings = () => {
             <div className="flex items-start">
               <BellIcon className="h-5 w-5 text-blue-600 mt-0.5 mr-3 flex-shrink-0" />
               <div className="text-sm text-blue-800">
-                <h4 className="font-medium mb-1">Configuración de Notificaciones</h4>
+                <h4 className="font-medium mb-1">{t('settings.notifications.infoTitle')}</h4>
                 <ul className="space-y-1">
-                  <li>• Las notificaciones por email están siempre disponibles</li>
-                  <li>• SMS requiere configuración de proveedor de telefonía</li>
-                  <li>• Push requiere aplicación móvil instalada</li>
-                  <li>• WhatsApp requiere WhatsApp Business API configurado</li>
+                  <li>• {t('settings.notifications.infoEmail')}</li>
+                  <li>• {t('settings.notifications.infoSms')}</li>
+                  <li>• {t('settings.notifications.infoPush')}</li>
+                  <li>• {t('settings.notifications.infoWhatsapp')}</li>
                 </ul>
               </div>
             </div>
@@ -221,7 +226,7 @@ const NotificationsSettings = () => {
               className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
               disabled={isLoading}
             >
-              Cancelar
+              {t('common.cancel')}
             </button>
             
             <button
@@ -229,7 +234,7 @@ const NotificationsSettings = () => {
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
               disabled={isLoading}
             >
-              {isLoading ? 'Guardando...' : 'Guardar Cambios'}
+              {isLoading ? t('common.saving') : t('common.saveChanges')}
             </button>
           </div>
         </form>
@@ -237,7 +242,7 @@ const NotificationsSettings = () => {
         {hasUnsavedChanges && (
           <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
             <p className="text-sm text-yellow-800">
-              Tienes cambios sin guardar. No olvides guardar antes de salir.
+              {t('settings.notifications.unsavedChanges')}
             </p>
           </div>
         )}
