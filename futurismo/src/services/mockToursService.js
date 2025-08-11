@@ -489,6 +489,234 @@ class MockToursService {
       data: duplicatedTour
     };
   }
+
+  /**
+   * Verificar disponibilidad de guía
+   */
+  async checkGuideAvailability(tourId, guideId) {
+    await this.simulateNetworkDelay();
+    
+    const tour = this.tours.find(t => t.id === tourId);
+    if (!tour) {
+      return {
+        success: false,
+        error: 'Tour no encontrado'
+      };
+    }
+
+    // Simular verificación de disponibilidad
+    // En un sistema real, esto verificaría conflictos con otros tours
+    const isAvailable = Math.random() > 0.2; // 80% de probabilidad de estar disponible
+    const conflicts = !isAvailable ? ['Tour City Tour Lima - 09:00 a 13:00'] : [];
+
+    return {
+      success: true,
+      data: {
+        isAvailable,
+        conflicts,
+        guideId,
+        tourId,
+        date: tour.date || new Date().toISOString()
+      }
+    };
+  }
+
+  /**
+   * Verificar competencias del guía
+   */
+  async checkGuideCompetences(tourId, guideId) {
+    await this.simulateNetworkDelay();
+    
+    const tour = this.tours.find(t => t.id === tourId);
+    if (!tour) {
+      return {
+        success: false,
+        error: 'Tour no encontrado'
+      };
+    }
+
+    // Simular verificación de competencias
+    const hasRequiredCompetences = Math.random() > 0.1; // 90% de probabilidad de tener competencias
+    const missingCompetences = !hasRequiredCompetences ? 
+      ['Certificación en primeros auxilios', 'Licencia de guía turístico'] : [];
+
+    return {
+      success: true,
+      data: {
+        hasRequiredCompetences,
+        missingCompetences,
+        guideId,
+        tourId
+      }
+    };
+  }
+
+  /**
+   * Asignar guía a tour
+   */
+  async assignGuideToTour(tourId, guideId, options = {}) {
+    await this.simulateNetworkDelay();
+    
+    const tour = this.tours.find(t => t.id === tourId);
+    if (!tour) {
+      return {
+        success: false,
+        error: 'Tour no encontrado'
+      };
+    }
+
+    // Actualizar tour con asignación
+    const updatedTour = {
+      ...tour,
+      assignedGuide: {
+        id: guideId,
+        name: `Guía ${guideId}`, // En un sistema real vendría del store de guías
+        assignedAt: new Date().toISOString(),
+        role: options.role || 'principal'
+      },
+      status: 'assigned',
+      updatedAt: new Date().toISOString()
+    };
+
+    const index = this.tours.findIndex(t => t.id === tourId);
+    this.tours[index] = updatedTour;
+    this.saveToStorage();
+
+    return {
+      success: true,
+      data: updatedTour
+    };
+  }
+
+  /**
+   * Asignar tour a agencia
+   */
+  async assignTourToAgency(tourId, agencyId, options = {}) {
+    await this.simulateNetworkDelay();
+    
+    const tour = this.tours.find(t => t.id === tourId);
+    if (!tour) {
+      return {
+        success: false,
+        error: 'Tour no encontrado'
+      };
+    }
+
+    // Actualizar tour con asignación de agencia
+    const updatedTour = {
+      ...tour,
+      assignedAgency: {
+        id: agencyId,
+        name: `Agencia ${agencyId}`, // En un sistema real vendría del store de agencias
+        assignedAt: new Date().toISOString(),
+        commission: options.commission || 10,
+        contractType: options.contractType || 'standard'
+      },
+      updatedAt: new Date().toISOString()
+    };
+
+    const index = this.tours.findIndex(t => t.id === tourId);
+    this.tours[index] = updatedTour;
+    this.saveToStorage();
+
+    return {
+      success: true,
+      data: updatedTour
+    };
+  }
+
+  /**
+   * Obtener guías disponibles para un tour
+   */
+  async getAvailableGuidesForTour(tourId, date) {
+    await this.simulateNetworkDelay();
+    
+    const tour = this.tours.find(t => t.id === tourId);
+    if (!tour) {
+      return {
+        success: false,
+        error: 'Tour no encontrado'
+      };
+    }
+
+    // Simular lista de guías disponibles
+    const availableGuides = [
+      {
+        id: '1',
+        name: 'Juan Pérez',
+        languages: ['Español', 'Inglés'],
+        specialties: ['Cultural', 'Histórico'],
+        rating: 4.8,
+        toursCompleted: 156,
+        availability: 'available'
+      },
+      {
+        id: '2', 
+        name: 'María García',
+        languages: ['Español', 'Portugués', 'Inglés'],
+        specialties: ['Gastronómico', 'Cultural'],
+        rating: 4.9,
+        toursCompleted: 203,
+        availability: 'available'
+      },
+      {
+        id: '3',
+        name: 'Carlos López',
+        languages: ['Español', 'Francés'],
+        specialties: ['Aventura', 'Naturaleza'],
+        rating: 4.7,
+        toursCompleted: 98,
+        availability: 'busy',
+        busyUntil: '14:00'
+      }
+    ];
+
+    return {
+      success: true,
+      data: {
+        guides: availableGuides,
+        tourId,
+        date,
+        totalAvailable: availableGuides.filter(g => g.availability === 'available').length
+      }
+    };
+  }
+
+  /**
+   * Remover asignación
+   */
+  async removeAssignment(tourId, assignmentType = 'guide') {
+    await this.simulateNetworkDelay();
+    
+    const tour = this.tours.find(t => t.id === tourId);
+    if (!tour) {
+      return {
+        success: false,
+        error: 'Tour no encontrado'
+      };
+    }
+
+    // Remover asignación según tipo
+    const updatedTour = { ...tour };
+    
+    if (assignmentType === 'guide') {
+      delete updatedTour.assignedGuide;
+      updatedTour.status = 'pending';
+    } else if (assignmentType === 'agency') {
+      delete updatedTour.assignedAgency;
+    }
+    
+    updatedTour.updatedAt = new Date().toISOString();
+
+    const index = this.tours.findIndex(t => t.id === tourId);
+    this.tours[index] = updatedTour;
+    this.saveToStorage();
+
+    return {
+      success: true,
+      data: updatedTour
+    };
+  }
 }
 
 export const mockToursService = new MockToursService();

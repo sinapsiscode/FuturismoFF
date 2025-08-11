@@ -409,6 +409,135 @@ const useToursStore = create((set, get) => ({
   // Limpiar tour seleccionado
   clearSelectedTour: () => set({ selectedTour: null }),
 
+  // Asignar guía a tour con validaciones
+  assignGuideToTour: async (tourId, guideId, options = {}) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      // Validar disponibilidad del guía
+      const availabilityResult = await toursService.checkGuideAvailability(tourId, guideId);
+      
+      if (!availabilityResult.success) {
+        throw new Error(availabilityResult.error || 'El guía no está disponible para este tour');
+      }
+
+      if (!availabilityResult.data.isAvailable) {
+        const conflicts = availabilityResult.data.conflicts || [];
+        throw new Error(`El guía tiene conflictos de horario: ${conflicts.join(', ')}`);
+      }
+
+      // Validar competencias si es necesario
+      if (options.validateCompetences) {
+        const competenceResult = await toursService.checkGuideCompetences(tourId, guideId);
+        
+        if (!competenceResult.success || !competenceResult.data.hasRequiredCompetences) {
+          throw new Error('El guía no tiene las competencias requeridas para este tour');
+        }
+      }
+
+      // Asignar el guía
+      const result = await toursService.assignGuideToTour(tourId, guideId, options);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al asignar guía');
+      }
+      
+      set((state) => ({
+        tours: state.tours.map(tour =>
+          tour.id === tourId ? result.data : tour
+        ),
+        isLoading: false
+      }));
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
+  },
+
+  // Asignar tour a agencia
+  assignTourToAgency: async (tourId, agencyId, options = {}) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await toursService.assignTourToAgency(tourId, agencyId, options);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al asignar tour a agencia');
+      }
+      
+      set((state) => ({
+        tours: state.tours.map(tour =>
+          tour.id === tourId ? result.data : tour
+        ),
+        isLoading: false
+      }));
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
+  },
+
+  // Obtener disponibilidad de guías para un tour
+  getAvailableGuidesForTour: async (tourId, date) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await toursService.getAvailableGuidesForTour(tourId, date);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al obtener guías disponibles');
+      }
+      
+      set({ isLoading: false });
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
+  },
+
+  // Remover asignación
+  removeAssignment: async (tourId, assignmentType = 'guide') => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const result = await toursService.removeAssignment(tourId, assignmentType);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al remover asignación');
+      }
+      
+      set((state) => ({
+        tours: state.tours.map(tour =>
+          tour.id === tourId ? result.data : tour
+        ),
+        isLoading: false
+      }));
+      
+      return result.data;
+    } catch (error) {
+      set({ 
+        isLoading: false,
+        error: error.message
+      });
+      throw error;
+    }
+  },
+
   // Establecer estado de carga
   setLoading: (isLoading) => set({ isLoading }),
 

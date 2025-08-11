@@ -432,6 +432,53 @@ class MockClientsService {
       data: filtered
     };
   }
+
+  // Obtener tipos de cliente
+  async getClientTypes() {
+    await this.simulateDelay();
+    
+    return {
+      success: true,
+      data: [
+        { id: 'agency', label: 'Agencia de Viajes', icon: 'building' },
+        { id: 'company', label: 'Empresa', icon: 'office' },
+        { id: 'individual', label: 'Particular', icon: 'user' }
+      ]
+    };
+  }
+
+  // Validar documento (RUC/DNI)
+  async validateDocument(type, number) {
+    await this.simulateDelay();
+    
+    const exists = this.clients.some(c => 
+      c.documentNumber === number && c.documentType === type
+    );
+    
+    return {
+      success: true,
+      data: {
+        valid: type === 'ruc' ? number.length === 11 : number.length === 8,
+        exists,
+        type,
+        number
+      }
+    };
+  }
+
+  // Obtener clientes con crédito
+  async getClientsWithCredit() {
+    await this.simulateDelay();
+    
+    const filtered = this.clients.filter(client => 
+      client.creditLimit && client.creditLimit > 0
+    );
+    
+    return {
+      success: true,
+      data: filtered
+    };
+  }
 }
 
 export const mockClientsService = new MockClientsService();

@@ -1,4 +1,4 @@
-import { BaseService } from './baseService';
+import BaseService from './baseService';
 
 // Mock data para transacciones financieras de guías
 const MOCK_EXPENSES = [

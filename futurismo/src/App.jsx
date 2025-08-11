@@ -29,6 +29,7 @@ const TourAssignments = lazy(() => import('./pages/TourAssignments'));
 const Providers = lazy(() => import('./pages/Providers'));
 const EmergencyProtocols = lazy(() => import('./pages/EmergencyProtocols'));
 const GuidesManagement = lazy(() => import('./pages/GuidesManagement'));
+const ClientsManagement = lazy(() => import('./pages/ClientsManagement'));
 const AgencyCalendar = lazy(() => import('./pages/AgencyCalendar'));
 const AgencyReports = lazy(() => import('./pages/AgencyReports'));
 const AgencyPoints = lazy(() => import('./pages/AgencyPoints'));
@@ -190,6 +191,14 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
                   <GuidesManagement />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="clients" 
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <ClientsManagement />
                 </ProtectedRoute>
               } 
             />

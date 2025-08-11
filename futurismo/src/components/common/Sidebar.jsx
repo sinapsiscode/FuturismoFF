@@ -53,6 +53,7 @@ const Sidebar = ({ isOpen, toggleSidebar, isMobile }) => {
         { path: '/admin/reservations', icon: CalendarIcon, label: t('navigation.reservationManagement') },
         { path: '/assignments', icon: UserCircleIcon, label: t('navigation.assignments') },
         { path: '/guides', icon: UserIcon, label: t('navigation.guides') },
+        { path: '/clients', icon: BuildingOffice2Icon, label: 'Clientes' },
         { path: '/marketplace', icon: MagnifyingGlassIcon, label: t('navigation.marketplace') },
         { path: '/providers', icon: BuildingOffice2Icon, label: t('navigation.providers') },
         { path: '/emergency', icon: ShieldCheckIcon, label: t('navigation.emergencies') },

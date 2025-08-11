@@ -349,6 +349,92 @@ class ToursService extends BaseService {
     return response.data;
   }
 
+  /**
+   * Verificar disponibilidad de guía para un tour
+   * @param {string} tourId - ID del tour
+   * @param {string} guideId - ID del guía
+   * @returns {Promise<Object>}
+   */
+  async checkGuideAvailability(tourId, guideId) {
+    if (this.isUsingMockData) {
+      return mockToursService.checkGuideAvailability(tourId, guideId);
+    }
+
+    return this.post(`/${tourId}/check-guide-availability`, { guideId });
+  }
+
+  /**
+   * Verificar competencias del guía para un tour
+   * @param {string} tourId - ID del tour
+   * @param {string} guideId - ID del guía
+   * @returns {Promise<Object>}
+   */
+  async checkGuideCompetences(tourId, guideId) {
+    if (this.isUsingMockData) {
+      return mockToursService.checkGuideCompetences(tourId, guideId);
+    }
+
+    return this.post(`/${tourId}/check-guide-competences`, { guideId });
+  }
+
+  /**
+   * Asignar guía a tour
+   * @param {string} tourId - ID del tour
+   * @param {string} guideId - ID del guía
+   * @param {Object} options - Opciones adicionales
+   * @returns {Promise<Object>}
+   */
+  async assignGuideToTour(tourId, guideId, options = {}) {
+    if (this.isUsingMockData) {
+      return mockToursService.assignGuideToTour(tourId, guideId, options);
+    }
+
+    return this.post(`/${tourId}/assign-guide`, { guideId, ...options });
+  }
+
+  /**
+   * Asignar tour a agencia
+   * @param {string} tourId - ID del tour
+   * @param {string} agencyId - ID de la agencia
+   * @param {Object} options - Opciones adicionales
+   * @returns {Promise<Object>}
+   */
+  async assignTourToAgency(tourId, agencyId, options = {}) {
+    if (this.isUsingMockData) {
+      return mockToursService.assignTourToAgency(tourId, agencyId, options);
+    }
+
+    return this.post(`/${tourId}/assign-agency`, { agencyId, ...options });
+  }
+
+  /**
+   * Obtener guías disponibles para un tour
+   * @param {string} tourId - ID del tour
+   * @param {string} date - Fecha del tour
+   * @returns {Promise<Object>}
+   */
+  async getAvailableGuidesForTour(tourId, date) {
+    if (this.isUsingMockData) {
+      return mockToursService.getAvailableGuidesForTour(tourId, date);
+    }
+
+    return this.get(`/${tourId}/available-guides`, { date });
+  }
+
+  /**
+   * Remover asignación de tour
+   * @param {string} tourId - ID del tour
+   * @param {string} assignmentType - Tipo de asignación ('guide' o 'agency')
+   * @returns {Promise<Object>}
+   */
+  async removeAssignment(tourId, assignmentType = 'guide') {
+    if (this.isUsingMockData) {
+      return mockToursService.removeAssignment(tourId, assignmentType);
+    }
+
+    return this.delete(`/${tourId}/assignment/${assignmentType}`);
+  }
+
   // Método auxiliar para generar CSV
   generateCSV(tours) {
     const headers = ['Código', 'Nombre', 'Categoría', 'Precio', 'Duración', 'Capacidad', 'Estado'];
