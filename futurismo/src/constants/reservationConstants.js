@@ -37,8 +37,7 @@ import { EXPORT_FORMATS as SHARED_EXPORT_FORMATS } from './sharedConstants';
 // Re-export export formats from shared constants
 export const EXPORT_FORMATS = {
   PDF: SHARED_EXPORT_FORMATS.PDF,
-  EXCEL: SHARED_EXPORT_FORMATS.EXCEL,
-  CSV: SHARED_EXPORT_FORMATS.CSV
+  EXCEL: SHARED_EXPORT_FORMATS.EXCEL
 };
 
 export const TOUR_TYPES = {

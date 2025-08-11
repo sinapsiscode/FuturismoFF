@@ -87,6 +87,7 @@ const useMarketplaceStore = create((set, get) => ({
 
   // Acciones CRUD - Guías
   fetchFreelanceGuides: async () => {
+    console.log('[MarketplaceStore] fetchFreelanceGuides started');
     set({ isLoading: true, error: null });
     
     try {
@@ -100,7 +101,9 @@ const useMarketplaceStore = create((set, get) => ({
         pageSize: pagination.pageSize
       };
       
+      console.log('[MarketplaceStore] Calling marketplaceService.getFreelanceGuides with params:', params);
       const result = await marketplaceService.getFreelanceGuides(params);
+      console.log('[MarketplaceStore] Result from marketplaceService:', result);
       
       if (!result.success) {
         throw new Error(result.error || 'Error al cargar guías');

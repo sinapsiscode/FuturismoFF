@@ -264,14 +264,10 @@ export const RATING_SCALE = {
  * @constant {Object} EXPORT_FORMATS
  * @property {string} PDF - PDF format
  * @property {string} EXCEL - Excel format
- * @property {string} CSV - CSV format
- * @property {string} JSON - JSON format
  */
 export const EXPORT_FORMATS = {
   PDF: 'pdf',
-  EXCEL: 'excel',
-  CSV: 'csv',
-  JSON: 'json'
+  EXCEL: 'excel'
 };
 
 /**

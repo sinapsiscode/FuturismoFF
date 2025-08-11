@@ -96,7 +96,7 @@ function App() {
   }, [isAuthenticated, token]);
 
   return (
-    <Router>
+    <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Suspense fallback={<LoadingSpinner fullScreen />}>
         <Routes>
           {/* Ruta de login */}

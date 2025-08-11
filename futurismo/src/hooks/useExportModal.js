@@ -47,20 +47,6 @@ const useExportModal = (reservationCount = 0, filterStatus = 'all') => {
         'common.export.formats.pdf.features.printReady'
       ],
       recommended: filterStatus !== 'all'
-    },
-    {
-      id: 'csv',
-      name: 'CSV',
-      extension: '.csv',
-      icon: DocumentIcon,
-      color: 'from-blue-500 to-blue-600',
-      descriptionKey: 'common.export.formats.csv.description',
-      features: [
-        'common.export.formats.csv.features.compatibility',
-        'common.export.formats.csv.features.import',
-        'common.export.formats.csv.features.lightweight'
-      ],
-      recommended: false
     }
   ];
 

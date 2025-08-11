@@ -49,17 +49,24 @@ const useFinancialStore = create((set, get) => ({
 
   // Acciones de inicialización
   initialize: async (guideId) => {
+    console.log('[FinancialStore] Initializing with guideId:', guideId);
     const { hasInitialized } = get();
-    if (hasInitialized && get().currentGuideId === guideId) return;
+    if (hasInitialized && get().currentGuideId === guideId) {
+      console.log('[FinancialStore] Already initialized, skipping');
+      return;
+    }
     
     set({ isLoading: true, error: null, currentGuideId: guideId });
     
     try {
       // Cargar categorías y tipos
+      console.log('[FinancialStore] Loading categories and income types...');
       const [categoriesResult, incomeTypesResult] = await Promise.all([
         financialService.getExpenseCategories(),
         financialService.getIncomeTypes()
       ]);
+      console.log('[FinancialStore] Categories result:', categoriesResult);
+      console.log('[FinancialStore] Income types result:', incomeTypesResult);
       
       if (!categoriesResult.success) {
         throw new Error(categoriesResult.error || 'Error al cargar categorías');
@@ -70,11 +77,13 @@ const useFinancialStore = create((set, get) => ({
       }
       
       // Cargar datos iniciales
+      console.log('[FinancialStore] Loading initial data...');
       await Promise.all([
         get().loadExpenses({ guideId }),
         get().loadIncome({ guideId }),
         get().loadFinancialStats({ guideId })
       ]);
+      console.log('[FinancialStore] Initial data loaded successfully');
       
       set({
         categories: categoriesResult.data,
@@ -82,7 +91,9 @@ const useFinancialStore = create((set, get) => ({
         isLoading: false,
         hasInitialized: true
       });
+      console.log('[FinancialStore] Initialization completed successfully');
     } catch (error) {
+      console.error('[FinancialStore] Initialization error:', error);
       set({ 
         isLoading: false,
         error: error.message

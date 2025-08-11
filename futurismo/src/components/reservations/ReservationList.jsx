@@ -35,6 +35,8 @@ const ReservationList = () => {
     paginatedReservations,
     totalPages,
     exportStats,
+    startIndex,
+    itemsPerPage,
     resetFilters
   } = useReservationFilters(reservationsData);
   

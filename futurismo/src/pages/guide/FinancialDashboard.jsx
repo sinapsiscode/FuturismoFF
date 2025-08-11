@@ -28,6 +28,7 @@ const FinancialDashboard = () => {
     incomeTypes,
     financialStats,
     isLoading,
+    error,
     initialize,
     createExpense,
     updateExpense,
@@ -482,15 +483,33 @@ const FinancialDashboard = () => {
     );
   };
 
-  // Mostrar loading si está cargando y no hay datos
+  // Mostrar loading o error
   if (isLoading && expenses.length === 0 && income.length === 0) {
     return (
       <div className="p-6 bg-gray-50 min-h-screen">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-center h-64">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-              <p className="mt-4 text-gray-600">Cargando datos financieros...</p>
+              {error ? (
+                <>
+                  <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span className="text-red-600 text-2xl">⚠</span>
+                  </div>
+                  <p className="text-red-600 font-medium">Error al cargar datos financieros</p>
+                  <p className="mt-2 text-gray-600 text-sm">{error}</p>
+                  <button 
+                    onClick={() => window.location.reload()} 
+                    className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    Reintentar
+                  </button>
+                </>
+              ) : (
+                <>
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+                  <p className="mt-4 text-gray-600">Cargando datos financieros...</p>
+                </>
+              )}
             </div>
           </div>
         </div>

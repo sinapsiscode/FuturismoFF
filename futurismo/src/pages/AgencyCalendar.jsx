@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { 
   CalendarIcon, 
   ChevronLeftIcon, 
@@ -25,12 +25,23 @@ const AgencyCalendar = () => {
   const [showReservationModal, setShowReservationModal] = useState(false);
   const [viewMode, setViewMode] = useState('month'); // month, week, day
   const [filterStatus, setFilterStatus] = useState('all');
+  const [calendarData, setCalendarData] = useState({});
 
   // Obtener datos del calendario para el mes actual
-  const calendarData = useMemo(() => {
-    const start = format(startOfMonth(currentDate), 'yyyy-MM-dd');
-    const end = format(endOfMonth(currentDate), 'yyyy-MM-dd');
-    return actions.getCalendarData(start, end);
+  useEffect(() => {
+    const fetchData = async () => {
+      const start = format(startOfMonth(currentDate), 'yyyy-MM-dd');
+      const end = format(endOfMonth(currentDate), 'yyyy-MM-dd');
+      try {
+        const data = await actions.fetchCalendarData(start, end);
+        setCalendarData(data || {});
+      } catch (error) {
+        console.error('Error fetching calendar data:', error);
+        setCalendarData({});
+      }
+    };
+    
+    fetchData();
   }, [currentDate, actions]);
 
   // Generar días del calendario

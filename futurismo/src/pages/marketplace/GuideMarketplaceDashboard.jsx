@@ -28,6 +28,9 @@ const GuideMarketplaceDashboard = () => {
     serviceRequests, 
     freelanceGuides,
     reviews,
+    fetchFreelanceGuides,
+    fetchServiceRequests,
+    fetchReviews,
     updateServiceRequest,
     addMessageToRequest
   } = useMarketplaceStore();
@@ -48,34 +51,70 @@ const GuideMarketplaceDashboard = () => {
   });
 
   useEffect(() => {
-    loadDashboardData();
-  }, []);
+    const initializeDashboard = async () => {
+      console.log('[GuideMarketplaceDashboard] Initializing dashboard...');
+      try {
+        // Primero cargar todos los datos del marketplace
+        await Promise.all([
+          fetchFreelanceGuides(),
+          fetchServiceRequests ? fetchServiceRequests() : Promise.resolve(),
+          fetchReviews ? fetchReviews() : Promise.resolve()
+        ]);
+        console.log('[GuideMarketplaceDashboard] Marketplace data loaded, now loading dashboard data...');
+        await loadDashboardData();
+      } catch (error) {
+        console.error('[GuideMarketplaceDashboard] Error initializing:', error);
+        setIsLoading(false);
+      }
+    };
+    
+    initializeDashboard();
+  }, [fetchFreelanceGuides]);
 
   const loadDashboardData = async () => {
+    console.log('[GuideMarketplaceDashboard] Starting loadDashboardData');
+    console.log('[GuideMarketplaceDashboard] User:', user);
+    console.log('[GuideMarketplaceDashboard] Available guides:', freelanceGuides);
+    
     setIsLoading(true);
     try {
       // Simular carga de datos
+      console.log('[GuideMarketplaceDashboard] Simulating network delay...');
       await new Promise(resolve => setTimeout(resolve, 500));
+      console.log('[GuideMarketplaceDashboard] Network delay completed');
       
       // Encontrar el guía actual (simulado con user.id)
+      console.log('[GuideMarketplaceDashboard] Looking for guide with email:', user.email);
       const currentGuide = freelanceGuides.find(g => g.email === user.email);
+      console.log('[GuideMarketplaceDashboard] Found guide:', currentGuide);
+      
       if (currentGuide) {
         setGuide(currentGuide);
         
+        console.log('[GuideMarketplaceDashboard] Setting guide data...');
+        
         // Filtrar solicitudes del guía
+        console.log('[GuideMarketplaceDashboard] Service requests:', serviceRequests);
         const requests = serviceRequests.filter(r => r.guideId === currentGuide.id);
+        console.log('[GuideMarketplaceDashboard] Filtered requests:', requests);
         setGuideRequests(requests);
         
         // Filtrar reseñas del guía
+        console.log('[GuideMarketplaceDashboard] Reviews:', reviews);
         const guideReviews = reviews.filter(r => r.guideId === currentGuide.id);
+        console.log('[GuideMarketplaceDashboard] Filtered reviews:', guideReviews);
         setGuideReviews(guideReviews);
         
         // Calcular estadísticas mensuales
+        console.log('[GuideMarketplaceDashboard] Calculating monthly stats...');
         calculateMonthlyStats(requests);
+      } else {
+        console.warn('[GuideMarketplaceDashboard] No guide found for user email:', user.email);
       }
     } catch (error) {
-      console.error('Error loading dashboard:', error);
+      console.error('[GuideMarketplaceDashboard] Error loading dashboard:', error);
     } finally {
+      console.log('[GuideMarketplaceDashboard] Setting isLoading to false');
       setIsLoading(false);
     }
   };

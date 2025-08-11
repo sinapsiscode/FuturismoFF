@@ -172,13 +172,6 @@ class ExportService {
     XLSX.writeFile(workbook, `${filename}_${new Date().toISOString().split('T')[0]}.xlsx`);
   }
 
-  // Exportar a CSV
-  exportToCSV(data, filename = 'reservas_export') {
-    const csv = XLSX.utils.sheet_to_csv(XLSX.utils.json_to_sheet(data));
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    this.downloadBlob(blob, `${filename}_${new Date().toISOString().split('T')[0]}.csv`);
-  }
-
   // Exportar a PDF
   exportToPDF(data, filename = 'reservas_export', title = 'Reporte de Reservas') {
     const doc = new jsPDF('l', 'mm', 'a4'); // Orientación landscape
@@ -286,9 +279,6 @@ class ExportService {
     switch (format) {
       case 'excel':
         this.exportToExcel(filteredData, baseFilename, 'Reservas');
-        break;
-      case 'csv':
-        this.exportToCSV(filteredData, baseFilename);
         break;
       case 'pdf':
         this.exportToPDF(filteredData, baseFilename, title);

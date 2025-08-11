@@ -3,6 +3,7 @@
  * Simula las respuestas del backend para desarrollo
  */
 
+import BaseService from './baseService';
 import { APP_CONFIG } from '../config/app.config';
 import {
   WORK_ZONES,
@@ -24,7 +25,7 @@ const MOCK_FREELANCE_GUIDES_DB = [
     fullName: 'María Elena Torres Vásquez',
     dni: '12345678',
     phone: '+51 987 654 321',
-    email: 'maria.torres@futurismo.com',
+    email: 'freelance@test.com',
     address: 'Av. Grau 123, Cusco',
     guideType: 'freelance',
     
@@ -143,8 +144,9 @@ const MOCK_SERVICE_REQUESTS_DB = [];
 // Base de datos mock de reseñas
 const MOCK_REVIEWS_DB = [];
 
-class MockMarketplaceService {
+class MockMarketplaceService extends BaseService {
   constructor() {
+    super();
     this.guides = [...MOCK_FREELANCE_GUIDES_DB];
     this.serviceRequests = [...MOCK_SERVICE_REQUESTS_DB];
     this.reviews = [...MOCK_REVIEWS_DB];

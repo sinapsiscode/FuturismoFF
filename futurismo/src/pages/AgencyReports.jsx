@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { ChartBarIcon, ArrowTrendingUpIcon, CurrencyDollarIcon, UserGroupIcon, CalendarIcon, ArrowDownTrayIcon, FunnelIcon, ChevronLeftIcon, ChevronRightIcon, ChartPieIcon } from '@heroicons/react/24/outline';
 import { format, addMonths, subMonths } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -20,24 +20,39 @@ import {
 import useAgencyStore from '../stores/agencyStore';
 
 const AgencyReports = () => {
-  const { actions } = useAgencyStore();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [reportType, setReportType] = useState('monthly'); // monthly, yearly
   const [chartType, setChartType] = useState('revenue'); // revenue, reservations, participants
+  const [reportData, setReportData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  
+  // Get actions from store after component initialization
+  const { actions } = useAgencyStore();
 
   // Obtener datos del reporte
-  const reportData = useMemo(() => {
-    const year = selectedDate.getFullYear();
-    const month = selectedDate.getMonth() + 1;
-    
-    if (reportType === 'monthly') {
-      return actions.getMonthlyReport(year, month);
-    } else {
-      return {
-        yearlyData: actions.getYearlyComparison(year),
-        year
-      };
-    }
+  useEffect(() => {
+    const fetchReportData = async () => {
+      setLoading(true);
+      const year = selectedDate.getFullYear();
+      const month = selectedDate.getMonth() + 1;
+      
+      try {
+        if (reportType === 'monthly') {
+          const data = await actions.fetchMonthlyReport(year, month);
+          setReportData(data);
+        } else {
+          const yearlyData = await actions.fetchYearlyComparison(year);
+          setReportData({ yearlyData, year });
+        }
+      } catch (error) {
+        console.error('Error fetching report data:', error);
+        setReportData(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchReportData();
   }, [selectedDate, reportType, actions]);
 
   const navigateDate = (direction) => {
@@ -53,7 +68,7 @@ const AgencyReports = () => {
 
   // Preparar datos para gráfico de barras diario (solo para vista mensual)
   const dailyChartData = useMemo(() => {
-    if (reportType !== 'monthly' || !reportData.dailyData) return [];
+    if (reportType !== 'monthly' || !reportData || !reportData.dailyData) return [];
     
     return reportData.dailyData.map(day => ({
       day: format(new Date(day.date), 'd MMM', { locale: es }),
@@ -67,7 +82,7 @@ const AgencyReports = () => {
 
   // Preparar datos para gráfico de servicios
   const serviceChartData = useMemo(() => {
-    if (reportType !== 'monthly' || !reportData.serviceBreakdown) return [];
+    if (reportType !== 'monthly' || !reportData || !reportData.serviceBreakdown) return [];
     
     return Object.entries(reportData.serviceBreakdown).map(([service, data], index) => ({
       name: service,
@@ -80,7 +95,7 @@ const AgencyReports = () => {
 
   // Preparar datos para gráfico anual
   const yearlyChartData = useMemo(() => {
-    if (reportType !== 'yearly' || !reportData.yearlyData) return [];
+    if (reportType !== 'yearly' || !reportData || !reportData.yearlyData) return [];
     
     return reportData.yearlyData.map(month => ({
       month: month.monthName,
@@ -165,8 +180,15 @@ const AgencyReports = () => {
         </div>
       </div>
 
+      {/* Estado de carga */}
+      {loading && (
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500"></div>
+        </div>
+      )}
+
       {/* Tarjetas de resumen */}
-      {reportType === 'monthly' && reportData.summary && (
+      {!loading && reportType === 'monthly' && reportData && reportData.summary && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
           <div className="bg-white p-6 rounded-lg shadow-lg">
             <div className="flex items-center space-x-3">
@@ -227,6 +249,7 @@ const AgencyReports = () => {
       )}
 
       {/* Gráficos */}
+      {!loading && reportData && (
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         {/* Gráfico principal */}
         <div className="bg-white rounded-lg shadow-lg p-6">
@@ -337,9 +360,10 @@ const AgencyReports = () => {
           </div>
         )}
       </div>
+      )}
 
       {/* Tabla detallada por servicios */}
-      {reportType === 'monthly' && serviceChartData.length > 0 && (
+      {!loading && reportType === 'monthly' && serviceChartData.length > 0 && (
         <div className="bg-white rounded-lg shadow-lg">
           <div className="p-6 border-b border-gray-200">
             <h3 className="text-lg font-semibold text-gray-900">
@@ -403,7 +427,7 @@ const AgencyReports = () => {
       )}
 
       {/* Tabla anual */}
-      {reportType === 'yearly' && reportData.yearlyData && (
+      {!loading && reportType === 'yearly' && reportData && reportData.yearlyData && (
         <div className="bg-white rounded-lg shadow-sm border border-gray-200">
           <div className="p-6 border-b border-gray-200">
             <h3 className="text-lg font-semibold text-gray-900">

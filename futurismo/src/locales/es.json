@@ -591,14 +591,6 @@
             "statistics": "Estadísticas incluidas",
             "printReady": "Listo para imprimir"
           }
-        },
-        "csv": {
-          "description": "Compatible con cualquier sistema y base de datos",
-          "features": {
-            "compatibility": "Máxima compatibilidad",
-            "import": "Fácil importación",
-            "lightweight": "Peso ligero"
-          }
         }
       }
     }
@@ -960,9 +952,6 @@
         },
         "pdf": {
           "description": "Perfecto para reportes formales"
-        },
-        "csv": {
-          "description": "Compatible con cualquier sistema"
         }
       },
       "stats": {

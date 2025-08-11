@@ -1,15 +1,29 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { StarIcon, ArrowTrendingUpIcon, TrophyIcon, GiftIcon, CalendarIcon, UserIcon, CreditCardIcon, FunnelIcon, ArrowDownTrayIcon, ClockIcon } from '@heroicons/react/24/outline';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import useAgencyStore from '../stores/agencyStore';
 
 const AgencyPoints = () => {
-  const { currentAgency, actions } = useAgencyStore();
+  const { currentAgency, pointsTransactions, actions, isLoading } = useAgencyStore();
   const [filterType, setFilterType] = useState('all');
 
-  const pointsHistory = actions.getPointsHistory();
-  const pointsBalance = actions.getPointsBalance();
+  // Fetch points data on component mount
+  useEffect(() => {
+    actions.fetchPointsTransactions();
+    actions.fetchPointsBalance();
+  }, [actions]);
+
+  const pointsHistory = pointsTransactions || [];
+  const pointsBalance = currentAgency ? {
+    balance: currentAgency.pointsBalance || 0,
+    totalEarned: currentAgency.totalEarned || 0,
+    totalRedeemed: currentAgency.totalRedeemed || 0
+  } : {
+    balance: 0,
+    totalEarned: 0,
+    totalRedeemed: 0
+  };
 
   const filteredHistory = filterType === 'all' 
     ? pointsHistory 
@@ -125,9 +139,9 @@ const AgencyPoints = () => {
             </div>
             <div>
               <p className="text-2xl font-bold text-gray-900">
-                {currentAgency.tier === 'gold' ? 'Oro' : 
-                 currentAgency.tier === 'silver' ? 'Plata' : 
-                 currentAgency.tier === 'bronze' ? 'Bronce' : 'Platino'}
+                {currentAgency?.tier === 'gold' ? 'Oro' : 
+                 currentAgency?.tier === 'silver' ? 'Plata' : 
+                 currentAgency?.tier === 'bronze' ? 'Bronce' : 'Platino'}
               </p>
               <p className="text-sm text-gray-600">Nivel Actual</p>
             </div>
@@ -160,7 +174,11 @@ const AgencyPoints = () => {
         </div>
 
         <div className="p-6">
-          {filteredHistory.length === 0 ? (
+          {isLoading ? (
+            <div className="flex items-center justify-center h-32">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"></div>
+            </div>
+          ) : filteredHistory.length === 0 ? (
             <div className="text-center py-8">
               <ClockIcon className="mx-auto h-12 w-12 text-gray-400" />
               <h3 className="mt-2 text-sm font-medium text-gray-900">

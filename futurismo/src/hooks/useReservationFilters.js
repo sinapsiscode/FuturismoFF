@@ -156,6 +156,8 @@ export const useReservationFilters = (reservations) => {
     paginatedReservations,
     totalPages,
     exportStats,
+    startIndex,
+    itemsPerPage: PAGINATION.DEFAULT_ITEMS_PER_PAGE,
     
     // Acciones
     resetFilters,

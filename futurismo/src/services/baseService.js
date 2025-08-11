@@ -47,6 +47,44 @@ class BaseService {
   }
 
   /**
+   * Simular delay de red para mock services
+   * @param {number} delay - Milisegundos de delay (por defecto 300-800ms)
+   * @returns {Promise<void>}
+   */
+  async simulateNetworkDelay(delay = null) {
+    if (!this.isUsingMockData) return;
+    
+    const actualDelay = delay || Math.random() * 500 + 300; // 300-800ms
+    return new Promise(resolve => setTimeout(resolve, actualDelay));
+  }
+
+  /**
+   * Formatear respuesta exitosa para mock services
+   * @param {*} data - Datos a retornar
+   * @returns {Object}
+   */
+  success(data) {
+    return {
+      success: true,
+      data
+    };
+  }
+
+  /**
+   * Formatear respuesta de error para mock services
+   * @param {string} message - Mensaje de error
+   * @param {*} details - Detalles adicionales del error
+   * @returns {Object}
+   */
+  error(message, details = null) {
+    return {
+      success: false,
+      error: message,
+      details
+    };
+  }
+
+  /**
    * Obtener token de autenticación
    * @returns {string|null}
    */

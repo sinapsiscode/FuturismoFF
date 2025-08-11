@@ -6,6 +6,7 @@ class FinancialService extends BaseService {
     super();
     // Por ahora usar mock, más tarde se puede cambiar por API real
     this.useMock = true;
+    console.log('[FinancialService] Constructor completed');
   }
 
   async getExpenses(filters = {}) {
@@ -129,8 +130,11 @@ class FinancialService extends BaseService {
   }
 
   async getExpenseCategories() {
+    console.log('[FinancialService] Getting expense categories, useMock:', this.useMock);
     if (this.useMock) {
-      return mockFinancialService.getExpenseCategories();
+      const result = await mockFinancialService.getExpenseCategories();
+      console.log('[FinancialService] Categories result:', result);
+      return result;
     }
 
     try {
@@ -142,8 +146,11 @@ class FinancialService extends BaseService {
   }
 
   async getIncomeTypes() {
+    console.log('[FinancialService] Getting income types, useMock:', this.useMock);
     if (this.useMock) {
-      return mockFinancialService.getIncomeTypes();
+      const result = await mockFinancialService.getIncomeTypes();
+      console.log('[FinancialService] Income types result:', result);
+      return result;
     }
 
     try {

@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink, Link, useLocation } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { HomeIcon, MapIcon, CalendarIcon, ClockIcon, ChatBubbleLeftRightIcon, UserIcon, ChevronLeftIcon, ChevronRightIcon, CogIcon, UserGroupIcon, DocumentTextIcon, CalendarDaysIcon, BuildingOffice2Icon, ShieldCheckIcon, ChartBarIcon, StarIcon, UserCircleIcon, CurrencyDollarIcon, MagnifyingGlassIcon, BriefcaseIcon, TruckIcon } from '@heroicons/react/24/outline';
 import { useTranslation } from 'react-i18next';
@@ -7,6 +7,7 @@ import { useAuthStore } from '../../stores/authStore';
 const Sidebar = ({ isOpen, toggleSidebar, isMobile }) => {
   const { user } = useAuthStore();
   const { t } = useTranslation();
+  const location = useLocation();
   
   // Menú diferente según el tipo de usuario
   const getMenuItems = () => {
@@ -73,6 +74,9 @@ const Sidebar = ({ isOpen, toggleSidebar, isMobile }) => {
   };
   
   const menuItems = getMenuItems();
+  
+  // Routes that should only match exactly (not as prefixes)
+  const exactMatchRoutes = ['/marketplace', '/dashboard', '/monitoring', '/reservations', '/history', '/chat', '/profile'];
 
   return (
     <aside className={`
@@ -108,17 +112,29 @@ const Sidebar = ({ isOpen, toggleSidebar, isMobile }) => {
         <ul className="space-y-2">
           {menuItems.map((item) => {
             const Icon = item.icon;
+            
+            // Lógica mejorada para determinar si está activo
+            let isActive = false;
+            if (item.path === '/marketplace') {
+              // Para /marketplace, solo activar si es exactamente esa ruta
+              isActive = location.pathname === '/marketplace';
+            } else if (item.path === '/marketplace/requests') {
+              // Para /marketplace/requests, activar si coincide exactamente o es una subruta
+              isActive = location.pathname === '/marketplace/requests' || location.pathname.startsWith('/marketplace/requests/');
+            } else {
+              // Para otras rutas, usar la lógica por defecto
+              isActive = location.pathname === item.path || location.pathname.startsWith(item.path + '/');
+            }
+            
             return (
-              <li key={item.path}>
-                <NavLink
+              <li key={`nav-${item.path}`}>
+                <Link
                   to={item.path}
-                  className={({ isActive }) =>
-                    `flex items-center px-4 py-3 rounded-lg transition-colors group relative ${
-                      isActive
-                        ? 'bg-primary text-white'
-                        : 'text-gray-700 hover:bg-gray-100'
-                    }`
-                  }
+                  className={`flex items-center px-4 py-3 rounded-lg transition-colors group relative ${
+                    isActive
+                      ? 'bg-primary text-white'
+                      : 'text-gray-700 hover:bg-gray-100'
+                  }`}
                 >
                   <Icon className="w-5 h-5 flex-shrink-0" />
                   {isOpen && (
@@ -131,7 +147,7 @@ const Sidebar = ({ isOpen, toggleSidebar, isMobile }) => {
                       {item.label}
                     </div>
                   )}
-                </NavLink>
+                </Link>
               </li>
             );
           })}
