@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { 
   UserPlusIcon, 
   UsersIcon,
@@ -10,6 +11,7 @@ import UserForm from '../components/users/UserForm';
 import { useUsersStore } from '../stores/usersStore';
 
 const Users = () => {
+  const { t } = useTranslation();
   const [currentView, setCurrentView] = useState('list'); // 'list', 'create', 'edit', 'view'
   const [selectedUser, setSelectedUser] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -58,10 +60,10 @@ const Users = () => {
 
   const renderHeader = () => {
     const titles = {
-      list: 'Gestión de Usuarios',
-      create: 'Nuevo Usuario',
-      edit: `Editar Usuario: ${selectedUser?.firstName} ${selectedUser?.lastName}`,
-      view: `Detalles de: ${selectedUser?.firstName} ${selectedUser?.lastName}`
+      list: t('users.management') || 'Gestión de Usuarios',
+      create: t('users.form.newUser') || 'Nuevo Usuario',
+      edit: `${t('users.form.editUser') || 'Editar Usuario'}: ${selectedUser?.firstName} ${selectedUser?.lastName}`,
+      view: `${t('users.details') || 'Detalles de'}: ${selectedUser?.firstName} ${selectedUser?.lastName}`
     };
 
     return (

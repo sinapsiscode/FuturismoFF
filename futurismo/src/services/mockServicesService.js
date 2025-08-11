@@ -120,6 +120,8 @@ class MockServicesService {
   constructor() {
     this.services = [...MOCK_SERVICES_DB];
     this.initializeStorage();
+    // Limpiar duplicados después de la inicialización
+    this.removeDuplicates();
   }
 
   initializeStorage() {
@@ -128,9 +130,23 @@ class MockServicesService {
     
     if (stored) {
       try {
-        this.services = JSON.parse(stored);
+        const storedServices = JSON.parse(stored);
+        // Verificar que los datos almacenados son válidos y no están duplicados
+        if (Array.isArray(storedServices) && storedServices.length > 0) {
+          // Solo usar datos almacenados si son diferentes a los datos base
+          const storedIds = new Set(storedServices.map(s => s.id));
+          const baseIds = new Set(MOCK_SERVICES_DB.map(s => s.id));
+          
+          // Si hay diferencias significativas, usar los datos almacenados
+          if (storedServices.length !== MOCK_SERVICES_DB.length || 
+              !Array.from(baseIds).every(id => storedIds.has(id))) {
+            this.services = storedServices;
+          }
+        }
       } catch (error) {
-        console.warn('Error loading mock services from storage:', error);
+        console.warn('Error loading mock services from storage, using default data:', error);
+        // En caso de error, limpiar el storage corrupto
+        localStorage.removeItem(storageKey);
       }
     }
   }
@@ -153,6 +169,33 @@ class MockServicesService {
   generateCode() {
     const number = this.services.length + 1;
     return `SRV${String(number).padStart(3, '0')}`;
+  }
+
+  // Método para eliminar duplicados
+  removeDuplicates() {
+    const seen = new Set();
+    this.services = this.services.filter(service => {
+      if (seen.has(service.id)) {
+        return false;
+      }
+      seen.add(service.id);
+      return true;
+    });
+    this.saveToStorage();
+  }
+
+  // Método para resetear datos a valores por defecto
+  resetToDefaultData() {
+    this.services = [...MOCK_SERVICES_DB];
+    this.removeDuplicates();
+    console.log('Servicios reseteados a valores por defecto');
+  }
+
+  // Método para limpiar localStorage y reinicializar
+  clearStorageAndReset() {
+    const storageKey = `${APP_CONFIG.storage.prefix}mock_services`;
+    localStorage.removeItem(storageKey);
+    this.resetToDefaultData();
   }
 
   // Obtener todos los servicios

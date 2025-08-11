@@ -280,7 +280,7 @@ const AgencyCalendar = () => {
               <p className="text-2xl font-bold text-gray-900">
                 {Object.values(calendarData).reduce((sum, day) => sum + day.reservations.length, 0)}
               </p>
-              <p className="text-sm text-gray-600">Total Reservas</p>
+              <p className="text-sm text-gray-600">{t('dashboard.totalReservations')}</p>
             </div>
           </div>
         </div>
@@ -294,7 +294,7 @@ const AgencyCalendar = () => {
               <p className="text-2xl font-bold text-gray-900">
                 S/. {Object.values(calendarData).reduce((sum, day) => sum + day.totalRevenue, 0).toLocaleString()}
               </p>
-              <p className="text-sm text-gray-600">Ingresos del Mes</p>
+              <p className="text-sm text-gray-600">{t('dashboard.incomeByMonth')}</p>
             </div>
           </div>
         </div>
@@ -308,7 +308,7 @@ const AgencyCalendar = () => {
               <p className="text-2xl font-bold text-gray-900">
                 {Object.values(calendarData).reduce((sum, day) => sum + day.totalParticipants, 0)}
               </p>
-              <p className="text-sm text-gray-600">Total Turistas</p>
+              <p className="text-sm text-gray-600">{t('dashboard.totalTourists')}</p>
             </div>
           </div>
         </div>

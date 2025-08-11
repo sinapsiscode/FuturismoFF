@@ -809,14 +809,14 @@ const ClientsManagement = () => {
 
               {/* Estadísticas */}
               <div>
-                <h4 className="text-sm font-medium text-gray-500 mb-2">Estadísticas</h4>
+                <h4 className="text-sm font-medium text-gray-500 mb-2">{t('common.statistics')}</h4>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div className="bg-gray-50 p-3 rounded-lg">
-                    <p className="text-sm text-gray-600">Total Reservas</p>
+                    <p className="text-sm text-gray-600">{t('dashboard.totalReservations')}</p>
                     <p className="text-lg font-semibold">{selectedClient.totalBookings || 0}</p>
                   </div>
                   <div className="bg-gray-50 p-3 rounded-lg">
-                    <p className="text-sm text-gray-600">Ingresos Totales</p>
+                    <p className="text-sm text-gray-600">{t('dashboard.totalIncome')}</p>
                     <p className="text-lg font-semibold">
                       S/ {(selectedClient.totalRevenue || 0).toLocaleString()}
                     </p>

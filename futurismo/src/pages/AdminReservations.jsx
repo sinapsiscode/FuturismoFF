@@ -1,10 +1,12 @@
 import { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { CalendarIcon, ClockIcon, UserGroupIcon, CurrencyDollarIcon, CheckCircleIcon, XCircleIcon, ExclamationTriangleIcon, FunnelIcon, MagnifyingGlassIcon, EyeIcon, PencilIcon, StarIcon, PhoneIcon, EnvelopeIcon, MapPinIcon, UserIcon } from '@heroicons/react/24/outline';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import useAgencyStore from '../stores/agencyStore';
 
 const AdminReservations = () => {
+  const { t } = useTranslation();
   const { actions } = useAgencyStore();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -129,7 +131,7 @@ const AdminReservations = () => {
             </div>
             <div>
               <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
-              <p className="text-sm text-gray-600">Total Reservas</p>
+              <p className="text-sm text-gray-600">{t('dashboard.totalReservations')}</p>
             </div>
           </div>
         </div>
@@ -141,7 +143,7 @@ const AdminReservations = () => {
             </div>
             <div>
               <p className="text-2xl font-bold text-gray-900">{stats.pending}</p>
-              <p className="text-sm text-gray-600">Pendientes</p>
+              <p className="text-sm text-gray-600">{t('dashboard.pending')}</p>
             </div>
           </div>
         </div>
@@ -153,7 +155,7 @@ const AdminReservations = () => {
             </div>
             <div>
               <p className="text-2xl font-bold text-gray-900">{stats.confirmed}</p>
-              <p className="text-sm text-gray-600">Confirmadas</p>
+              <p className="text-sm text-gray-600">{t('dashboard.confirmed')}</p>
             </div>
           </div>
         </div>
@@ -165,7 +167,7 @@ const AdminReservations = () => {
             </div>
             <div>
               <p className="text-2xl font-bold text-gray-900">{stats.cancelled}</p>
-              <p className="text-sm text-gray-600">Canceladas</p>
+              <p className="text-sm text-gray-600">{t('dashboard.cancelled')}</p>
             </div>
           </div>
         </div>
@@ -232,7 +234,7 @@ const AdminReservations = () => {
                   Estado
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Acciones
+                  {t('common.actions')}
                 </th>
               </tr>
             </thead>

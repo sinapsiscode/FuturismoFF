@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   TruckIcon,
   UserIcon,
@@ -41,6 +42,7 @@ import {
 import toast from 'react-hot-toast';
 
 const DriversManagement = () => {
+  const { t } = useTranslation();
   const [showForm, setShowForm] = useState(false);
   const [editingDriver, setEditingDriver] = useState(null);
   const [showDetails, setShowDetails] = useState(false);
@@ -913,14 +915,14 @@ const DriversManagement = () => {
                       }}
                       className="px-4 py-2 border rounded-lg hover:bg-gray-50"
                     >
-                      Cancelar
+                      {t('common.cancel')}
                     </button>
                     <button
                       type="submit"
                       disabled={loading}
                       className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
                     >
-                      {loading ? 'Guardando...' : (editingDriver ? 'Actualizar' : 'Crear')}
+                      {loading ? t('common.saving') : (editingDriver ? t('common.update') : t('common.create'))}
                     </button>
                   </div>
                 </form>

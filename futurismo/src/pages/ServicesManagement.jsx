@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { 
   PlusIcon, 
   Cog6ToothIcon,
@@ -11,11 +12,12 @@ import ServiceForm from '../components/services/ServiceForm';
 import { useServicesStore } from '../stores/servicesStore';
 
 const ServicesManagement = () => {
+  const { t } = useTranslation();
   const [currentView, setCurrentView] = useState('list'); // 'list', 'create', 'edit', 'view'
   const [selectedService, setSelectedService] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const { deleteService, updateServiceStatus } = useServicesStore();
+  const { deleteService, updateServiceStatus, clearDuplicatesAndReset } = useServicesStore();
 
   const handleCreateService = () => {
     setSelectedService(null);
@@ -57,12 +59,18 @@ const ServicesManagement = () => {
     setSelectedService(null);
   };
 
+  const handleClearDuplicates = async () => {
+    if (window.confirm('¿Estás seguro de que quieres limpiar los duplicados y resetear los datos? Esto restaurará los servicios a los valores por defecto.')) {
+      await clearDuplicatesAndReset();
+    }
+  };
+
   const renderHeader = () => {
     const titles = {
-      list: 'Gestión de Servicios',
-      create: 'Nuevo Servicio',
-      edit: 'Editar Servicio',
-      view: 'Detalles del Servicio'
+      list: t('services.management') || 'Gestión de Servicios',
+      create: t('services.newService') || 'Nuevo Servicio',
+      edit: t('services.editService') || 'Editar Servicio',
+      view: t('services.serviceDetails') || 'Detalles del Servicio'
     };
 
     return (
@@ -92,11 +100,19 @@ const ServicesManagement = () => {
         {currentView === 'list' && (
           <div className="flex items-center space-x-3">
             <button
+              onClick={handleClearDuplicates}
+              className="inline-flex items-center px-3 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors"
+              title="Limpiar duplicados y resetear datos"
+            >
+              <Cog6ToothIcon className="h-4 w-4 mr-2" />
+              {t('services.clearDuplicates') || 'Limpiar Duplicados'}
+            </button>
+            <button
               onClick={handleCreateService}
               className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
             >
               <PlusIcon className="h-4 w-4 mr-2" />
-              Nuevo Servicio
+              {t('services.newService') || 'Nuevo Servicio'}
             </button>
           </div>
         )}
@@ -117,7 +133,7 @@ const ServicesManagement = () => {
               </div>
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Total Servicios</p>
+              <p className="text-sm font-medium text-gray-600">{t('services.totalServices') || 'Total Servicios'}</p>
               <p className="text-2xl font-semibold text-gray-900">--</p>
             </div>
           </div>
@@ -131,7 +147,7 @@ const ServicesManagement = () => {
               </div>
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Pendientes</p>
+              <p className="text-sm font-medium text-gray-600">{t('dashboard.pending')}</p>
               <p className="text-2xl font-semibold text-gray-900">--</p>
             </div>
           </div>

@@ -59,7 +59,7 @@ const useSidebarMenu = () => {
       return [
         ...baseItems,
         { path: '/monitoring', icon: MapIcon, label: t('navigation.monitoring') },
-        { path: '/services', icon: ClipboardDocumentListIcon, label: 'Servicios' },
+        { path: '/services', icon: ClipboardDocumentListIcon, label: t('navigation.services') },
         { path: '/reservations', icon: CalendarIcon, label: t('navigation.reservations') },
         { path: '/marketplace', icon: MagnifyingGlassIcon, label: t('navigation.searchGuides') },
         { path: '/marketplace/requests', icon: BriefcaseIcon, label: t('navigation.myContracts') },
@@ -93,7 +93,7 @@ const useSidebarMenu = () => {
       return [
         ...baseItems,
         { path: '/monitoring', icon: MapIcon, label: t('navigation.monitoring') },
-        { path: '/services', icon: ClipboardDocumentListIcon, label: 'Servicios' },
+        { path: '/services', icon: ClipboardDocumentListIcon, label: t('navigation.services') },
         { path: '/admin/reservations', icon: CalendarIcon, label: t('navigation.reservationManagement') },
         { path: '/assignments', icon: UserCircleIcon, label: t('navigation.assignments') },
         { path: '/guides', icon: UserIcon, label: t('navigation.guides') },

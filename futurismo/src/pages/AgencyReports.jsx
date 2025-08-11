@@ -199,7 +199,7 @@ const AgencyReports = () => {
                 <p className="text-2xl font-bold text-gray-900">
                   {reportData.summary.totalReservations}
                 </p>
-                <p className="text-sm text-gray-600">Total Reservas</p>
+                <p className="text-sm text-gray-600">{t('dashboard.totalReservations')}</p>
               </div>
             </div>
           </div>
@@ -213,7 +213,7 @@ const AgencyReports = () => {
                 <p className="text-2xl font-bold text-gray-900">
                   {formatCurrency(reportData.summary.totalRevenue)}
                 </p>
-                <p className="text-sm text-gray-600">Ingresos Totales</p>
+                <p className="text-sm text-gray-600">{t('dashboard.totalIncome')}</p>
               </div>
             </div>
           </div>
@@ -227,7 +227,7 @@ const AgencyReports = () => {
                 <p className="text-2xl font-bold text-gray-900">
                   {reportData.summary.totalParticipants}
                 </p>
-                <p className="text-sm text-gray-600">Total Turistas</p>
+                <p className="text-sm text-gray-600">{t('dashboard.totalTourists')}</p>
               </div>
             </div>
           </div>

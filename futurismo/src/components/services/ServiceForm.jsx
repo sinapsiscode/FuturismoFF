@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { 
@@ -57,6 +58,7 @@ const serviceSchema = yup.object({
 });
 
 const ServiceForm = ({ service = null, onSubmit, onCancel, isLoading = false }) => {
+  const { t } = useTranslation();
   const { createService, updateService } = useServicesStore();
 
   const isEdit = !!service;
@@ -409,7 +411,7 @@ const ServiceForm = ({ service = null, onSubmit, onCancel, isLoading = false }) 
             disabled={isLoading}
           >
             <XMarkIcon className="h-4 w-4 mr-2 inline" />
-            Cancelar
+            {t('common.cancel')}
           </button>
           
           <button
@@ -418,7 +420,7 @@ const ServiceForm = ({ service = null, onSubmit, onCancel, isLoading = false }) 
             disabled={isLoading}
           >
             <CheckIcon className="h-4 w-4 mr-2 inline" />
-            {isLoading ? 'Guardando...' : (isEdit ? 'Actualizar Servicio' : 'Crear Servicio')}
+            {isLoading ? t('common.saving') : (isEdit ? t('common.updateService') : t('common.createService'))}
           </button>
         </div>
       </form>

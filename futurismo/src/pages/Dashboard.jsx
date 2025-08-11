@@ -169,21 +169,21 @@ const Dashboard = () => {
         ) : (
           <>
             <StatsCard
-              title="Total Reservas"
+              title={t('dashboard.totalReservations')}
               value={stats.totalReservations}
               icon={CalendarIcon}
               trend="+25%"
               color="primary"
             />
             <StatsCard
-              title="Total Turistas"
+              title={t('dashboard.totalTourists')}
               value={stats.totalTourists}
               icon={UserGroupIcon}
               trend="+22%"
               color="success"
             />
             <StatsCard
-              title="Ingresos Totales"
+              title={t('dashboard.totalIncome')}
               value={`$${stats.totalRevenue.toLocaleString()}`}
               icon={CurrencyDollarIcon}
               trend="+28%"

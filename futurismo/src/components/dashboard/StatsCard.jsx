@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 import { ArrowTrendingUpIcon, ArrowTrendingDownIcon } from '@heroicons/react/24/outline';
@@ -12,7 +12,32 @@ const StatsCard = ({
   subtitle = null,
   loading = false 
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const [translationText, setTranslationText] = useState('vs mes anterior');
+  
+  useEffect(() => {
+    const checkTranslation = () => {
+      const translated = t('dashboard.stats.vsPreviousMonth');
+      console.log('Traducción obtenida:', translated);
+      console.log('Recursos disponibles:', i18n.hasResourceBundle('es', 'translation'));
+      console.log('Idioma actual:', i18n.language);
+      
+      if (translated !== 'dashboard.stats.vsPreviousMonth') {
+        setTranslationText(translated);
+      }
+    };
+    
+    checkTranslation();
+    
+    // Escuchar cambios en las traducciones
+    i18n.on('loaded', checkTranslation);
+    i18n.on('languageChanged', checkTranslation);
+    
+    return () => {
+      i18n.off('loaded', checkTranslation);
+      i18n.off('languageChanged', checkTranslation);
+    };
+  }, [t, i18n]);
   
   const colorClasses = {
     primary: 'bg-primary-100 text-primary-600',
@@ -62,7 +87,7 @@ const StatsCard = ({
                 {trend}
               </span>
               <span className="text-sm text-gray-500 ml-1">
-                {t('dashboard.stats.vsPreviousMonth')}
+                {translationText}
               </span>
             </div>
           )}

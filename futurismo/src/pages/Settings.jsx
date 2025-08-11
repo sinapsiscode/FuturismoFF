@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { 
   CogIcon,
   BuildingOfficeIcon,
@@ -18,21 +19,22 @@ import NotificationsSettings from '../components/settings/NotificationsSettings'
 import { useSettingsStore } from '../stores/settingsStore';
 
 const Settings = () => {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState('general');
   const { hasUnsavedChanges, exportSettings, importSettings } = useSettingsStore();
 
   const tabs = [
     {
       id: 'general',
-      name: 'General',
+      name: t('settings.general.title') || 'General',
       icon: BuildingOfficeIcon,
-      description: 'Información de la empresa y configuraciones básicas'
+      description: t('settings.general.description') || 'Información de la empresa y configuraciones básicas'
     },
     {
       id: 'tours',
-      name: 'Tours',
+      name: t('settings.tours.title') || 'Tours',
       icon: MapIcon,
-      description: 'Configuración de tours y servicios'
+      description: t('settings.tours.description') || 'Configuración de tours y servicios'
     },
     {
       id: 'agencies',

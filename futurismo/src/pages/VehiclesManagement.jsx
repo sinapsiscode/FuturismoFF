@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   TruckIcon,
   PlusIcon,
@@ -43,6 +44,7 @@ import {
 import toast from 'react-hot-toast';
 
 const VehiclesManagement = () => {
+  const { t } = useTranslation();
   const [showForm, setShowForm] = useState(false);
   const [editingVehicle, setEditingVehicle] = useState(null);
   const [showDetails, setShowDetails] = useState(false);
@@ -1158,7 +1160,7 @@ const VehiclesManagement = () => {
                       }}
                       className="px-4 py-2 border rounded-lg hover:bg-gray-50"
                     >
-                      Cancelar
+                      {t('common.cancel')}
                     </button>
                     <button
                       type="submit"
@@ -1594,7 +1596,7 @@ const VehiclesManagement = () => {
                       onClick={() => setShowMaintenanceForm(false)}
                       className="px-4 py-2 border rounded-lg hover:bg-gray-50"
                     >
-                      Cancelar
+                      {t('common.cancel')}
                     </button>
                     <button
                       type="submit"

@@ -107,6 +107,9 @@
     "reservationsByMonth": "Reservas por Mes",
     "touristsByMonth": "Turistas por Mes",
     "incomeByMonth": "Ingresos por Mes",
+    "pending": "Pendientes",
+    "confirmed": "Confirmadas",
+    "cancelled": "Canceladas",
     "activeToursNow": "Tours Activos Ahora",
     "tour": "Tour",
     "guide": "Guía",
@@ -115,7 +118,182 @@
     "enRoute": "En ruta",
     "atStop": "En parada",
     "starting": "Iniciando",
-    "viewLiveMonitoring": "Ver monitoreo en tiempo real →"
+    "viewLiveMonitoring": "Ver monitoreo en tiempo real →",
+    "stats": {
+      "vsPreviousMonth": "vs mes anterior"
+    },
+    "export": {
+      "title": "Exportar Datos",
+      "filterByStatus": "Filtrar por Estado",
+      "activeFilter": "Filtro activo",
+      "dataPreview": "Vista Previa de Datos",
+      "exportFormat": "Formato de Exportación",
+      "exportButton": "Exportar {{count}} reserva(s) como {{format}}",
+      "tip": "Tip",
+      "tipDescription": "Los archivos se descargarán automáticamente con la fecha actual en el nombre",
+      "reservations": "reservas",
+      "filterNote": "Solo se exportarán las reservas con estado \"{{status}}\"",
+      "stats": {
+        "reservations": "Reservas",
+        "tourists": "Turistas",
+        "revenue": "Ingresos",
+        "average": "Promedio",
+        "avgTicket": "Ticket Promedio"
+      },
+      "statusOptions": {
+        "all": "Información Completa",
+        "pending": "Solo Pendientes",
+        "confirmed": "Solo Confirmadas",
+        "cancelled": "Solo Canceladas"
+      },
+      "formats": {
+        "excel": {
+          "description": "Ideal para análisis detallado"
+        },
+        "pdf": {
+          "description": "Perfecto para reportes formales"
+        }
+      },
+      "subtitle": "Descarga reportes según tus necesidades",
+      "filterByStatus": "Filtrar por Estado",
+      "reservations": "reservas",
+      "activeFilter": "Filtro activo",
+      "filterNote": "Solo se exportarán las reservas con estado \"{{status}}\"",
+      "dataPreview": "Vista Previa de Datos",
+      "exportFormat": "Formato de Exportación",
+      "exportButton": "Exportar {{count}} reserva(s) como {{format}}",
+      "tip": "Tip",
+      "tipDescription": "Los archivos se descargarán automáticamente con la fecha actual en el nombre",
+      "reservations": "reservas",
+      "filterNote": "Solo se exportarán las reservas con estado \"{{status}}\"",
+      "success": "✅ {{status}} exportada exitosamente!\n\n📊 Datos exportados:\n• {{count}} reservas\n• {{tourists}} turistas\n• ${{revenue}} en ingresos\n• Formato: {{format}}\n\n📁 El archivo se descargó automáticamente.",
+      "error": "Error al exportar los datos. Intenta nuevamente.",
+      "statusOptions": {
+        "all": "Información Completa",
+        "pending": "Solo Pendientes",
+        "confirmed": "Solo Confirmadas",
+        "cancelled": "Solo Canceladas"
+      },
+      "formats": {
+        "excel": {
+          "description": "Ideal para análisis detallado"
+        },
+        "pdf": {
+          "description": "Perfecto para reportes formales"
+        }
+      },
+      "stats": {
+        "reservations": "Reservas",
+        "tourists": "Turistas",
+        "revenue": "Ingresos",
+        "avgTicket": "Ticket Promedio"
+      }
+    },
+    "chart": {
+      "title": "Análisis de Servicios",
+      "timeRange": {
+        "week": "Última semana",
+        "month": "Mes",
+        "quarter": "Último trimestre",
+        "year": "Último año"
+      },
+      "selectTimeRange": "Seleccionar rango de tiempo",
+      "selectChartType": "Seleccionar tipo de gráfico",
+      "types": {
+        "line": "Línea",
+        "bar": "Barra",
+        "pie": "Circular"
+      },
+      "kpis": {
+        "totalReservations": "Total Reservas",
+        "totalTourists": "Total Turistas",
+        "totalRevenue": "Ingresos Totales",
+        "vs": "vs",
+        "previousMonth": "mes anterior"
+      },
+      "months": {
+        "jan": "Ene",
+        "feb": "Feb",
+        "mar": "Mar",
+        "apr": "Abr",
+        "may": "May",
+        "jun": "Jun",
+        "jul": "Jul",
+        "aug": "Ago",
+        "sep": "Sep",
+        "oct": "Oct",
+        "nov": "Nov",
+        "dec": "Dic"
+      },
+      "tours": {
+        "gastronomic": "Tour Gastronómico",
+        "palomino": "Islas Palomino",
+        "nazca": "Líneas de Nazca"
+      },
+      "categories": {
+        "regular": "Tours Regulares",
+        "private": "Tours Privados",
+        "transfers": "Traslados"
+      },
+      "reservations": "Reservas",
+      "tourists": "Turistas",
+      "summary": {
+        "popularTour": "Tour más popular",
+        "avgPerBooking": "Promedio por reserva",
+        "bestDay": "Mejor día",
+        "saturday": "Sábados"
+      },
+      "selectTimeRange": "Seleccionar rango de tiempo",
+      "selectChartType": "Seleccionar tipo de gráfico",
+      "reservations": "Reservas",
+      "tourists": "Turistas",
+      "revenue": "Ingresos ($)",
+      "timeRange": {
+        "week": "Última semana",
+        "month": "Último mes",
+        "quarter": "Último trimestre",
+        "year": "Último año"
+      },
+      "types": {
+        "line": "Líneas",
+        "bar": "Barras",
+        "pie": "Torta"
+      },
+      "months": {
+        "jan": "Ene",
+        "feb": "Feb",
+        "mar": "Mar",
+        "apr": "Abr",
+        "may": "May",
+        "jun": "Jun",
+        "jul": "Jul"
+      },
+      "tours": {
+        "gastronomic": "Gastronómico",
+        "palomino": "Islas Palomino",
+        "nazca": "Líneas de Nazca"
+      },
+      "categories": {
+        "regular": "Tours Regulares",
+        "private": "Tours Privados",
+        "transfers": "Traslados"
+      },
+      "kpis": {
+        "totalReservations": "Total Reservas",
+        "totalTourists": "Total Turistas",
+        "totalRevenue": "Ingresos Totales",
+        "occupancyRate": "Tasa Ocupación",
+        "vs": "vs.",
+        "previousMonth": "mes anterior"
+      },
+      "summary": {
+        "popularTour": "Tour más popular",
+        "avgPerBooking": "Promedio por reserva",
+        "bestDay": "Mejor día",
+        "conversionRate": "Tasa conversión",
+        "saturday": "Sábados"
+      }
+    }
   },
   "reservations": {
     "reservations": "Reservas",
@@ -327,7 +505,8 @@
     "providers": "Proveedores",
     "coordination": "Coordinación",
     "users": "Usuarios",
-    "settings": "Configuración"
+    "settings": "Configuración",
+    "services": "Servicios"
   },
   "quickActions": {
     "quickActions": "Acciones Rápidas",
@@ -335,6 +514,7 @@
     "createNewReservation": "Crear una nueva reserva de tour",
     "viewCalendar": "Ver Calendario",
     "checkAvailability": "Consultar disponibilidad",
+    "consultAvailability": "Consultar disponibilidad",
     "liveMonitoring": "Monitoreo en Vivo",
     "viewActiveTours": "Ver tours activos",
     "consultFullDay": "Consultar Full Day",
@@ -473,9 +653,6 @@
     "fileTooLarge": "El archivo es demasiado grande. Máximo 5MB.",
     "loadingStats": "Error al cargar estadísticas"
   },
-  "common": {
-    "loading": "Cargando..."
-  },
   "stats": {
     "totalClients": "Total de Clientes",
     "completedReservations": "Reservas completadas",
@@ -539,61 +716,6 @@
     "fileTooLarge": "El archivo es demasiado grande. Máximo 5MB.",
     "loadingStats": "Error al cargar estadísticas",
     "loadingAgenda": "Error al cargar la agenda"
-  },
-  "common": {
-    "loading": "Cargando...",
-    "cancel": "Cancelar",
-    "add": "Agregar",
-    "update": "Actualizar",
-    "save": "Guardar",
-    "saving": "Guardando...",
-    "delete": "Eliminar",
-    "close": "Cerrar",
-    "edit": "Editar",
-    "view": "Ver",
-    "export": {
-      "title": "Exportar Reservas",
-      "subtitle": "{{count}} reserva",
-      "subtitle_plural": "{{count}} reservas",
-      "dataPreview": "Vista previa de datos",
-      "selectFormat": "Selecciona el formato de exportación",
-      "recommended": "Recomendado",
-      "downloadNote": "El archivo se descargará automáticamente al procesar la exportación",
-      "exporting": "Exportando...",
-      "exportNow": "Exportar Ahora",
-      "status": {
-        "all": "Todas las reservas",
-        "pending": "Reservas pendientes",
-        "confirmed": "Reservas confirmadas",
-        "cancelled": "Reservas canceladas",
-        "completed": "Reservas completadas",
-        "filtered": "Reservas filtradas"
-      },
-      "stats": {
-        "reservations": "Reservas",
-        "tourists": "Turistas",
-        "revenue": "Ingresos",
-        "average": "Promedio"
-      },
-      "formats": {
-        "excel": {
-          "description": "Perfecto para análisis detallado y manipulación de datos",
-          "features": {
-            "organized": "Columnas organizadas",
-            "formulas": "Fórmulas automáticas",
-            "charts": "Gráficos incluidos"
-          }
-        },
-        "pdf": {
-          "description": "Ideal para reportes formales y presentaciones",
-          "features": {
-            "professional": "Formato profesional",
-            "statistics": "Estadísticas incluidas",
-            "printReady": "Listo para imprimir"
-          }
-        }
-      }
-    }
   },
   "calendar": {
     "editEvent": "Editar Evento",
@@ -925,99 +1047,6 @@
     "tours": "tours",
     "defaultSpecialty": "Guía turístico"
   },
-  "dashboard": {
-    "export": {
-      "title": "Exportar Datos",
-      "subtitle": "Descarga reportes según tus necesidades",
-      "filterByStatus": "Filtrar por Estado",
-      "reservations": "reservas",
-      "activeFilter": "Filtro activo",
-      "filterNote": "Solo se exportarán las reservas con estado \"{{status}}\"",
-      "dataPreview": "Vista Previa de Datos",
-      "exportFormat": "Formato de Exportación",
-      "exportButton": "Exportar {{count}} reserva(s) como {{format}}",
-      "tip": "Tip",
-      "tipDescription": "Los archivos se descargarán automáticamente con la fecha actual en el nombre",
-      "success": "✅ {{status}} exportada exitosamente!\n\n📊 Datos exportados:\n• {{count}} reservas\n• {{tourists}} turistas\n• ${{revenue}} en ingresos\n• Formato: {{format}}\n\n📁 El archivo se descargó automáticamente.",
-      "error": "Error al exportar los datos. Intenta nuevamente.",
-      "statusOptions": {
-        "all": "Información Completa",
-        "pending": "Solo Pendientes",
-        "confirmed": "Solo Confirmadas",
-        "cancelled": "Solo Canceladas"
-      },
-      "formats": {
-        "excel": {
-          "description": "Ideal para análisis detallado"
-        },
-        "pdf": {
-          "description": "Perfecto para reportes formales"
-        }
-      },
-      "stats": {
-        "reservations": "Reservas",
-        "tourists": "Turistas",
-        "revenue": "Ingresos",
-        "avgTicket": "Ticket Promedio"
-      }
-    },
-    "chart": {
-      "title": "Análisis de Servicios",
-      "selectTimeRange": "Seleccionar rango de tiempo",
-      "selectChartType": "Seleccionar tipo de gráfico",
-      "reservations": "Reservas",
-      "tourists": "Turistas",
-      "revenue": "Ingresos ($)",
-      "timeRange": {
-        "week": "Última semana",
-        "month": "Último mes",
-        "quarter": "Último trimestre",
-        "year": "Último año"
-      },
-      "types": {
-        "line": "Líneas",
-        "bar": "Barras",
-        "pie": "Torta"
-      },
-      "months": {
-        "jan": "Ene",
-        "feb": "Feb",
-        "mar": "Mar",
-        "apr": "Abr",
-        "may": "May",
-        "jun": "Jun",
-        "jul": "Jul"
-      },
-      "tours": {
-        "gastronomic": "Gastronómico",
-        "palomino": "Islas Palomino",
-        "nazca": "Líneas de Nazca"
-      },
-      "categories": {
-        "regular": "Tours Regulares",
-        "private": "Tours Privados",
-        "transfers": "Traslados"
-      },
-      "kpis": {
-        "totalReservations": "Total Reservas",
-        "totalTourists": "Total Turistas",
-        "totalRevenue": "Ingresos Totales",
-        "occupancyRate": "Tasa Ocupación",
-        "vs": "vs.",
-        "previousMonth": "mes anterior"
-      },
-      "summary": {
-        "popularTour": "Tour más popular",
-        "avgPerBooking": "Promedio por reserva",
-        "bestDay": "Mejor día",
-        "conversionRate": "Tasa conversión",
-        "saturday": "Sábados"
-      }
-    },
-    "stats": {
-      "vsPreviousMonth": "vs mes anterior"
-    }
-  },
   "emergency": {
     "materials": {
       "title": "Gestión de Materiales",
@@ -1145,16 +1174,32 @@
     }
   },
   "common": {
+    "loading": "Cargando...",
+    "statistics": "Estadísticas",
+    "noData": "No hay datos",
+    "actions": "Acciones",
+    "changeLanguage": "Cambiar idioma",
     "requiredFields": "Campos obligatorios",
     "cancel": "Cancelar",
+    "add": "Agregar",
+    "update": "Actualizar",
     "save": "Guardar",
     "saving": "Guardando...",
     "saveChanges": "Guardar Cambios",
+    "delete": "Eliminar",
+    "close": "Cerrar",
+    "edit": "Editar",
+    "view": "Ver",
+    "create": "Crear",
+    "createService": "Crear Servicio",
+    "updateService": "Actualizar Servicio",
     "min": "Mínimo",
     "max": "Máximo"
   },
   "settings": {
+    "title": "Configuración",
     "general": {
+      "description": "Información de la empresa y configuraciones básicas",
       "title": "Configuración General",
       "companyInfo": "Información de la Empresa",
       "companyName": "Nombre de la Empresa",
@@ -1187,7 +1232,8 @@
       }
     },
     "tours": {
-      "title": "Configuración de Tours y Servicios",
+      "title": "Tours",
+      "description": "Configuración de tours y servicios",
       "basicSettings": "Configuraciones Básicas",
       "maxCapacity": "Capacidad Máxima por Tour",
       "defaultDuration": "Duración por Defecto (horas)",
@@ -1260,7 +1306,17 @@
       }
     }
   },
+  "services": {
+    "management": "Gestión de Servicios",
+    "newService": "Nuevo Servicio",
+    "editService": "Editar Servicio",
+    "serviceDetails": "Detalles del Servicio",
+    "clearDuplicates": "Limpiar Duplicados",
+    "totalServices": "Total Servicios"
+  },
   "users": {
+    "management": "Gestión de Usuarios",
+    "details": "Detalles de",
     "stats": {
       "totalUsers": "Total Usuarios",
       "administrators": "Administradores",
