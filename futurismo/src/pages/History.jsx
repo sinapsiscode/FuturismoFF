@@ -7,12 +7,15 @@ import HistoryFilters from '../components/history/HistoryFilters';
 import HistoryTable from '../components/history/HistoryTable';
 import HistoryPagination from '../components/history/HistoryPagination';
 import ServiceDetailsModal from '../components/history/ServiceDetailsModal';
+import RatingModal from '../components/rating/RatingModal';
 
 const History = () => {
   const { t } = useTranslation();
   const { user } = useAuthStore();
   const [selectedService, setSelectedService] = useState(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [isRatingModalOpen, setIsRatingModalOpen] = useState(false);
+  const [ratingLoading, setRatingLoading] = useState(false);
 
   const {
     filteredServices,
@@ -42,6 +45,37 @@ const History = () => {
   const handleCloseDetails = () => {
     setIsDetailsModalOpen(false);
     setSelectedService(null);
+  };
+
+  const handleRate = (service) => {
+    setSelectedService(service);
+    setIsRatingModalOpen(true);
+  };
+
+  const handleCloseRating = () => {
+    setIsRatingModalOpen(false);
+    setSelectedService(null);
+  };
+
+  const handleSubmitRating = async (ratingData) => {
+    setRatingLoading(true);
+    try {
+      // Simular guardado de calificación
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Aquí iría la llamada a la API
+      console.log('Rating submitted:', ratingData);
+      
+      // Actualizar el servicio con la nueva calificación
+      // En un entorno real, esto vendría del servidor
+      // Por ahora simulamos la actualización
+      
+      handleCloseRating();
+    } catch (error) {
+      console.error('Error submitting rating:', error);
+    } finally {
+      setRatingLoading(false);
+    }
   };
 
   const paginatedServices = getPaginatedServices();
@@ -155,6 +189,7 @@ const History = () => {
             sort={sort}
             onSort={updateSort}
             onViewDetails={handleViewDetails}
+            onRate={handleRate}
             loading={loading}
           />
         </div>
@@ -174,6 +209,16 @@ const History = () => {
           isOpen={isDetailsModalOpen}
           onClose={handleCloseDetails}
           service={selectedService}
+        />
+
+        {/* Modal de calificación */}
+        <RatingModal
+          isOpen={isRatingModalOpen}
+          onClose={handleCloseRating}
+          onSubmit={handleSubmitRating}
+          service={selectedService}
+          type="service"
+          loading={ratingLoading}
         />
       </div>
     </div>

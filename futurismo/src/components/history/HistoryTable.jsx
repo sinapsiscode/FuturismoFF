@@ -5,15 +5,18 @@ import {
   ChevronUpIcon, 
   ChevronDownIcon,
   EyeIcon,
+  StarIcon,
   DocumentTextIcon
 } from '@heroicons/react/24/outline';
+import StarRating from '../common/StarRating';
 
 const HistoryTable = ({ 
   services, 
   sort, 
   onSort, 
   loading,
-  onViewDetails 
+  onViewDetails,
+  onRate
 }) => {
   const { t } = useTranslation();
 
@@ -174,6 +177,9 @@ const HistoryTable = ({
                 </button>
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                {t('history.table.headers.rating')}
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 {t('history.table.headers.actions')}
               </th>
             </tr>
@@ -181,7 +187,7 @@ const HistoryTable = ({
           <tbody className="bg-white divide-y divide-gray-200">
             {services.length === 0 ? (
               <tr>
-                <td colSpan="8" className="px-6 py-12 text-center text-gray-500">
+                <td colSpan="9" className="px-6 py-12 text-center text-gray-500">
                   <DocumentTextIcon className="w-12 h-12 mx-auto mb-4 text-gray-400" />
                   <p className="text-lg font-medium">{t('history.table.noResults')}</p>
                   <p className="text-sm">{t('history.table.noResultsDescription')}</p>
@@ -225,6 +231,15 @@ const HistoryTable = ({
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                     {formatCurrency(service.amount)}
                   </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {service.rating ? (
+                      <StarRating rating={service.rating} size="sm" showValue />
+                    ) : service.status === 'completed' ? (
+                      <span className="text-xs text-gray-400">{t('history.table.notRated')}</span>
+                    ) : (
+                      <span className="text-xs text-gray-400">-</span>
+                    )}
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex items-center space-x-2">
                       <button
@@ -234,6 +249,15 @@ const HistoryTable = ({
                       >
                         <EyeIcon className="w-4 h-4" />
                       </button>
+                      {service.status === 'completed' && !service.rating && onRate && (
+                        <button
+                          onClick={() => onRate(service)}
+                          className="text-yellow-600 hover:text-yellow-900 p-1 rounded hover:bg-yellow-50"
+                          title={t('history.table.actions.rate')}
+                        >
+                          <StarIcon className="w-4 h-4" />
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -258,7 +282,8 @@ HistoryTable.propTypes = {
     driver: PropTypes.string,
     amount: PropTypes.number.isRequired,
     duration: PropTypes.number.isRequired,
-    passengers: PropTypes.number.isRequired
+    passengers: PropTypes.number.isRequired,
+    rating: PropTypes.number
   })).isRequired,
   sort: PropTypes.shape({
     field: PropTypes.string.isRequired,
@@ -266,6 +291,7 @@ HistoryTable.propTypes = {
   }).isRequired,
   onSort: PropTypes.func.isRequired,
   onViewDetails: PropTypes.func.isRequired,
+  onRate: PropTypes.func,
   loading: PropTypes.bool
 };
 

@@ -615,7 +615,9 @@
     "allStatuses": "Todos los estados",
     "dateFrom": "Fecha desde",
     "dateTo": "Fecha hasta",
+    "dateRange": "Período",
     "client": "Cliente",
+    "clientOrAgency": "Cliente / Agencia",
     "minPassengers": "Min. pasajeros",
     "maxPassengers": "Máx. pasajeros",
     "clear": "Limpiar",
@@ -1517,6 +1519,7 @@
         "status": "Estado",
         "guide": "Guía",
         "amount": "Monto",
+        "rating": "Calificación",
         "actions": "Acciones"
       },
       "driver": "Chofer",
@@ -1531,8 +1534,10 @@
         "transfer": "Traslado"
       },
       "actions": {
-        "viewDetails": "Ver detalles"
+        "viewDetails": "Ver detalles",
+        "rate": "Calificar"
       },
+      "notRated": "Sin calificar",
       "noResults": "No se encontraron resultados",
       "noResultsDescription": "Intenta ajustar los filtros de búsqueda"
     },
@@ -1576,6 +1581,55 @@
     "error": {
       "title": "Error al cargar historial",
       "retry": "Reintentar"
+    }
+  },
+  "monitoring": {
+    "tour": {
+      "checkIn": "Check-in",
+      "checkOut": "Check-out", 
+      "checkedIn": "Check-in realizado exitosamente",
+      "checkedOut": "Check-out completado exitosamente",
+      "nextStop": "Siguiente parada: {{stopName}}",
+      "inProgress": "En progreso",
+      "timeElapsed": "Tiempo transcurrido",
+      "reportIncident": "Reportar incidencia",
+      "incidentPrompt": "Describe la incidencia:",
+      "incidentReported": "Incidencia reportada exitosamente"
+    },
+    "notifications": {
+      "checkIn": "Check-in realizado",
+      "checkInMessage": "El guía ha llegado a: {{stopName}}",
+      "checkOut": "Check-out completado",
+      "checkOutMessage": "El guía ha terminado en: {{stopName}}",
+      "incident": "Incidencia reportada",
+      "incidentMessage": "Incidencia en {{stopName}}: {{incident}}"
+    },
+    "incidents": {
+      "generic": "Incidencia reportada por el guía"
+    }
+  },
+  "rating": {
+    "modal": {
+      "title": {
+        "service": "Calificar Servicio",
+        "guide": "Calificar Guía",
+        "tour": "Calificar Tour"
+      },
+      "guide": "Guía",
+      "rateExperience": "¿Cómo calificarías tu experiencia?",
+      "levels": {
+        "terrible": "Terrible",
+        "bad": "Malo",
+        "okay": "Regular",
+        "good": "Bueno", 
+        "excellent": "Excelente"
+      },
+      "comments": "Comentarios (opcional)",
+      "commentsPlaceholder": "Comparte tu experiencia para ayudar a otros usuarios...",
+      "submit": "Enviar Calificación"
+    },
+    "errors": {
+      "ratingRequired": "La calificación es requerida"
     }
   }
 }

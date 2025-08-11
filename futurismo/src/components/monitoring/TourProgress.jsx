@@ -14,7 +14,13 @@ const TourProgress = ({ tourId, isGuideView = false }) => {
     estimatedDelay,
     handlePhotosChange,
     canUploadPhotos,
-    toggleStop
+    toggleStop,
+    // Nuevas funciones interactivas
+    handleCheckIn,
+    handleCheckOut,
+    reportIncident,
+    canCheckIn,
+    canCheckOut
   } = useTourProgress(tourId, isGuideView);
 
   return (
@@ -39,6 +45,12 @@ const TourProgress = ({ tourId, isGuideView = false }) => {
               onToggle={() => toggleStop(stop.id)}
               canUploadPhotos={canUploadPhotos}
               onPhotosChange={handlePhotosChange}
+              // Pasar las nuevas funciones interactivas
+              onCheckIn={handleCheckIn}
+              onCheckOut={handleCheckOut}
+              onReportIncident={reportIncident}
+              canCheckIn={canCheckIn}
+              canCheckOut={canCheckOut}
             />
           ))}
         </div>

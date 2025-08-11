@@ -18,7 +18,6 @@ const useGuideTracker = (guide) => {
   const mockGuide = {
     ...mockGuideData,
     name: t(mockGuideData.name),
-    phone: t(mockGuideData.phone),
     email: t(mockGuideData.email),
     currentTour: mockGuideData.currentTour ? {
       ...mockGuideData.currentTour,

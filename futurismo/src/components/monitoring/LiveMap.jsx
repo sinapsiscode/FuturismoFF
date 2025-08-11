@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker } from 'react-leaflet';
 import L from 'leaflet';
-import { MapPinIcon, UserGroupIcon, PhoneIcon, ClockIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import { MapPinIcon, UserGroupIcon, ClockIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { useServicesStore } from '../../stores/servicesStore';
 import { formatters } from '../../utils/formatters';
 import 'leaflet/dist/leaflet.css';

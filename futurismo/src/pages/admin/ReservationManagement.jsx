@@ -37,8 +37,6 @@ const ReservationManagement = () => {
     minClients: '',
     maxClients: '',
     clientCategory: 'all', // all, individual, small, medium, large, extra_large
-    // Nuevos filtros por agencia
-    agency: 'all',
     // Nuevos filtros de fecha avanzados
     dateFilterType: 'custom', // custom, today, week, biweekly, month, quarter, year
     specificDate: '',
@@ -192,10 +190,6 @@ const ReservationManagement = () => {
       }
     }
 
-    // Filtro por agencia
-    if (filters.agency !== 'all') {
-      filtered = filtered.filter(res => res.agencyId === filters.agency);
-    }
 
     // Filtros de fecha avanzados
     if (filters.dateFilterType !== 'custom') {
@@ -376,30 +370,70 @@ const ReservationManagement = () => {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-            {/* Rango de fechas */}
+            {/* Período de fecha */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Fecha desde
+                Período
               </label>
-              <input
-                type="date"
-                value={filters.dateFrom}
-                onChange={(e) => handleFilterChange('dateFrom', e.target.value)}
+              <select
+                value={filters.dateFilterType}
+                onChange={(e) => handleFilterChange('dateFilterType', e.target.value)}
                 className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
+              >
+                {dateFilterOptions.map(option => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
             </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Fecha hasta
-              </label>
-              <input
-                type="date"
-                value={filters.dateTo}
-                onChange={(e) => handleFilterChange('dateTo', e.target.value)}
-                className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
+
+            {/* Solo mostrar inputs de fecha si es personalizado */}
+            {filters.dateFilterType === 'custom' && (
+              <>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Fecha desde
+                  </label>
+                  <input
+                    type="date"
+                    value={filters.dateFrom}
+                    onChange={(e) => handleFilterChange('dateFrom', e.target.value)}
+                    className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Fecha hasta
+                  </label>
+                  <input
+                    type="date"
+                    value={filters.dateTo}
+                    onChange={(e) => handleFilterChange('dateTo', e.target.value)}
+                    className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+              </>
+            )}
+
+            {/* Año selector para filtro anual */}
+            {filters.dateFilterType === 'year' && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Año
+                </label>
+                <select
+                  value={filters.year}
+                  onChange={(e) => handleFilterChange('year', parseInt(e.target.value))}
+                  className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i).map(year => (
+                    <option key={year} value={year}>{year}</option>
+                  ))}
+                </select>
+              </div>
+            )}
 
             {/* Destino */}
             <div>
@@ -487,101 +521,13 @@ const ReservationManagement = () => {
                 <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                 <input
                   type="text"
-                  placeholder="Cliente, email, ID..."
+                  placeholder="Cliente, agencia, email, ID..."
                   value={filters.searchTerm}
                   onChange={(e) => handleFilterChange('searchTerm', e.target.value)}
                   className="w-full pl-10 pr-4 p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
             </div>
-          </div>
-
-          {/* Filtros por agencia y fecha avanzados */}
-          <div className="border-t pt-4 mb-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Filtro por agencia */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Agencia
-                </label>
-                <select
-                  value={filters.agency}
-                  onChange={(e) => handleFilterChange('agency', e.target.value)}
-                  className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option key="all" value="all">Todas las agencias</option>
-                  {agencies.map(agency => (
-                    <option key={agency.id} value={agency.id}>
-                      {agency.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Filtro de fecha avanzado */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Período de fecha
-                </label>
-                <select
-                  value={filters.dateFilterType}
-                  onChange={(e) => handleFilterChange('dateFilterType', e.target.value)}
-                  className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  {dateFilterOptions.map(option => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            {/* Año selector para filtro anual */}
-            {filters.dateFilterType === 'year' && (
-              <div className="mt-4 w-full md:w-1/4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Año
-                </label>
-                <select
-                  value={filters.year}
-                  onChange={(e) => handleFilterChange('year', parseInt(e.target.value))}
-                  className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i).map(year => (
-                    <option key={year} value={year}>{year}</option>
-                  ))}
-                </select>
-              </div>
-            )}
-
-            {/* Indicadores de filtros activos */}
-            {(filters.agency !== 'all' || filters.dateFilterType !== 'custom') && (
-              <div className="mt-3 flex flex-wrap gap-2">
-                {filters.agency !== 'all' && (
-                  <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
-                    Agencia: {agencies.find(a => a.id === filters.agency)?.name}
-                    <button
-                      onClick={() => handleFilterChange('agency', 'all')}
-                      className="text-blue-600 hover:text-blue-800"
-                    >
-                      ×
-                    </button>
-                  </span>
-                )}
-                {filters.dateFilterType !== 'custom' && (
-                  <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
-                    Período: {dateFilterOptions.find(d => d.value === filters.dateFilterType)?.label}
-                    <button
-                      onClick={() => handleFilterChange('dateFilterType', 'custom')}
-                      className="text-green-600 hover:text-green-800"
-                    >
-                      ×
-                    </button>
-                  </span>
-                )}
-              </div>
-            )}
           </div>
 
           {/* Filtros por cantidad de clientes */}
@@ -697,20 +643,13 @@ const ReservationManagement = () => {
         </div>
 
         {/* Estadísticas */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           <StatCard
             title="Total de Clientes"
             value={stats.totalClients}
             subtitle="Reservas filtradas"
             icon={Users}
             color="blue"
-          />
-          <StatCard
-            title="Total Turistas"
-            value={stats.totalTourists}
-            subtitle="Personas atendidas"
-            icon={TrendingUp}
-            color="green"
           />
           <StatCard
             title="Ingresos Totales"
@@ -728,35 +667,6 @@ const ReservationManagement = () => {
           />
         </div>
 
-        {/* Distribución por tamaño de grupo */}
-        {stats.groupSizeDistribution.length > 0 && (
-          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-            <div className="flex items-center mb-4">
-              <Users className="w-5 h-5 text-purple-600 mr-2" />
-              <h3 className="text-lg font-semibold text-gray-800">Distribución por Tamaño de Grupo</h3>
-            </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-              {stats.groupSizeDistribution.map((item, index) => (
-                <div key={index} className="text-center p-4 bg-gray-50 rounded-lg border hover:bg-gray-100 transition-colors">
-                  <div className={`w-12 h-12 rounded-full mx-auto mb-2 flex items-center justify-center text-white font-bold ${
-                    index === 0 ? 'bg-blue-500' : 
-                    index === 1 ? 'bg-green-500' : 
-                    index === 2 ? 'bg-yellow-500' : 
-                    index === 3 ? 'bg-purple-500' : 'bg-red-500'
-                  }`}>
-                    {item.count}
-                  </div>
-                  <div className="text-sm font-medium text-gray-800 mb-1">
-                    {item.category.split(' ')[0]} {item.category.split(' ')[1]}
-                  </div>
-                  <div className="text-xs text-gray-600">
-                    {item.percentage}% del total
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
 
         {/* Acciones */}
         <div className="flex justify-between items-center mb-6">

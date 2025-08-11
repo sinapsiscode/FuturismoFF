@@ -1,7 +1,6 @@
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 import { 
-  PhoneIcon, 
   EnvelopeIcon,
   BoltIcon,
   SignalIcon,
@@ -31,10 +30,6 @@ const GuideHeader = ({ guide, getBatteryColor, getSignalColor }) => {
           <div>
             <h3 className="text-xl font-semibold">{guide.name}</h3>
             <div className="flex items-center gap-4 mt-1 text-sm text-gray-600">
-              <div className="flex items-center gap-1">
-                <PhoneIcon className="w-4 h-4" />
-                <span>{guide.phone}</span>
-              </div>
               <div className="flex items-center gap-1">
                 <EnvelopeIcon className="w-4 h-4" />
                 <span>{guide.email}</span>

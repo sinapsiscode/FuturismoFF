@@ -6,7 +6,6 @@ export const getMockTourData = (tourId) => ({
   name: 'monitoring.tour.mockName',
   guide: {
     name: 'monitoring.guide.mockName',
-    phone: 'monitoring.guide.mockPhone',
     avatar: 'https://i.pravatar.cc/150?img=1'
   },
   tourists: {
@@ -118,7 +117,6 @@ export const getMockTourData = (tourId) => ({
 export const getMockGuideData = (guideId) => ({
   id: guideId || '1',
   name: 'monitoring.guide.mockName',
-  phone: 'monitoring.guide.mockPhone',
   email: 'monitoring.guide.mockEmail',
   avatar: 'https://i.pravatar.cc/150?img=1',
   status: GUIDE_STATUS.ACTIVE,

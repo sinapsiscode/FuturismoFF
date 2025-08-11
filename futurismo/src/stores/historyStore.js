@@ -62,14 +62,26 @@ const useHistoryStore = create(
         }
       },
 
-      // Aplicar filtros
+      // Aplicar filtros (legacy - not used anymore to avoid circular calls)
       applyFilters: () => {
-        const { services, filters, sort } = get();
-        let filtered = [...services];
+        // This function is kept for compatibility but not used
+        // All filtering is now done inline in updateFilter, clearFilters, etc.
+      },
 
-        // Filtro por búsqueda
-        if (filters.search.trim()) {
-          const searchTerm = filters.search.toLowerCase();
+      // Actualizar filtros
+      updateFilter: (filterName, value) => {
+        const state = get();
+        const newFilters = {
+          ...state.filters,
+          [filterName]: value
+        };
+        
+        // Apply filters immediately without calling applyFilters
+        let filtered = [...state.services];
+
+        // Filter logic (moved here to avoid circular calls)
+        if (newFilters.search.trim()) {
+          const searchTerm = newFilters.search.toLowerCase();
           filtered = filtered.filter(service => 
             service.serviceName.toLowerCase().includes(searchTerm) ||
             service.clientName.toLowerCase().includes(searchTerm) ||
@@ -78,47 +90,40 @@ const useHistoryStore = create(
           );
         }
 
-        // Filtro por rango de fechas
-        if (filters.dateRange !== 'all') {
+        if (newFilters.dateRange !== 'all') {
           const now = new Date();
-          const filterDate = getDateByRange(filters.dateRange, now);
+          const filterDate = getDateByRange(newFilters.dateRange, now);
           filtered = filtered.filter(service => 
             new Date(service.date) >= filterDate
           );
         }
 
-        // Filtro por estado
-        if (filters.status !== 'all') {
-          filtered = filtered.filter(service => service.status === filters.status);
+        if (newFilters.status !== 'all') {
+          filtered = filtered.filter(service => service.status === newFilters.status);
         }
 
-        // Filtro por tipo de servicio
-        if (filters.serviceType !== 'all') {
-          filtered = filtered.filter(service => service.serviceType === filters.serviceType);
+        if (newFilters.serviceType !== 'all') {
+          filtered = filtered.filter(service => service.serviceType === newFilters.serviceType);
         }
 
-        // Filtro por guía
-        if (filters.guide !== 'all') {
-          filtered = filtered.filter(service => service.guide === filters.guide);
+        if (newFilters.guide !== 'all') {
+          filtered = filtered.filter(service => service.guide === newFilters.guide);
         }
 
-        // Filtro por chofer
-        if (filters.driver !== 'all') {
-          filtered = filtered.filter(service => service.driver === filters.driver);
+        if (newFilters.driver !== 'all') {
+          filtered = filtered.filter(service => service.driver === newFilters.driver);
         }
 
-        // Filtro por vehículo
-        if (filters.vehicle !== 'all') {
-          filtered = filtered.filter(service => service.vehicle === filters.vehicle);
+        if (newFilters.vehicle !== 'all') {
+          filtered = filtered.filter(service => service.vehicle === newFilters.vehicle);
         }
 
-        // Ordenamiento
+        // Sort
         filtered.sort((a, b) => {
-          const { field, direction } = sort;
+          const { field, direction } = state.sort;
           let aVal = a[field];
           let bVal = b[field];
 
-          // Conversión especial para fechas
           if (field === 'date') {
             aVal = new Date(aVal);
             bVal = new Date(bVal);
@@ -131,40 +136,27 @@ const useHistoryStore = create(
           }
         });
 
-        // Actualizar paginación
         const totalItems = filtered.length;
-        const totalPages = Math.ceil(totalItems / get().pagination.itemsPerPage);
+        const totalPages = Math.ceil(totalItems / state.pagination.itemsPerPage);
 
-        set({ 
+        set({
+          filters: newFilters,
           filteredServices: filtered,
           pagination: {
-            ...get().pagination,
+            ...state.pagination,
+            currentPage: 1,
             totalItems,
             totalPages
           }
         });
       },
 
-      // Actualizar filtros
-      updateFilter: (filterName, value) => {
-        set(state => ({
-          filters: {
-            ...state.filters,
-            [filterName]: value
-          },
-          pagination: {
-            ...state.pagination,
-            currentPage: 1 // Reset to first page when filtering
-          }
-        }));
-        // Use setTimeout to prevent immediate re-render loops
-        setTimeout(() => {
-          get().applyFilters();
-        }, 0);
-      },
-
       // Limpiar filtros
       clearFilters: () => {
+        const state = get();
+        const totalItems = state.services.length;
+        const totalPages = Math.ceil(totalItems / state.pagination.itemsPerPage);
+        
         set({
           filters: {
             dateRange: 'all',
@@ -175,14 +167,14 @@ const useHistoryStore = create(
             driver: 'all',
             vehicle: 'all'
           },
+          filteredServices: [...state.services],
           pagination: {
-            ...get().pagination,
-            currentPage: 1
+            ...state.pagination,
+            currentPage: 1,
+            totalItems,
+            totalPages
           }
         });
-        setTimeout(() => {
-          get().applyFilters();
-        }, 0);
       },
 
       // Cambiar página
@@ -197,20 +189,37 @@ const useHistoryStore = create(
 
       // Cambiar ordenamiento
       updateSort: (field) => {
-        const currentSort = get().sort;
+        const state = get();
+        const currentSort = state.sort;
         const newDirection = currentSort.field === field && currentSort.direction === 'desc' 
           ? 'asc' 
           : 'desc';
+        
+        // Sort filtered services directly
+        const sortedServices = [...state.filteredServices];
+        sortedServices.sort((a, b) => {
+          let aVal = a[field];
+          let bVal = b[field];
+
+          if (field === 'date') {
+            aVal = new Date(aVal);
+            bVal = new Date(bVal);
+          }
+
+          if (newDirection === 'asc') {
+            return aVal > bVal ? 1 : -1;
+          } else {
+            return aVal < bVal ? 1 : -1;
+          }
+        });
         
         set({
           sort: {
             field,
             direction: newDirection
-          }
+          },
+          filteredServices: sortedServices
         });
-        setTimeout(() => {
-          get().applyFilters();
-        }, 0);
       },
 
       // Obtener servicios paginados
@@ -255,20 +264,25 @@ function generateMockHistoryData() {
     const date = new Date();
     date.setDate(date.getDate() - Math.floor(Math.random() * 365));
 
+    const status = statuses[Math.floor(Math.random() * statuses.length)];
+    const hasRating = status === 'completed' && Math.random() > 0.3; // 70% de servicios completados tienen rating
+
     services.push({
       id: `service-${i + 1}`,
       serviceName: `Servicio ${i + 1}`,
       clientName: `Cliente ${i + 1}`,
       date: date.toISOString(),
       serviceType: serviceTypes[Math.floor(Math.random() * serviceTypes.length)],
-      status: statuses[Math.floor(Math.random() * statuses.length)],
+      status,
       guide: guides[Math.floor(Math.random() * guides.length)],
       driver: drivers[Math.floor(Math.random() * drivers.length)],
       vehicle: vehicles[Math.floor(Math.random() * vehicles.length)],
       amount: Math.floor(Math.random() * 500) + 100,
       duration: Math.floor(Math.random() * 8) + 2,
       passengers: Math.floor(Math.random() * 10) + 1,
-      notes: `Notas para el servicio ${i + 1}`
+      notes: `Notas para el servicio ${i + 1}`,
+      rating: hasRating ? Math.floor(Math.random() * 5) + 1 : null,
+      ratingComment: hasRating ? `Comentario de calificación para el servicio ${i + 1}` : null
     });
   }
 

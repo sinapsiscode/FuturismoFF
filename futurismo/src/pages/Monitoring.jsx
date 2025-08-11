@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { MapIcon, UserGroupIcon, ChartBarIcon, FunnelIcon } from '@heroicons/react/24/outline';
 import { useTranslation } from 'react-i18next';
 import LiveMapResponsive from '../components/monitoring/LiveMapResponsive';
-import GuideTracker from '../components/monitoring/GuideTracker';
 import TourProgress from '../components/monitoring/TourProgress';
 import useAuthStore from '../stores/authStore';
 
@@ -10,7 +9,6 @@ const Monitoring = () => {
   const { user } = useAuthStore();
   const { t } = useTranslation();
   const [activeView, setActiveView] = useState('map');
-  const [selectedGuide, setSelectedGuide] = useState(null);
   const [selectedTour, setSelectedTour] = useState(null);
   
   // Para guías, solo mostrar sus propios tours
@@ -37,19 +35,6 @@ const Monitoring = () => {
               <MapIcon className="w-4 h-4 inline mr-2" />
               {isGuide ? t('monitoring.myLocation') : t('monitoring.liveMap')}
             </button>
-            {!isGuide && (
-              <button
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                  activeView === 'guides'
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-                onClick={() => setActiveView('guides')}
-              >
-                <UserGroupIcon className="w-4 h-4 inline mr-2" />
-                {t('monitoring.guides')}
-              </button>
-            )}
             <button
               className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                 activeView === 'tours'
@@ -74,50 +59,6 @@ const Monitoring = () => {
       <div className="flex-1 min-h-0">
         {activeView === 'map' && <LiveMapResponsive />}
         
-        {activeView === 'guides' && !isGuide && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full">
-            {/* Lista de guías */}
-            <div className="bg-white rounded-lg shadow-lg p-6 overflow-y-auto">
-              <h3 className="text-lg font-semibold mb-4">{t('monitoring.activeGuides')}</h3>
-              <div className="space-y-3">
-                {[1, 2, 3, 4].map((id) => (
-                  <div
-                    key={id}
-                    className={`p-4 border rounded-lg cursor-pointer transition-all ${
-                      selectedGuide === id
-                        ? 'border-primary-500 bg-primary-50'
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                    onClick={() => setSelectedGuide(id)}
-                  >
-                    <div className="flex items-center gap-3">
-                      <img
-                        src={`https://i.pravatar.cc/150?img=${id}`}
-                        alt="Guía"
-                        className="w-10 h-10 rounded-full"
-                      />
-                      <div>
-                        <p className="font-medium">Guía {id}</p>
-                        <p className="text-sm text-gray-600">{t('monitoring.onService')}</p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Detalles del guía seleccionado */}
-            <div className="overflow-y-auto">
-              {selectedGuide ? (
-                <GuideTracker guideId={selectedGuide} />
-              ) : (
-                <div className="bg-white rounded-lg shadow-lg p-6 h-full flex items-center justify-center">
-                  <p className="text-gray-500">{t('monitoring.selectGuide')}</p>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
 
         {activeView === 'tours' && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full">

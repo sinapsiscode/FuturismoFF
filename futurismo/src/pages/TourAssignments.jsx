@@ -29,9 +29,8 @@ const TourAssignments = () => {
   const navigate = useNavigate();
   const [selectedTour, setSelectedTour] = useState(null);
   const [showAssignModal, setShowAssignModal] = useState(false);
-  const [assignmentType, setAssignmentType] = useState('guide'); // 'guide', 'agency', 'driver', 'vehicle'
+  const [assignmentType, setAssignmentType] = useState('guide'); // 'guide', 'driver', 'vehicle'
   const [selectedGuide, setSelectedGuide] = useState('');
-  const [selectedAgency, setSelectedAgency] = useState('');
   const [selectedDriver, setSelectedDriver] = useState('');
   const [selectedVehicle, setSelectedVehicle] = useState('');
   const [validateCompetences, setValidateCompetences] = useState(true);
@@ -46,8 +45,7 @@ const TourAssignments = () => {
   const { 
     tours, 
     loadTours, 
-    assignGuideToTour, 
-    assignTourToAgency,
+    assignGuideToTour,
     getAvailableGuidesForTour,
     removeAssignment,
     isLoading 
@@ -74,36 +72,55 @@ const TourAssignments = () => {
     loadData();
   }, []);
 
-  // Filtrar tours
+  // Filtrar tours - Por defecto solo mostrar tours sin asignaciones completas
   const filteredTours = tours.filter(tour => {
-    if (filter === 'pending' && tour.assignedGuide) return false;
-    if (filter === 'assigned' && !tour.assignedGuide) return false;
+    // Verificar si el tour tiene todas las asignaciones
+    const hasCompleteAssignments = tour.assignedGuide && tour.assignedDriver && tour.assignedVehicle;
+    
+    // Si el filtro es 'pending', mostrar solo tours sin asignaciones completas
+    if (filter === 'pending') return !hasCompleteAssignments;
+    
+    // Si el filtro es 'assigned', mostrar solo tours con todas las asignaciones
+    if (filter === 'assigned') return hasCompleteAssignments;
+    
+    // Si el filtro es 'today', mostrar tours de hoy sin asignaciones completas
     if (filter === 'today') {
       const today = new Date().toDateString();
       const tourDate = new Date(tour.date || tour.createdAt).toDateString();
-      return today === tourDate;
+      return today === tourDate && !hasCompleteAssignments;
     }
     
-    if (searchTerm) {
+    // Si el filtro es 'all', mostrar solo tours sin asignaciones completas
+    if (filter === 'all') return !hasCompleteAssignments;
+    
+    // Aplicar búsqueda solo en tours sin asignaciones completas
+    if (searchTerm && !hasCompleteAssignments) {
       const term = searchTerm.toLowerCase();
       return tour.name.toLowerCase().includes(term) ||
              tour.code.toLowerCase().includes(term) ||
              tour.category.toLowerCase().includes(term);
     }
     
-    return true;
+    return !hasCompleteAssignments;
   });
 
   // Contar tours por estado
   const getCounts = () => {
     const counts = {
       total: tours.length,
-      pending: tours.filter(t => !t.assignedGuide).length,
-      assigned: tours.filter(t => t.assignedGuide).length,
+      pending: tours.filter(t => {
+        const hasCompleteAssignments = t.assignedGuide && t.assignedDriver && t.assignedVehicle;
+        return !hasCompleteAssignments;
+      }).length,
+      assigned: tours.filter(t => {
+        const hasCompleteAssignments = t.assignedGuide && t.assignedDriver && t.assignedVehicle;
+        return hasCompleteAssignments;
+      }).length,
       today: tours.filter(t => {
         const today = new Date().toDateString();
         const tourDate = new Date(t.date || t.createdAt).toDateString();
-        return today === tourDate;
+        const hasCompleteAssignments = t.assignedGuide && t.assignedDriver && t.assignedVehicle;
+        return today === tourDate && !hasCompleteAssignments;
       }).length
     };
     return counts;
@@ -117,7 +134,6 @@ const TourAssignments = () => {
     setShowAssignModal(true);
     setAssignmentType('guide');
     setSelectedGuide('');
-    setSelectedAgency('');
     setSelectedDriver('');
     setSelectedVehicle('');
     setValidateCompetences(true);
@@ -181,15 +197,6 @@ const TourAssignments = () => {
           toast.success('Guía asignado exitosamente');
           break;
           
-        case 'agency':
-          if (!selectedAgency) {
-            toast.error('Seleccione una agencia');
-            return;
-          }
-          await assignTourToAgency(selectedTour.id, selectedAgency);
-          toast.success('Agencia asignada exitosamente');
-          break;
-          
         case 'driver':
           if (!selectedDriver) {
             toast.error('Seleccione un chofer');
@@ -240,9 +247,6 @@ const TourAssignments = () => {
     }
   };
 
-  // Obtener agencias (clientes tipo agencia)
-  const agencies = clients.filter(c => c.type === 'agency' && c.status === 'active');
-  
   return (
     <div className="p-6 max-w-7xl mx-auto">
       {/* Header */}
@@ -254,7 +258,7 @@ const TourAssignments = () => {
           </h1>
         </div>
         <p className="text-gray-600">
-          Asigna guías, agencias, choferes y vehículos a los tours programados
+          Asigna guías, choferes y vehículos a los tours pendientes
         </p>
       </div>
 
@@ -356,10 +360,10 @@ const TourAssignments = () => {
             <FunnelIcon className="h-5 w-5 text-gray-400" />
             <div className="flex items-center space-x-2">
               {[
-                { key: 'all', label: 'Todos' },
+                { key: 'all', label: 'Pendientes' },
                 { key: 'pending', label: 'Sin Asignar' },
-                { key: 'assigned', label: 'Asignados' },
-                { key: 'today', label: 'Hoy' }
+                { key: 'assigned', label: 'Completados' },
+                { key: 'today', label: 'Pendientes Hoy' }
               ].map(({ key, label }) => (
                 <button
                   key={key}
@@ -401,11 +405,11 @@ const TourAssignments = () => {
                   <p className="text-sm text-gray-500">Código: {tour.code}</p>
                 </div>
                 <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                  tour.assignedGuide 
+                  tour.assignedGuide && tour.assignedDriver && tour.assignedVehicle
                     ? 'bg-green-100 text-green-800'
                     : 'bg-yellow-100 text-yellow-800'
                 }`}>
-                  {tour.assignedGuide ? 'Asignado' : 'Pendiente'}
+                  {tour.assignedGuide && tour.assignedDriver && tour.assignedVehicle ? 'Completo' : 'Pendiente'}
                 </span>
               </div>
 
@@ -450,28 +454,6 @@ const TourAssignments = () => {
                   </div>
                 )}
 
-                {/* Agencia */}
-                {tour.assignedAgency ? (
-                  <div className="flex items-center justify-between text-sm">
-                    <div className="flex items-center text-green-700">
-                      <BuildingOfficeIcon className="h-4 w-4 mr-2" />
-                      <span>
-                        {agencies.find(a => a.id === tour.assignedAgency)?.name || 'Agencia asignada'}
-                      </span>
-                    </div>
-                    <button
-                      onClick={() => handleRemoveAssignment(tour.id, 'agency')}
-                      className="text-red-600 hover:text-red-800"
-                    >
-                      <XMarkIcon className="h-4 w-4" />
-                    </button>
-                  </div>
-                ) : (
-                  <div className="text-sm text-gray-500">
-                    <BuildingOfficeIcon className="h-4 w-4 inline mr-2" />
-                    Sin agencia asignada
-                  </div>
-                )}
 
                 {/* Chofer */}
                 {tour.assignedDriver ? (
@@ -535,10 +517,10 @@ const TourAssignments = () => {
         <div className="bg-white rounded-lg shadow-sm border p-8 text-center">
           <ExclamationTriangleIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">
-            No se encontraron tours
+            No hay tours pendientes de asignación
           </h3>
           <p className="text-gray-500">
-            No hay tours que coincidan con los filtros seleccionados.
+            Todos los tours tienen sus asignaciones completas o no hay tours que coincidan con los filtros.
           </p>
         </div>
       )}
@@ -563,7 +545,6 @@ const TourAssignments = () => {
             <div className="flex space-x-2 mb-6">
               {[
                 { key: 'guide', label: 'Guía', icon: UserIcon },
-                { key: 'agency', label: 'Agencia', icon: BuildingOfficeIcon },
                 { key: 'driver', label: 'Chofer', icon: UserIcon },
                 { key: 'vehicle', label: 'Vehículo', icon: TruckIcon }
               ].map(({ key, label, icon: Icon }) => (
@@ -633,28 +614,6 @@ const TourAssignments = () => {
               </div>
             )}
 
-            {/* Agency Assignment */}
-            {assignmentType === 'agency' && (
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Seleccionar Agencia
-                  </label>
-                  <select
-                    value={selectedAgency}
-                    onChange={(e) => setSelectedAgency(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="">Seleccione una agencia</option>
-                    {agencies.map((agency) => (
-                      <option key={agency.id} value={agency.id}>
-                        {agency.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-            )}
 
             {/* Driver Assignment */}
             {assignmentType === 'driver' && (
@@ -759,7 +718,6 @@ const TourAssignments = () => {
                 disabled={
                   isLoading ||
                   (assignmentType === 'guide' && !selectedGuide) ||
-                  (assignmentType === 'agency' && !selectedAgency) ||
                   (assignmentType === 'driver' && !selectedDriver) ||
                   (assignmentType === 'vehicle' && !selectedVehicle)
                 }

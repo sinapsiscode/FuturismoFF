@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { MapPinIcon, UserGroupIcon, PhoneIcon, ClockIcon, ExclamationTriangleIcon, PlusIcon, MinusIcon, ViewfinderCircleIcon } from '@heroicons/react/24/outline';
+import { MapPinIcon, UserGroupIcon, ClockIcon, ExclamationTriangleIcon, PlusIcon, MinusIcon, ViewfinderCircleIcon } from '@heroicons/react/24/outline';
 import useServicesStore from '../../stores/servicesStore';
 import { useLayout } from '../../contexts/LayoutContext';
 

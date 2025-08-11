@@ -236,27 +236,28 @@ const ReservationList = () => {
                 <option value="completada">{t('reservations.completed')}</option>
               </select>
 
-              <input
-                type="date"
-                placeholder="Fecha desde"
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                value={dateFrom}
-                onChange={(e) => setDateFrom(e.target.value)}
-                title={t('search.dateFrom')}
-              />
-
-              <input
-                type="date"
-                placeholder="Fecha hasta"
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                value={dateTo}
-                onChange={(e) => setDateTo(e.target.value)}
-                title={t('search.dateTo')}
-              />
+              <div className="flex gap-2 items-center bg-gray-50 rounded-lg px-3 py-2 border border-gray-300">
+                <span className="text-sm text-gray-600 whitespace-nowrap">{t('search.dateRange')}:</span>
+                <input
+                  type="date"
+                  className="px-2 py-1 border-0 bg-transparent focus:ring-0 focus:outline-none text-sm"
+                  value={dateFrom}
+                  onChange={(e) => setDateFrom(e.target.value)}
+                  title={t('search.dateFrom')}
+                />
+                <span className="text-gray-400">-</span>
+                <input
+                  type="date"
+                  className="px-2 py-1 border-0 bg-transparent focus:ring-0 focus:outline-none text-sm"
+                  value={dateTo}
+                  onChange={(e) => setDateTo(e.target.value)}
+                  title={t('search.dateTo')}
+                />
+              </div>
 
               <input
                 type="text"
-                placeholder={t('search.client')}
+                placeholder={t('search.clientOrAgency')}
                 className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 w-40"
                 value={customerFilter}
                 onChange={(e) => setCustomerFilter(e.target.value)}
@@ -291,7 +292,7 @@ const ReservationList = () => {
                     setMaxPassengers('');
                     setCurrentPage(1);
                   }}
-                  className="px-4 py-2 text-gray-600 hover:text-gray-800 flex items-center gap-1"
+                  className="px-3 py-2 text-gray-600 hover:text-gray-800 bg-gray-100 hover:bg-gray-200 rounded-lg flex items-center gap-1 text-sm transition-colors"
                   title={t('search.clear')}
                 >
                   <XMarkIcon className="w-4 h-4" />

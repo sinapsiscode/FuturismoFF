@@ -7,7 +7,10 @@ import {
   ChevronRightIcon, 
   ExclamationTriangleIcon,
   CameraIcon,
-  EllipsisHorizontalCircleIcon
+  EllipsisHorizontalCircleIcon,
+  PlayIcon,
+  StopIcon,
+  ExclamationCircleIcon
 } from '@heroicons/react/24/outline';
 import { formatters } from '../../utils/formatters';
 import PhotoUpload from '../common/PhotoUpload';
@@ -20,7 +23,13 @@ const TourStopItem = ({
   isExpanded, 
   onToggle, 
   canUploadPhotos,
-  onPhotosChange 
+  onPhotosChange,
+  // Nuevas props para interactividad
+  onCheckIn,
+  onCheckOut,
+  onReportIncident,
+  canCheckIn,
+  canCheckOut
 }) => {
   const { t } = useTranslation();
 
@@ -163,6 +172,72 @@ const TourStopItem = ({
                 <p>{t('monitoring.tour.notVisitedYet')}</p>
               </div>
             )}
+
+            {/* BOTONES INTERACTIVOS PARA GUÍAS */}
+            {(canCheckIn || canCheckOut || onReportIncident) && (
+              <div className="pt-3 border-t border-gray-200">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    {canCheckIn && canCheckIn(stop) && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onCheckIn(stop.id);
+                        }}
+                        className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-green-500"
+                      >
+                        <PlayIcon className="w-4 h-4" />
+                        {t('monitoring.tour.checkIn')}
+                      </button>
+                    )}
+
+                    {canCheckOut && canCheckOut(stop) && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onCheckOut(stop.id);
+                        }}
+                        className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <StopIcon className="w-4 h-4" />
+                        {t('monitoring.tour.checkOut')}
+                      </button>
+                    )}
+
+                    {stop.status === TOUR_STATUS.IN_PROGRESS && (
+                      <div className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-blue-700 bg-blue-100 rounded-full">
+                        <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                        {t('monitoring.tour.inProgress')}
+                      </div>
+                    )}
+                  </div>
+
+                  {onReportIncident && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const message = prompt(t('monitoring.tour.incidentPrompt'));
+                        if (message && message.trim()) {
+                          onReportIncident(stop.id, 'custom', message.trim());
+                        }
+                      }}
+                      className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-yellow-700 hover:text-yellow-800 hover:bg-yellow-50 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                      title={t('monitoring.tour.reportIncident')}
+                    >
+                      <ExclamationCircleIcon className="w-3 h-3" />
+                      {t('monitoring.tour.reportIncident')}
+                    </button>
+                  )}
+                </div>
+
+                {/* Mostrar tiempo transcurrido si está en progreso */}
+                {stop.status === TOUR_STATUS.IN_PROGRESS && stop.arrivalTime && (
+                  <div className="mt-2 text-xs text-gray-500">
+                    {t('monitoring.tour.timeElapsed')}: {Math.round((new Date() - new Date(stop.arrivalTime)) / 60000)} {t('monitoring.tour.minutes')}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -177,7 +252,13 @@ TourStopItem.propTypes = {
   isExpanded: PropTypes.bool.isRequired,
   onToggle: PropTypes.func.isRequired,
   canUploadPhotos: PropTypes.func.isRequired,
-  onPhotosChange: PropTypes.func.isRequired
+  onPhotosChange: PropTypes.func.isRequired,
+  // Nuevas props para interactividad
+  onCheckIn: PropTypes.func,
+  onCheckOut: PropTypes.func,
+  onReportIncident: PropTypes.func,
+  canCheckIn: PropTypes.func,
+  canCheckOut: PropTypes.func
 };
 
 export default TourStopItem;

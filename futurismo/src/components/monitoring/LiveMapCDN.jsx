@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { MapPinIcon, UserGroupIcon, PhoneIcon, ClockIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import { MapPinIcon, UserGroupIcon, ClockIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { useServicesStore } from '../../stores/servicesStore';
 
 const LiveMapCDN = ({ filters, onServiceSelect }) => {
@@ -318,10 +318,6 @@ const LiveMapCDN = ({ filters, onServiceSelect }) => {
                     <div className="mt-4 p-3 bg-blue-50 rounded-lg">
                       <p className="text-sm font-medium text-blue-900">Guía Asignado</p>
                       <p className="text-sm text-blue-700">{selectedService.guide.name}</p>
-                      <div className="flex items-center gap-1 mt-1">
-                        <PhoneIcon className="w-3 h-3 text-blue-600" />
-                        <span className="text-xs text-blue-600">{selectedService.guide.phone}</span>
-                      </div>
                     </div>
                   )}
 
