@@ -304,27 +304,11 @@ const Dashboard = () => {
         <div className="space-y-6">
           {(user?.role === 'agency' || user?.role === 'admin') && <ExportPanel />}
           
-          {/* Quick Access to Rewards */}
-          <div className="bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg p-6 text-white">
-            <h3 className="text-lg font-semibold mb-4">🎁 Sistema de Premios</h3>
-            <div className="space-y-3">
-              {user?.role === 'admin' && (
-                <div className="space-y-2">
-                  <Link
-                    to="/admin/rewards"
-                    className="block bg-white bg-opacity-20 hover:bg-opacity-30 transition-all duration-200 rounded-lg p-3 text-center"
-                  >
-                    👨‍💼 Gestionar Premios
-                  </Link>
-                  <Link
-                    to="/test-rewards"
-                    className="block bg-white bg-opacity-20 hover:bg-opacity-30 transition-all duration-200 rounded-lg p-3 text-center"
-                  >
-                    🧪 Test Rewards
-                  </Link>
-                </div>
-              )}
-              {user?.role === 'agency' && (
+          {/* Quick Access to Rewards - Solo para Agencias */}
+          {user?.role === 'agency' && (
+            <div className="bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg p-6 text-white">
+              <h3 className="text-lg font-semibold mb-4">🎁 Sistema de Premios</h3>
+              <div className="space-y-3">
                 <div className="space-y-2">
                   <Link
                     to="/agency/rewards"
@@ -339,9 +323,9 @@ const Dashboard = () => {
                     🧪 Test Rewards
                   </Link>
                 </div>
-              )}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
 
