@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
@@ -15,6 +15,8 @@ import {
   CheckCircleIcon
 } from '@heroicons/react/24/outline';
 import { useServicesStore } from '../../stores/servicesStore';
+import LanguageMultiSelect from '../common/LanguageMultiSelect';
+import StopsManager from './StopsManager';
 
 // Esquema de validación
 const serviceSchema = yup.object({
@@ -44,17 +46,28 @@ const serviceSchema = yup.object({
     .required('El número máximo de participantes es requerido')
     .min(1, 'Mínimo 1 participante')
     .max(50, 'Máximo 50 participantes'),
-  
-  // Requisitos
-  language: yup
-    .string()
-    .required('El idioma principal es requerido'),
-  
-  // Comercial
   basePrice: yup
     .number()
-    .required('El precio base es requerido')
-    .min(0, 'El precio no puede ser negativo')
+    .required('El precio por turista es requerido')
+    .min(0, 'El precio no puede ser negativo'),
+  
+  // Requisitos
+  languages: yup
+    .array()
+    .of(yup.string())
+    .min(1, 'Selecciona al menos un idioma')
+    .required('Los idiomas son requeridos'),
+  
+  // Paradas
+  stops: yup
+    .array()
+    .of(
+      yup.object({
+        name: yup.string().required('El nombre de la parada es requerido'),
+        duration: yup.number().min(0),
+        description: yup.string()
+      })
+    )
 });
 
 const ServiceForm = ({ service = null, onSubmit, onCancel, isLoading = false }) => {
@@ -66,6 +79,7 @@ const ServiceForm = ({ service = null, onSubmit, onCancel, isLoading = false }) 
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
     reset
   } = useForm({
@@ -80,11 +94,15 @@ const ServiceForm = ({ service = null, onSubmit, onCancel, isLoading = false }) 
       // Detalles operativos
       duration: service?.duration || 4,
       maxParticipants: service?.maxParticipants || 10,
+      basePrice: service?.basePrice || 0,
       
       // Requisitos
-      language: service?.language || 'es',
+      languages: service?.languages || ['es'],
       requiresGuide: service?.requiresGuide !== false,
       requiresTransport: service?.requiresTransport !== false,
+      
+      // Paradas
+      stops: service?.stops || [],
       
       // Comercial
       basePrice: service?.basePrice || 0,
@@ -107,9 +125,12 @@ const ServiceForm = ({ service = null, onSubmit, onCancel, isLoading = false }) 
       maxParticipants: parseInt(data.maxParticipants),
       
       // Requisitos
-      language: data.language,
+      languages: data.languages,
       requiresGuide: data.requiresGuide,
       requiresTransport: data.requiresTransport,
+      
+      // Paradas
+      stops: data.stops || [],
       
       // Comercial
       basePrice: parseFloat(data.basePrice),
@@ -209,26 +230,91 @@ const ServiceForm = ({ service = null, onSubmit, onCancel, isLoading = false }) 
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Idioma Principal *
+                <GlobeAltIcon className="inline w-4 h-4 mr-1 text-gray-400" />
+                Idiomas Disponibles *
+              </label>
+              <Controller
+                name="languages"
+                control={control}
+                render={({ field }) => (
+                  <LanguageMultiSelect
+                    value={field.value}
+                    onChange={field.onChange}
+                    error={!!errors.languages}
+                    placeholder="Selecciona los idiomas disponibles"
+                  />
+                )}
+              />
+              {errors.languages && (
+                <p className="mt-1 text-sm text-red-600">{errors.languages.message}</p>
+              )}
+              <p className="mt-1 text-xs text-gray-500">
+                Los clientes podrán elegir entre estos idiomas al reservar
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Precio por Turista (S/.) *
               </label>
               <div className="relative">
-                <GlobeAltIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <select
-                  {...register('language')}
+                <CurrencyDollarIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <input
+                  type="number"
+                  step="0.01"
+                  {...register('basePrice')}
                   className={`pl-10 pr-4 py-2 w-full border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                    errors.language ? 'border-red-300' : 'border-gray-300'
+                    errors.basePrice ? 'border-red-300' : 'border-gray-300'
                   }`}
-                >
-                  <option value="es">Español</option>
-                  <option value="en">English</option>
-                  <option value="pt">Português</option>
-                  <option value="fr">Français</option>
-                  <option value="de">Deutsch</option>
-                  <option value="it">Italiano</option>
-                </select>
+                  placeholder="0.00"
+                />
               </div>
-              {errors.language && (
-                <p className="mt-1 text-sm text-red-600">{errors.language.message}</p>
+              {errors.basePrice && (
+                <p className="mt-1 text-sm text-red-600">{errors.basePrice.message}</p>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Duración (horas) *
+              </label>
+              <div className="relative">
+                <ClockIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <input
+                  type="number"
+                  {...register('duration')}
+                  min="1"
+                  max="24"
+                  className={`pl-10 pr-4 py-2 w-full border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                    errors.duration ? 'border-red-300' : 'border-gray-300'
+                  }`}
+                  placeholder="8"
+                />
+              </div>
+              {errors.duration && (
+                <p className="mt-1 text-sm text-red-600">{errors.duration.message}</p>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Máximo de Participantes *
+              </label>
+              <div className="relative">
+                <UsersIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <input
+                  type="number"
+                  {...register('maxParticipants')}
+                  min="1"
+                  max="50"
+                  className={`pl-10 pr-4 py-2 w-full border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                    errors.maxParticipants ? 'border-red-300' : 'border-gray-300'
+                  }`}
+                  placeholder="10"
+                />
+              </div>
+              {errors.maxParticipants && (
+                <p className="mt-1 text-sm text-red-600">{errors.maxParticipants.message}</p>
               )}
             </div>
 
@@ -251,83 +337,23 @@ const ServiceForm = ({ service = null, onSubmit, onCancel, isLoading = false }) 
           </div>
         </div>
 
-        {/* Detalles Operativos */}
+        {/* Itinerario de Paradas */}
         <div className="bg-white p-6 rounded-lg shadow-sm border">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">
-            Detalles Operativos
+            Itinerario del Tour
           </h3>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Duración (horas) *
-              </label>
-              <div className="relative">
-                <ClockIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <input
-                  type="number"
-                  {...register('duration')}
-                  min="1"
-                  max="24"
-                  className={`pl-10 pr-4 py-2 w-full border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                    errors.duration ? 'border-red-300' : 'border-gray-300'
-                  }`}
-                />
-              </div>
-              {errors.duration && (
-                <p className="mt-1 text-sm text-red-600">{errors.duration.message}</p>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Máximo de Participantes *
-              </label>
-              <div className="relative">
-                <UsersIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <input
-                  type="number"
-                  {...register('maxParticipants')}
-                  min="1"
-                  max="50"
-                  className={`pl-10 pr-4 py-2 w-full border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                    errors.maxParticipants ? 'border-red-300' : 'border-gray-300'
-                  }`}
-                />
-              </div>
-              {errors.maxParticipants && (
-                <p className="mt-1 text-sm text-red-600">{errors.maxParticipants.message}</p>
-              )}
-            </div>
-
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-3">
-                Requisitos del Servicio
-              </label>
-              <div className="space-y-3">
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    {...register('requiresGuide')}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                  />
-                  <label className="ml-2 block text-sm text-gray-900">
-                    Requiere guía turístico
-                  </label>
-                </div>
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    {...register('requiresTransport')}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                  />
-                  <label className="ml-2 block text-sm text-gray-900">
-                    Requiere transporte
-                  </label>
-                </div>
-              </div>
-            </div>
-          </div>
+          <Controller
+            name="stops"
+            control={control}
+            render={({ field }) => (
+              <StopsManager
+                stops={field.value}
+                onChange={field.onChange}
+                errors={errors.stops?.message}
+              />
+            )}
+          />
         </div>
 
         {/* Información Comercial */}
@@ -337,30 +363,6 @@ const ServiceForm = ({ service = null, onSubmit, onCancel, isLoading = false }) 
           </h3>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Precio Base (S/.) *
-              </label>
-              <div className="relative">
-                <CurrencyDollarIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <input
-                  type="number"
-                  step="0.01"
-                  {...register('basePrice')}
-                  className={`pl-10 pr-4 py-2 w-full border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                    errors.basePrice ? 'border-red-300' : 'border-gray-300'
-                  }`}
-                  placeholder="0.00"
-                />
-              </div>
-              {errors.basePrice && (
-                <p className="mt-1 text-sm text-red-600">{errors.basePrice.message}</p>
-              )}
-              <p className="mt-1 text-xs text-gray-500">
-                Precio por persona para el servicio base
-              </p>
-            </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Incluye
@@ -385,7 +387,7 @@ const ServiceForm = ({ service = null, onSubmit, onCancel, isLoading = false }) 
               />
             </div>
 
-            <div>
+            <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Notas Adicionales
               </label>

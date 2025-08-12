@@ -45,9 +45,20 @@ const useGuideProfile = (guide) => {
       : 'bg-yellow-100 text-yellow-800';
   };
 
+  // Calcular años de experiencia dinámicamente si hay fecha de inicio profesional
+  const calculateYearsExperience = () => {
+    if (guide?.professionalStartDate) {
+      const start = new Date(guide.professionalStartDate);
+      const now = new Date();
+      const years = (now - start) / (1000 * 60 * 60 * 24 * 365.25);
+      return Math.floor(years);
+    }
+    return guide?.stats?.yearsExperience || 0;
+  };
+
   const stats = {
     toursCompleted: guide?.stats?.toursCompleted || 0,
-    yearsExperience: guide?.stats?.yearsExperience || 0,
+    yearsExperience: calculateYearsExperience(),
     certifications: guide?.stats?.certifications || 0,
     rating: guide?.stats?.rating || 0
   };

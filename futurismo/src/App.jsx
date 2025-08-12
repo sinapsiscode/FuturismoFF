@@ -56,6 +56,9 @@ const RewardsManagement = lazy(() => import('./pages/admin/RewardsManagement'));
 const RewardsStore = lazy(() => import('./pages/agency/RewardsStore'));
 const TestRewards = lazy(() => import('./pages/TestRewards'));
 
+// Auth pages
+const FreelancerRegister = lazy(() => import('./pages/FreelancerRegister'));
+
 // WebSocket service
 import webSocketService from './services/websocket';
 
@@ -112,6 +115,13 @@ function App() {
             } 
           />
 
+          {/* Ruta de registro para freelancers */}
+          <Route 
+            path="/register" 
+            element={
+              isAuthenticated ? <Navigate to="/dashboard" replace /> : <FreelancerRegister />
+            } 
+          />
 
           {/* Rutas protegidas */}
           <Route
@@ -294,19 +304,9 @@ function App() {
               path="test-rewards" 
               element={<TestRewards />}
             />
-            <Route 
-              path="rewards-demo" 
-              element={<RewardsManagement />}
-            />
-            <Route 
-              path="rewards-store-demo" 
-              element={<RewardsStore />}
-            />
             
             {/* RUTAS DEMO CON BYPASS DE AUTENTICACIÓN */}
             <Route path="demo-test" element={<TestRewards />} />
-            <Route path="demo-admin" element={<RewardsManagement />} />
-            <Route path="demo-agency" element={<RewardsStore />} />
             
             <Route 
               path="guide/finances" 

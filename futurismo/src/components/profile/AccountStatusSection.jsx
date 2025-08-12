@@ -8,16 +8,6 @@ const AccountStatusSection = () => {
     verificationLevel: 'verified',
     memberSince: '2014-03-15',
     lastActivity: '2024-06-26',
-    subscriptionPlan: 'Premium',
-    subscriptionExpiry: '2024-12-31',
-    features: {
-      maxReservations: 1000,
-      maxTours: 50,
-      customerSupport: '24/7',
-      analyticsAccess: true,
-      apiAccess: true,
-      customBranding: true
-    },
     compliance: {
       businessLicense: { status: 'approved', date: '2024-01-15' },
       taxCertification: { status: 'approved', date: '2024-02-20' },
@@ -139,55 +129,6 @@ const AccountStatusSection = () => {
               </div>
             </div>
           </div>
-
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Plan de suscripción
-              </label>
-              <div className="p-4 bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-lg">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-lg font-semibold text-purple-800">{accountData.subscriptionPlan}</span>
-                  <span className="text-sm text-purple-600">Activo</span>
-                </div>
-                <p className="text-sm text-purple-700">
-                  Válido hasta: {formatDate(accountData.subscriptionExpiry)}
-                </p>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Características incluidas
-              </label>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-600">Máx. reservas mensuales</span>
-                  <span className="font-medium text-gray-900">{accountData.features.maxReservations}</span>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-600">Máx. tours activos</span>
-                  <span className="font-medium text-gray-900">{accountData.features.maxTours}</span>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-600">Soporte al cliente</span>
-                  <span className="font-medium text-gray-900">{accountData.features.customerSupport}</span>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-600">Acceso a analytics</span>
-                  <CheckCircleIcon className="w-4 h-4 text-green-600" />
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-600">API access</span>
-                  <CheckCircleIcon className="w-4 h-4 text-green-600" />
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-600">Branding personalizado</span>
-                  <CheckCircleIcon className="w-4 h-4 text-green-600" />
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Estado de cumplimiento normativo */}
@@ -227,9 +168,6 @@ const AccountStatusSection = () => {
         <div className="border-t border-gray-200 pt-6">
           <h4 className="text-md font-semibold text-gray-900 mb-4">Acciones disponibles</h4>
           <div className="flex flex-wrap gap-3">
-            <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-              Renovar suscripción
-            </button>
             <button className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
               Actualizar documentos
             </button>

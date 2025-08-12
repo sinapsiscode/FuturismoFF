@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import toast from 'react-hot-toast';
@@ -324,6 +324,24 @@ const Login = () => {
             <p className="text-xs text-gray-500 text-center mt-3">
               {t('auth.validCredentials')}
             </p>
+          </div>
+
+          {/* Registro para freelancers */}
+          <div className="mt-6 pt-6 border-t border-gray-200">
+            <div className="text-center">
+              <p className="text-sm text-gray-600">
+                ¿Eres guía turístico y quieres unirte?
+              </p>
+              <Link
+                to="/register"
+                className="mt-2 inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-500"
+              >
+                Regístrate como Guía Freelancer
+                <svg className="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
+            </div>
           </div>
         </div>
 

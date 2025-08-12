@@ -147,11 +147,27 @@ const ServicesListSimple = ({
                       <div className="text-sm text-gray-900">
                         {service.destination}
                       </div>
-                      {service.language && (
+                      {(service.languages || service.language) && (
                         <div className="text-xs text-gray-500">
-                          {service.language === 'es' ? 'Español' : 
-                           service.language === 'en' ? 'English' : 
-                           service.language.toUpperCase()}
+                          {service.languages ? (
+                            service.languages.map(lang => {
+                              const langMap = {
+                                'es': '🇪🇸',
+                                'en': '🇺🇸',
+                                'pt': '🇵🇹',
+                                'fr': '🇫🇷',
+                                'de': '🇩🇪',
+                                'it': '🇮🇹',
+                                'nl': '🇳🇱'
+                              };
+                              return langMap[lang] || lang.toUpperCase();
+                            }).join(' ')
+                          ) : (
+                            // Compatibilidad con campo antiguo
+                            service.language === 'es' ? '🇪🇸 Español' : 
+                            service.language === 'en' ? '🇺🇸 English' : 
+                            service.language.toUpperCase()
+                          )}
                         </div>
                       )}
                     </td>

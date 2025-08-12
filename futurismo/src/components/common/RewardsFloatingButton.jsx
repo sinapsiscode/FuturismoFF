@@ -5,7 +5,7 @@ import { useAuthStore } from '../../stores/authStore';
 const RewardsFloatingButton = () => {
   const { user } = useAuthStore();
 
-  if (!user || (user.role !== 'admin' && user.role !== 'agency')) {
+  if (!user || (user.role !== 'agency' && user.role !== 'admin')) {
     return null;
   }
 
@@ -14,7 +14,7 @@ const RewardsFloatingButton = () => {
   };
 
   const getLabel = () => {
-    return user.role === 'admin' ? 'Gestionar Premios' : 'Tienda de Premios';
+    return user.role === 'admin' ? 'Sistema de Premios' : 'Tienda de Premios';
   };
 
   return (

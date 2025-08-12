@@ -6,6 +6,9 @@ import { useAuthStore } from '../stores/authStore';
 import CompanyDataSection from '../components/profile/CompanyDataSection';
 import ContactDataSection from '../components/profile/ContactDataSection';
 import PaymentDataSection from '../components/profile/PaymentDataSection';
+import AdminCompanyDataSection from '../components/profile/AdminCompanyDataSection';
+import AdminContactDataSection from '../components/profile/AdminContactDataSection';
+import AdminPaymentDataSection from '../components/profile/AdminPaymentDataSection';
 import AccountStatusSection from '../components/profile/AccountStatusSection';
 import DocumentsSection from '../components/profile/DocumentsSection';
 import FeedbackSection from '../components/profile/FeedbackSectionSimple';
@@ -17,16 +20,25 @@ const Profile = () => {
 
   // Configurar tabs - Secciones dinámicas según el rol
   const getTabsForRole = () => {
-    const baseSections = ['company', 'contact', 'payment', 'status', 'documents'];
-    const sections = (user?.role === 'agency' || user?.role === 'admin') 
+    const baseSections = user?.role === 'admin' 
+      ? ['company', 'contact', 'payment']
+      : ['company', 'contact', 'payment', 'status', 'documents'];
+    const sections = (user?.role === 'agency') 
       ? [...baseSections, 'feedback'] 
       : baseSections;
       
-    return [
-      { id: 'profile', name: t('profile.myProfile'), icon: UserIcon, sections },
-      { id: 'guides', name: t('profile.guideAvailability'), icon: CalendarIcon },
-      { id: 'settings', name: t('profile.configuration'), icon: CogIcon }
+    const tabsList = [
+      { id: 'profile', name: t('profile.myProfile'), icon: UserIcon, sections }
     ];
+    
+    // Solo mostrar guías si no es admin
+    if (user?.role !== 'admin') {
+      tabsList.push({ id: 'guides', name: t('profile.guideAvailability'), icon: CalendarIcon });
+    }
+    
+    tabsList.push({ id: 'settings', name: t('profile.configuration'), icon: CogIcon });
+    
+    return tabsList;
   };
 
   const tabs = getTabsForRole();
@@ -115,22 +127,22 @@ const Profile = () => {
           {getProfileHeader()}
 
           {/* Datos de empresa */}
-          <CompanyDataSection />
+          {user?.role === 'admin' ? <AdminCompanyDataSection /> : <CompanyDataSection />}
 
           {/* Datos de contacto */}
-          <ContactDataSection />
+          {user?.role === 'admin' ? <AdminContactDataSection /> : <ContactDataSection />}
 
           {/* Datos de pago */}
-          <PaymentDataSection />
+          {user?.role === 'admin' ? <AdminPaymentDataSection /> : <PaymentDataSection />}
 
-          {/* Estado de la cuenta */}
-          <AccountStatusSection />
+          {/* Estado de la cuenta - No para admin */}
+          {user?.role !== 'admin' && <AccountStatusSection />}
 
-          {/* Documentos */}
-          <DocumentsSection />
+          {/* Documentos - No para admin */}
+          {user?.role !== 'admin' && <DocumentsSection />}
 
-          {/* Opiniones y sugerencias - Solo para agencias y admins */}
-          {(user?.role === 'agency' || user?.role === 'admin') && (
+          {/* Opiniones y sugerencias - Solo para agencias */}
+          {user?.role === 'agency' && (
             <FeedbackSection userRole={user?.role} />
           )}
 
@@ -173,7 +185,7 @@ const Profile = () => {
         </div>
       )}
 
-      {activeTab === 'guides' && (
+      {activeTab === 'guides' && user?.role !== 'admin' && (
         <FreelanceAvailabilityView />
       )}
 

@@ -17,13 +17,43 @@ const MOCK_SERVICES_DB = [
     description: 'Recorrido por los principales atractivos del centro histórico de Lima, incluyendo Plaza de Armas, Catedral, Palacio de Gobierno y Casa de la Literatura.',
     duration: 4,
     maxParticipants: 15,
-    language: 'es',
+    languages: ['es', 'en'],
     requiresGuide: true,
     requiresTransport: true,
     basePrice: 45.00,
     includes: 'Transporte, guía certificado, entradas a museos',
     excludes: 'Almuerzo, bebidas, gastos personales',
     notes: 'Disponible todos los días. Punto de encuentro en Plaza San Martín.',
+    stops: [
+      {
+        id: 'stop-001-1',
+        order: 1,
+        name: 'Plaza San Martín',
+        duration: 0,
+        description: 'Punto de encuentro y recojo de turistas'
+      },
+      {
+        id: 'stop-001-2',
+        order: 2,
+        name: 'Plaza de Armas',
+        duration: 45,
+        description: 'Visita a la Catedral y Palacio de Gobierno'
+      },
+      {
+        id: 'stop-001-3',
+        order: 3,
+        name: 'Convento de San Francisco',
+        duration: 60,
+        description: 'Recorrido por catacumbas y biblioteca antigua'
+      },
+      {
+        id: 'stop-001-4',
+        order: 4,
+        name: 'Casa de la Literatura',
+        duration: 30,
+        description: 'Exposición permanente de literatura peruana'
+      }
+    ],
     createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
     lastUpdate: new Date().toISOString()
   },
@@ -36,7 +66,7 @@ const MOCK_SERVICES_DB = [
     description: 'Visita a los principales museos de Lima: Museo Nacional de Arqueología, Antropología e Historia del Perú y Museo de Arte de Lima.',
     duration: 3,
     maxParticipants: 12,
-    language: 'en',
+    languages: ['en', 'es', 'pt'],
     requiresGuide: true,
     requiresTransport: false,
     basePrice: 35.00,
@@ -55,7 +85,7 @@ const MOCK_SERVICES_DB = [
     description: 'Experiencia culinaria visitando mercados locales, restaurantes tradicionales y cevicherías emblemáticas.',
     duration: 5,
     maxParticipants: 8,
-    language: 'es',
+    languages: ['es', 'en', 'fr', 'pt', 'it'],
     requiresGuide: true,
     requiresTransport: true,
     basePrice: 120.00,
@@ -74,7 +104,7 @@ const MOCK_SERVICES_DB = [
     description: 'Recorrido por los humedales más importantes de Lima, observación de aves y flora nativa.',
     duration: 3,
     maxParticipants: 20,
-    language: 'es',
+    languages: ['es', 'en', 'de', 'nl'],
     requiresGuide: true,
     requiresTransport: true,
     basePrice: 25.00,
@@ -93,13 +123,50 @@ const MOCK_SERVICES_DB = [
     description: 'Tour de aventura combinando arqueología y deportes: visita al santuario prehispánico y actividades de sandboarding.',
     duration: 6,
     maxParticipants: 10,
-    language: 'es',
+    languages: ['es', 'en'],
     requiresGuide: true,
     requiresTransport: true,
     basePrice: 85.00,
     includes: 'Transporte 4x4, guía especializado, equipos para sandboard, almuerzo',
     excludes: 'Seguro de accidentes, bebidas extras',
     notes: 'Edad mínima 12 años. Se requiere firma de deslinde de responsabilidades.',
+    stops: [
+      {
+        id: 'stop-005-1',
+        order: 1,
+        name: 'Lima - Hotel',
+        duration: 0,
+        description: 'Recojo en hotel a las 6:00 AM'
+      },
+      {
+        id: 'stop-005-2',
+        order: 2,
+        name: 'Lurín',
+        duration: 15,
+        description: 'Parada técnica para desayuno'
+      },
+      {
+        id: 'stop-005-3',
+        order: 3,
+        name: 'Sitio Arqueológico Pachacamac',
+        duration: 120,
+        description: 'Visita guiada al templo del Sol y museo de sitio'
+      },
+      {
+        id: 'stop-005-4',
+        order: 4,
+        name: 'Dunas de Chilca',
+        duration: 180,
+        description: 'Actividades de sandboarding y almuerzo campestre'
+      },
+      {
+        id: 'stop-005-5',
+        order: 5,
+        name: 'Lima - Hotel',
+        duration: 0,
+        description: 'Retorno y llegada aproximada 5:00 PM'
+      }
+    ],
     createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
     lastUpdate: new Date().toISOString()
   }

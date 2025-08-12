@@ -97,25 +97,6 @@ const ServicesManagement = () => {
           </div>
         </div>
 
-        {currentView === 'list' && (
-          <div className="flex items-center space-x-3">
-            <button
-              onClick={handleClearDuplicates}
-              className="inline-flex items-center px-3 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors"
-              title="Limpiar duplicados y resetear datos"
-            >
-              <Cog6ToothIcon className="h-4 w-4 mr-2" />
-              {t('services.clearDuplicates') || 'Limpiar Duplicados'}
-            </button>
-            <button
-              onClick={handleCreateService}
-              className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
-            >
-              <PlusIcon className="h-4 w-4 mr-2" />
-              {t('services.newService') || 'Nuevo Servicio'}
-            </button>
-          </div>
-        )}
       </div>
     );
   };

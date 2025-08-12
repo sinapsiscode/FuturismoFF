@@ -1,7 +1,7 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
 import useLayout from '../../hooks/useLayout';
-import Sidebar from './Sidebar';
+import SidebarEnhanced from './SidebarEnhanced';
 import Header from './Header';
 import MobileOverlay from './MobileOverlay';
 import NotificationCenter from '../notifications/NotificationCenter';
@@ -23,7 +23,7 @@ const Layout = () => {
         onClick={closeSidebar}
       />
 
-      <Sidebar 
+      <SidebarEnhanced 
         isOpen={sidebarOpen} 
         toggleSidebar={toggleSidebar}
         isMobile={!isDesktop}

@@ -2,9 +2,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Outlet } from 'react-router-dom';
 import { useLayout } from '../../contexts/LayoutContext';
-import AppSidebar from './AppSidebar';
+import AppSidebarEnhanced from './AppSidebarEnhanced';
 import AppHeader from './AppHeader';
-import RewardsFloatingButton from '../common/RewardsFloatingButton';
 import styles from '../../styles/layout.module.css';
 
 const AppLayout = () => {
@@ -26,7 +25,7 @@ const AppLayout = () => {
         className={`${styles.sidebarContainer} ${sidebarOpen ? styles.open : ''}`}
         aria-label="Main navigation"
       >
-        <AppSidebar />
+        <AppSidebarEnhanced />
       </aside>
 
       {/* Main Content */}
@@ -44,8 +43,6 @@ const AppLayout = () => {
         </main>
       </div>
       
-      {/* Floating Rewards Button */}
-      <RewardsFloatingButton />
     </div>
   );
 };
