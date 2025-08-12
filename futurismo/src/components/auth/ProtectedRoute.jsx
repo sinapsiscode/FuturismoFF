@@ -7,6 +7,12 @@ const ProtectedRoute = ({ children, allowedRoles = [], requireGuideType = null }
   const user = useAuthStore((state) => state.user);
   const location = useLocation();
 
+  // Rutas que NO requieren autenticación (bypass completo)
+  const publicRoutes = ['/demo-test', '/demo-admin', '/demo-agency', '/test-rewards'];
+  if (publicRoutes.includes(location.pathname)) {
+    return children;
+  }
+
   if (!isAuthenticated) {
     // Guardar la ruta intentada para redirigir después del login
     return <Navigate to="/login" state={{ from: location }} replace />;

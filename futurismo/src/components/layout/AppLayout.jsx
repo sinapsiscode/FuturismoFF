@@ -4,6 +4,7 @@ import { Outlet } from 'react-router-dom';
 import { useLayout } from '../../contexts/LayoutContext';
 import AppSidebar from './AppSidebar';
 import AppHeader from './AppHeader';
+import RewardsFloatingButton from '../common/RewardsFloatingButton';
 import styles from '../../styles/layout.module.css';
 
 const AppLayout = () => {
@@ -42,6 +43,9 @@ const AppLayout = () => {
           </div>
         </main>
       </div>
+      
+      {/* Floating Rewards Button */}
+      <RewardsFloatingButton />
     </div>
   );
 };

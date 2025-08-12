@@ -287,8 +287,8 @@ const TourAssignments = () => {
             <div className="flex items-center">
               <BuildingOffice2Icon className="w-6 h-6 text-green-600 mr-3" />
               <div>
-                <h4 className="font-semibold text-gray-900">Clientes</h4>
-                <p className="text-sm text-gray-600">Gestionar clientes</p>
+                <h4 className="font-semibold text-gray-900">Agencias</h4>
+                <p className="text-sm text-gray-600">Gestionar agencias</p>
               </div>
               <ChevronRightIcon className="w-4 h-4 text-gray-400 ml-auto" />
             </div>

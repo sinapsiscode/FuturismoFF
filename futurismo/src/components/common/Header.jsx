@@ -7,6 +7,7 @@ import LanguageToggle from './LanguageToggle';
 import SearchBar from './SearchBar';
 import ProfileMenu from './ProfileMenu';
 import NotificationBell from '../notifications/NotificationBell';
+import PointsDisplay from './PointsDisplay';
 
 const Header = ({ toggleSidebar, sidebarOpen }) => {
   const { t } = useTranslation();
@@ -20,7 +21,6 @@ const Header = ({ toggleSidebar, sidebarOpen }) => {
     handleLogout,
     handleSearch,
     navigateToProfile,
-    navigateToSettings,
     toggleNotifications,
     userInitial,
     userDisplayName,
@@ -50,6 +50,8 @@ const Header = ({ toggleSidebar, sidebarOpen }) => {
 
           {/* Right side */}
           <div className="flex items-center space-x-4">
+            <PointsDisplay />
+            
             <LanguageToggle />
             
             <NotificationBell />
@@ -61,7 +63,6 @@ const Header = ({ toggleSidebar, sidebarOpen }) => {
               userDisplayName={userDisplayName}
               userRoleKey={userRoleKey}
               onNavigateProfile={navigateToProfile}
-              onNavigateSettings={navigateToSettings}
               onLogout={handleLogout}
               menuRef={profileMenuRef}
             />

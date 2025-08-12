@@ -4,8 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { 
   ChevronDownIcon, 
   ArrowRightOnRectangleIcon, 
-  UserIcon, 
-  CogIcon 
+  UserIcon
 } from '@heroicons/react/24/outline';
 
 const ProfileMenu = ({ 
@@ -15,7 +14,6 @@ const ProfileMenu = ({
   userDisplayName, 
   userRoleKey,
   onNavigateProfile,
-  onNavigateSettings,
   onLogout,
   menuRef
 }) => {
@@ -51,13 +49,6 @@ const ProfileMenu = ({
             <UserIcon className="w-4 h-4 mr-3" />
             {t('profile.myProfile')}
           </button>
-          <button
-            onClick={onNavigateSettings}
-            className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full"
-          >
-            <CogIcon className="w-4 h-4 mr-3" />
-            {t('profile.configuration')}
-          </button>
           <hr className="my-1" />
           <button
             onClick={onLogout}
@@ -79,7 +70,6 @@ ProfileMenu.propTypes = {
   userDisplayName: PropTypes.string.isRequired,
   userRoleKey: PropTypes.string,
   onNavigateProfile: PropTypes.func.isRequired,
-  onNavigateSettings: PropTypes.func.isRequired,
   onLogout: PropTypes.func.isRequired,
   menuRef: PropTypes.object
 };

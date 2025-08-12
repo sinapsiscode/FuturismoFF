@@ -23,13 +23,8 @@ const useDriversStore = create(
         totalPages: 0
       },
       filters: {
-        status: '',
-        licenseCategory: '',
-        employmentType: '',
-        workShift: '',
         search: ''
       },
-      statistics: null,
 
       // Actions
       
@@ -266,41 +261,7 @@ const useDriversStore = create(
         }
       },
 
-      // Obtener estadísticas
-      fetchStatistics: async () => {
-        try {
-          const result = await driversService.getDriversStatistics();
-          
-          if (result.success) {
-            set({ statistics: result.data });
-            return result.data;
-          } else {
-            throw new Error(result.error);
-          }
-        } catch (error) {
-          toast.error(error.message || 'Error al cargar estadísticas');
-          return null;
-        }
-      },
 
-      // Subir foto
-      uploadDriverPhoto: async (driverId, file, onProgress) => {
-        try {
-          const result = await driversService.uploadPhoto(driverId, file, onProgress);
-          
-          if (result.success) {
-            // Actualizar chofer con nueva foto
-            await get().fetchDriverById(driverId);
-            toast.success('Foto actualizada exitosamente');
-            return result.data;
-          } else {
-            throw new Error(result.error);
-          }
-        } catch (error) {
-          toast.error(error.message || 'Error al subir foto');
-          return null;
-        }
-      },
 
       // Actualizar filtros
       setFilters: (filters) => {
@@ -313,10 +274,6 @@ const useDriversStore = create(
       clearFilters: () => {
         set({
           filters: {
-            status: '',
-            licenseCategory: '',
-            employmentType: '',
-            workShift: '',
             search: ''
           }
         });

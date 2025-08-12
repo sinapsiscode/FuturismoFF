@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { ArrowTrendingUpIcon, CalendarIcon, CheckCircleIcon, ClockIcon, UserGroupIcon, CurrencyDollarIcon, ExclamationTriangleIcon, ChartBarIcon } from '@heroicons/react/24/outline';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 import StatsCard from '../components/dashboard/StatsCard';
 import ServiceChart from '../components/dashboard/ServiceChart';
 import ExportPanel from '../components/dashboard/ExportPanel';
@@ -297,65 +298,50 @@ const Dashboard = () => {
         <div className="lg:col-span-2 space-y-6">
           <ServiceChart />
           
-          {/* Tours activos mini table */}
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold">{t('dashboard.activeToursNow')}</h3>
-              <span className="text-sm text-gray-500">
-                {new Date().toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' })}
-              </span>
-            </div>
-            
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="text-xs text-gray-700 uppercase bg-gray-50">
-                  <tr>
-                    <th className="px-4 py-2 text-left">{t('dashboard.tour')}</th>
-                    <th className="px-4 py-2 text-left">{t('dashboard.guide')}</th>
-                    <th className="px-4 py-2 text-center">{t('dashboard.tourists')}</th>
-                    <th className="px-4 py-2 text-left">{t('dashboard.status')}</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  <tr>
-                    <td className="px-4 py-3">City Tour Lima</td>
-                    <td className="px-4 py-3">Carlos Mendoza</td>
-                    <td className="px-4 py-3 text-center">12</td>
-                    <td className="px-4 py-3">
-                      <span className="badge badge-green">{t('dashboard.enRoute')}</span>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="px-4 py-3">Tour Gastronómico</td>
-                    <td className="px-4 py-3">María García</td>
-                    <td className="px-4 py-3 text-center">8</td>
-                    <td className="px-4 py-3">
-                      <span className="badge badge-yellow">{t('dashboard.atStop')}</span>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="px-4 py-3">Islas Palomino</td>
-                    <td className="px-4 py-3">Juan Pérez</td>
-                    <td className="px-4 py-3 text-center">15</td>
-                    <td className="px-4 py-3">
-                      <span className="badge badge-blue">{t('dashboard.starting')}</span>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            
-            <div className="mt-4 text-center">
-              <a href="/monitoring" className="text-sm font-medium text-primary-600 hover:text-primary-700">
-                {t('dashboard.viewLiveMonitoring')}
-              </a>
-            </div>
-          </div>
         </div>
 
         {/* Right Column - ChartBarIcon & Quick Actions */}
         <div className="space-y-6">
           {(user?.role === 'agency' || user?.role === 'admin') && <ExportPanel />}
+          
+          {/* Quick Access to Rewards */}
+          <div className="bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg p-6 text-white">
+            <h3 className="text-lg font-semibold mb-4">🎁 Sistema de Premios</h3>
+            <div className="space-y-3">
+              {user?.role === 'admin' && (
+                <div className="space-y-2">
+                  <Link
+                    to="/admin/rewards"
+                    className="block bg-white bg-opacity-20 hover:bg-opacity-30 transition-all duration-200 rounded-lg p-3 text-center"
+                  >
+                    👨‍💼 Gestionar Premios
+                  </Link>
+                  <Link
+                    to="/test-rewards"
+                    className="block bg-white bg-opacity-20 hover:bg-opacity-30 transition-all duration-200 rounded-lg p-3 text-center"
+                  >
+                    🧪 Test Rewards
+                  </Link>
+                </div>
+              )}
+              {user?.role === 'agency' && (
+                <div className="space-y-2">
+                  <Link
+                    to="/agency/rewards"
+                    className="block bg-white bg-opacity-20 hover:bg-opacity-30 transition-all duration-200 rounded-lg p-3 text-center"
+                  >
+                    🛍️ Tienda de Premios
+                  </Link>
+                  <Link
+                    to="/test-rewards"
+                    className="block bg-white bg-opacity-20 hover:bg-opacity-30 transition-all duration-200 rounded-lg p-3 text-center"
+                  >
+                    🧪 Test Rewards
+                  </Link>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
 

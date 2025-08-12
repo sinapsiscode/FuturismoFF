@@ -5,8 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { 
   ChevronDownIcon, 
   ArrowRightOnRectangleIcon, 
-  UserIcon, 
-  CogIcon 
+  UserIcon
 } from '@heroicons/react/24/outline';
 
 const ProfileMenu = ({ user, viewport, onLogout }) => {
@@ -71,16 +70,6 @@ const ProfileMenu = ({ user, viewport, onLogout }) => {
           >
             <UserIcon className="w-4 h-4 mr-3" />
             {t('profile.myProfile')}
-          </button>
-          <button
-            onClick={() => {
-              navigate('/settings');
-              setIsOpen(false);
-            }}
-            className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full"
-          >
-            <CogIcon className="w-4 h-4 mr-3" />
-            {t('profile.configuration')}
           </button>
           <hr className="my-1" />
           <button

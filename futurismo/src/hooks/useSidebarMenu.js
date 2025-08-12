@@ -8,7 +8,6 @@ import {
   ClockIcon, 
   ChatBubbleLeftRightIcon, 
   UserIcon,
-  CogIcon,
   UserGroupIcon,
   DocumentTextIcon,
   CalendarDaysIcon,
@@ -35,7 +34,6 @@ const useSidebarMenu = () => {
     ClockIcon,
     ChatBubbleLeftRightIcon,
     UserIcon,
-    CogIcon,
     UserGroupIcon,
     DocumentTextIcon,
     CalendarDaysIcon,
@@ -105,7 +103,6 @@ const useSidebarMenu = () => {
         { path: '/history', icon: DocumentTextIcon, label: t('navigation.history') },
         { path: '/chat', icon: ChatBubbleLeftRightIcon, label: t('navigation.chat') },
         { path: '/users', icon: UserGroupIcon, label: t('navigation.users') },
-        { path: '/settings', icon: CogIcon, label: t('navigation.settings') },
         { path: '/profile', icon: UserIcon, label: t('navigation.profile') }
       ];
     }

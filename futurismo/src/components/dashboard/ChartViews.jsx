@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 import {
-  LineChart, Line, BarChart, Bar, PieChart, Pie, Cell,
+  LineChart, Line, BarChart, Bar,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
 import { formatters } from '../../utils/formatters';
@@ -29,7 +29,7 @@ const CustomTooltip = ({ active, payload, label }) => {
   return null;
 };
 
-const ChartViews = ({ chartType, lineData, barData, pieData }) => {
+const ChartViews = ({ chartType, lineData, barData }) => {
   const { t } = useTranslation();
 
   return (
@@ -69,34 +69,13 @@ const ChartViews = ({ chartType, lineData, barData, pieData }) => {
           <BarChart data={barData}>
             <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
             <XAxis dataKey="tour" stroke="#6B7280" />
-            <YAxis stroke="#6B7280" />
+            <YAxis yAxisId="left" stroke="#6B7280" />
+            <YAxis yAxisId="right" orientation="right" stroke="#6B7280" tickFormatter={(value) => `$${(value/1000).toFixed(0)}k`} />
             <Tooltip content={<CustomTooltip />} />
             <Legend />
-            <Bar dataKey="reservas" fill="#1E40AF" name={t('dashboard.chart.reservations')} />
-            <Bar dataKey="ingresos" fill="#10B981" name={t('dashboard.chart.revenue')} />
+            <Bar yAxisId="left" dataKey="reservas" fill="#1E40AF" name={t('dashboard.chart.reservations')} />
+            <Bar yAxisId="right" dataKey="ingresos" fill="#10B981" name={t('dashboard.chart.revenue')} />
           </BarChart>
-        </ResponsiveContainer>
-      )}
-
-      {chartType === 'pie' && (
-        <ResponsiveContainer width="100%" height="100%">
-          <PieChart>
-            <Pie
-              data={pieData}
-              cx="50%"
-              cy="50%"
-              labelLine={false}
-              label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-              outerRadius={100}
-              fill="#8884d8"
-              dataKey="value"
-            >
-              {pieData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.color} />
-              ))}
-            </Pie>
-            <Tooltip />
-          </PieChart>
         </ResponsiveContainer>
       )}
     </div>
@@ -104,10 +83,9 @@ const ChartViews = ({ chartType, lineData, barData, pieData }) => {
 };
 
 ChartViews.propTypes = {
-  chartType: PropTypes.oneOf(['line', 'bar', 'pie']).isRequired,
+  chartType: PropTypes.oneOf(['line', 'bar']).isRequired,
   lineData: PropTypes.array.isRequired,
-  barData: PropTypes.array.isRequired,
-  pieData: PropTypes.array.isRequired
+  barData: PropTypes.array.isRequired
 };
 
 export default ChartViews;

@@ -4,6 +4,13 @@ import dashboardService from '../services/dashboardService';
 
 const useServiceChart = () => {
   const [chartType, setChartType] = useState('line');
+  
+  // Validar chartType para asegurar que no sea 'pie'
+  useEffect(() => {
+    if (chartType === 'pie') {
+      setChartType('line');
+    }
+  }, [chartType]);
   const [timeRange, setTimeRange] = useState('month');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -12,7 +19,6 @@ const useServiceChart = () => {
   // Estados para los datos
   const [lineData, setLineData] = useState([]);
   const [barData, setBarData] = useState([]);
-  const [pieData, setPieData] = useState([]);
   const [kpiData, setKpiData] = useState({
     totalReservas: { actual: 0, anterior: 0, crecimiento: 0 },
     totalTuristas: { actual: 0, anterior: 0, crecimiento: 0 },
@@ -49,17 +55,8 @@ const useServiceChart = () => {
                 item.tour
         }));
         
-        const translatedPieData = stats.pieData.map(item => ({
-          ...item,
-          name: item.name === 'Tours Regulares' ? t('dashboard.chart.categories.regular') :
-                item.name === 'Tours Privados' ? t('dashboard.chart.categories.private') :
-                item.name === 'Traslados' ? t('dashboard.chart.categories.transfers') :
-                item.name
-        }));
-        
         setLineData(translatedLineData);
         setBarData(translatedBarData);
-        setPieData(translatedPieData);
         setKpiData(stats.kpiData);
         setSummaryData({
           ...stats.summaryData,
@@ -85,8 +82,7 @@ const useServiceChart = () => {
 
   const chartTypeOptions = [
     { value: 'line', label: t('dashboard.chart.types.line') },
-    { value: 'bar', label: t('dashboard.chart.types.bar') },
-    { value: 'pie', label: t('dashboard.chart.types.pie') }
+    { value: 'bar', label: t('dashboard.chart.types.bar') }
   ];
 
   return {
@@ -96,7 +92,6 @@ const useServiceChart = () => {
     setTimeRange,
     lineData,
     barData,
-    pieData,
     kpiData,
     summaryData,
     timeRangeOptions,

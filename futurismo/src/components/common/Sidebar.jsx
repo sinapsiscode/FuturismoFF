@@ -1,6 +1,6 @@
 import { NavLink, Link, useLocation } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import { HomeIcon, MapIcon, CalendarIcon, ClockIcon, ChatBubbleLeftRightIcon, UserIcon, ChevronLeftIcon, ChevronRightIcon, CogIcon, UserGroupIcon, DocumentTextIcon, CalendarDaysIcon, BuildingOffice2Icon, ShieldCheckIcon, ChartBarIcon, StarIcon, UserCircleIcon, CurrencyDollarIcon, MagnifyingGlassIcon, BriefcaseIcon, TruckIcon } from '@heroicons/react/24/outline';
+import { HomeIcon, MapIcon, CalendarIcon, ClockIcon, ChatBubbleLeftRightIcon, UserIcon, ChevronLeftIcon, ChevronRightIcon, UserGroupIcon, DocumentTextIcon, CalendarDaysIcon, BuildingOffice2Icon, ShieldCheckIcon, ChartBarIcon, StarIcon, UserCircleIcon, CurrencyDollarIcon, MagnifyingGlassIcon, BriefcaseIcon, TruckIcon, GiftIcon } from '@heroicons/react/24/outline';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../../stores/authStore';
 
@@ -24,7 +24,8 @@ const Sidebar = ({ isOpen, toggleSidebar, isMobile }) => {
         { path: '/marketplace/requests', icon: BriefcaseIcon, label: t('navigation.myContracts') },
         { path: '/agency/calendar', icon: CalendarDaysIcon, label: t('navigation.calendar') },
         { path: '/agency/reports', icon: ChartBarIcon, label: t('navigation.reports') },
-        { path: '/agency/points', icon: StarIcon, label: t('navigation.points') },
+        { path: '/agency/points', icon: StarIcon, label: 'Mis Puntos' },
+        { path: '/agency/rewards', icon: GiftIcon, label: 'Tienda de Premios' },
         { path: '/history', icon: ClockIcon, label: t('navigation.history') },
         { path: '/chat', icon: ChatBubbleLeftRightIcon, label: t('navigation.chat') },
         { path: '/profile', icon: UserIcon, label: t('navigation.profile') }
@@ -55,7 +56,7 @@ const Sidebar = ({ isOpen, toggleSidebar, isMobile }) => {
           { path: '/admin/reservations', icon: CalendarIcon, label: t('navigation.reservationManagement') },
           { path: '/assignments', icon: UserCircleIcon, label: t('navigation.assignments') },
           { path: '/guides', icon: UserIcon, label: t('navigation.guides') },
-          { path: '/clients', icon: BuildingOffice2Icon, label: 'Clientes' },
+          { path: '/clients', icon: BuildingOffice2Icon, label: 'Agencias' },
           { path: '/drivers', icon: TruckIcon, label: 'Choferes' },
           { path: '/vehicles', icon: TruckIcon, label: 'Vehículos' },
           { path: '/marketplace', icon: MagnifyingGlassIcon, label: t('navigation.marketplace') },
@@ -63,10 +64,10 @@ const Sidebar = ({ isOpen, toggleSidebar, isMobile }) => {
           { path: '/emergency', icon: ShieldCheckIcon, label: t('navigation.emergencies') },
           { path: '/agenda', icon: CalendarDaysIcon, label: t('navigation.coordination') },
           { path: '/admin/reports', icon: ChartBarIcon, label: t('navigation.reports') },
+          { path: '/admin/rewards', icon: GiftIcon, label: 'Sistema de Premios' },
           { path: '/history', icon: DocumentTextIcon, label: t('navigation.history') },
           { path: '/chat', icon: ChatBubbleLeftRightIcon, label: t('navigation.chat') },
           { path: '/users', icon: UserGroupIcon, label: t('navigation.users') },
-          { path: '/settings', icon: CogIcon, label: t('navigation.settings') },
           { path: '/profile', icon: UserIcon, label: t('navigation.profile') }
         ];
       } catch (error) {

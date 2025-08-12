@@ -3,11 +3,7 @@
  */
 
 import { 
-  DRIVER_STATUS, 
-  LICENSE_CATEGORIES, 
-  EMPLOYMENT_TYPES,
-  WORK_SHIFTS,
-  DOCUMENT_STATUS,
+  LICENSE_CATEGORIES,
   DRIVER_MESSAGES
 } from '../constants/driversConstants';
 
@@ -42,10 +38,7 @@ const generateMockDrivers = (count = 20) => {
     const backgroundExpiry = new Date();
     backgroundExpiry.setMonth(backgroundExpiry.getMonth() + Math.floor(Math.random() * 36) - 12);
 
-    const statusOptions = [DRIVER_STATUS.ACTIVE, DRIVER_STATUS.ACTIVE, DRIVER_STATUS.ACTIVE, DRIVER_STATUS.INACTIVE, DRIVER_STATUS.VACATION];
     const licenseOptions = [LICENSE_CATEGORIES.A_IIIC, LICENSE_CATEGORIES.B_IIA, LICENSE_CATEGORIES.B_IIB, LICENSE_CATEGORIES.B_IIC];
-    const employmentOptions = [EMPLOYMENT_TYPES.FULL_TIME, EMPLOYMENT_TYPES.FULL_TIME, EMPLOYMENT_TYPES.PART_TIME, EMPLOYMENT_TYPES.CONTRACTOR];
-    const shiftOptions = [WORK_SHIFTS.MORNING, WORK_SHIFTS.AFTERNOON, WORK_SHIFTS.FLEXIBLE];
 
     drivers.push({
       id: `DRV${String(i).padStart(3, '0')}`,
@@ -53,74 +46,13 @@ const generateMockDrivers = (count = 20) => {
       lastName,
       fullName: `${firstName} ${lastName}`,
       dni: `${Math.floor(Math.random() * 90000000) + 10000000}`,
-      birthDate: birthDate.toISOString(),
-      age: new Date().getFullYear() - birthDate.getFullYear(),
-      phone: `9${Math.floor(Math.random() * 90000000) + 10000000}`,
-      email: `${firstName.toLowerCase()}.${lastName.toLowerCase()}@example.com`,
-      address: `Av. ${lastNames[Math.floor(Math.random() * lastNames.length)]} ${Math.floor(Math.random() * 999) + 100}, Lima`,
-      
-      // Información laboral
-      employmentType: employmentOptions[Math.floor(Math.random() * employmentOptions.length)],
-      workShift: shiftOptions[Math.floor(Math.random() * shiftOptions.length)],
-      hireDate: hireDate.toISOString(),
-      yearsOfService: hireYearsAgo,
-      status: statusOptions[Math.floor(Math.random() * statusOptions.length)],
       
       // Licencia
       licenseNumber: `${firstName.charAt(0)}${Math.floor(Math.random() * 90000000) + 10000000}`,
       licenseCategory: licenseOptions[Math.floor(Math.random() * licenseOptions.length)],
       licenseExpiry: licenseExpiry.toISOString(),
       
-      // Documentos
-      documents: {
-        license: {
-          number: `${firstName.charAt(0)}${Math.floor(Math.random() * 90000000) + 10000000}`,
-          expiry: licenseExpiry.toISOString(),
-          status: getDocumentStatus(licenseExpiry)
-        },
-        medicalCertificate: {
-          expiry: medicalExpiry.toISOString(),
-          status: getDocumentStatus(medicalExpiry)
-        },
-        backgroundCheck: {
-          expiry: backgroundExpiry.toISOString(),
-          status: getDocumentStatus(backgroundExpiry)
-        }
-      },
-      
-      // Contacto de emergencia
-      emergencyContact: {
-        name: `${emergencyName} ${lastName}`,
-        relationship: ['Esposa', 'Madre', 'Hermana', 'Hija'][Math.floor(Math.random() * 4)],
-        phone: `9${Math.floor(Math.random() * 90000000) + 10000000}`
-      },
-      
-      // Métricas
-      metrics: {
-        totalTrips: Math.floor(Math.random() * 500) + 100,
-        accidentFreeKm: Math.floor(Math.random() * 50000) + 10000,
-        averageRating: (Math.random() * 1.5 + 3.5).toFixed(1),
-        punctualityRate: Math.floor(Math.random() * 20) + 80,
-        hoursThisWeek: Math.floor(Math.random() * 20) + 30,
-        hoursThisMonth: Math.floor(Math.random() * 80) + 120
-      },
-      
-      // Asignaciones actuales
-      currentAssignments: [],
-      
-      // Disponibilidad
-      availability: {
-        monday: shiftOptions[Math.floor(Math.random() * shiftOptions.length)] !== WORK_SHIFTS.NIGHT,
-        tuesday: shiftOptions[Math.floor(Math.random() * shiftOptions.length)] !== WORK_SHIFTS.NIGHT,
-        wednesday: shiftOptions[Math.floor(Math.random() * shiftOptions.length)] !== WORK_SHIFTS.NIGHT,
-        thursday: shiftOptions[Math.floor(Math.random() * shiftOptions.length)] !== WORK_SHIFTS.NIGHT,
-        friday: shiftOptions[Math.floor(Math.random() * shiftOptions.length)] !== WORK_SHIFTS.NIGHT,
-        saturday: Math.random() > 0.5,
-        sunday: Math.random() > 0.7
-      },
-      
-      notes: '',
-      createdAt: hireDate.toISOString(),
+      createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     });
   }
@@ -128,16 +60,6 @@ const generateMockDrivers = (count = 20) => {
   return drivers;
 };
 
-// Helper para determinar el estado del documento
-function getDocumentStatus(expiryDate) {
-  const today = new Date();
-  const expiry = new Date(expiryDate);
-  const daysUntilExpiry = Math.floor((expiry - today) / (1000 * 60 * 60 * 24));
-  
-  if (daysUntilExpiry < 0) return DOCUMENT_STATUS.EXPIRED;
-  if (daysUntilExpiry <= 30) return DOCUMENT_STATUS.EXPIRING_SOON;
-  return DOCUMENT_STATUS.VALID;
-}
 
 // Estado inicial
 let mockDrivers = generateMockDrivers();
@@ -153,22 +75,6 @@ class MockDriversService {
     let result = [...mockDrivers];
     
     // Filtrado
-    if (params.status) {
-      result = result.filter(driver => driver.status === params.status);
-    }
-    
-    if (params.licenseCategory) {
-      result = result.filter(driver => driver.licenseCategory === params.licenseCategory);
-    }
-    
-    if (params.employmentType) {
-      result = result.filter(driver => driver.employmentType === params.employmentType);
-    }
-    
-    if (params.workShift) {
-      result = result.filter(driver => driver.workShift === params.workShift);
-    }
-    
     if (params.search) {
       const searchLower = params.search.toLowerCase();
       result = result.filter(driver => 
@@ -243,32 +149,6 @@ class MockDriversService {
       id: `DRV${String(mockDrivers.length + 1).padStart(3, '0')}`,
       ...driverData,
       fullName: `${driverData.firstName} ${driverData.lastName}`,
-      age: new Date().getFullYear() - new Date(driverData.birthDate).getFullYear(),
-      yearsOfService: 0,
-      documents: {
-        license: {
-          number: driverData.licenseNumber,
-          expiry: driverData.licenseExpiry,
-          status: getDocumentStatus(driverData.licenseExpiry)
-        },
-        medicalCertificate: driverData.documents?.medicalCertificate || {
-          expiry: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString(),
-          status: DOCUMENT_STATUS.VALID
-        },
-        backgroundCheck: driverData.documents?.backgroundCheck || {
-          expiry: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
-          status: DOCUMENT_STATUS.VALID
-        }
-      },
-      metrics: {
-        totalTrips: 0,
-        accidentFreeKm: 0,
-        averageRating: 0,
-        punctualityRate: 100,
-        hoursThisWeek: 0,
-        hoursThisMonth: 0
-      },
-      currentAssignments: [],
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
@@ -320,11 +200,6 @@ class MockDriversService {
       updatedAt: new Date().toISOString()
     };
     
-    // Actualizar estado de documentos si se actualizaron fechas
-    if (driverData.licenseExpiry) {
-      updatedDriver.documents.license.expiry = driverData.licenseExpiry;
-      updatedDriver.documents.license.status = getDocumentStatus(driverData.licenseExpiry);
-    }
     
     mockDrivers[index] = updatedDriver;
     
@@ -348,13 +223,6 @@ class MockDriversService {
       };
     }
     
-    // Verificar si tiene asignaciones activas
-    if (mockDrivers[index].currentAssignments.length > 0) {
-      return {
-        success: false,
-        error: 'No se puede eliminar un chofer con asignaciones activas'
-      };
-    }
     
     mockDrivers.splice(index, 1);
     
@@ -377,28 +245,6 @@ class MockDriversService {
       };
     }
     
-    // Verificar estado activo
-    if (driver.status !== DRIVER_STATUS.ACTIVE) {
-      return {
-        success: false,
-        data: {
-          isAvailable: false,
-          reason: `El chofer está ${DRIVER_STATUS_LABELS[driver.status].toLowerCase()}`
-        }
-      };
-    }
-    
-    // Verificar licencia vigente
-    if (driver.documents.license.status === DOCUMENT_STATUS.EXPIRED) {
-      return {
-        success: false,
-        data: {
-          isAvailable: false,
-          reason: DRIVER_MESSAGES.LICENSE_EXPIRED
-        }
-      };
-    }
-    
     // Simular verificación de disponibilidad (80% disponible)
     const isAvailable = Math.random() > 0.2;
     
@@ -406,10 +252,7 @@ class MockDriversService {
       success: true,
       data: {
         isAvailable,
-        reason: isAvailable ? null : 'El chofer ya tiene una asignación en esa fecha',
-        currentAssignments: driver.currentAssignments,
-        hoursThisWeek: driver.metrics.hoursThisWeek,
-        maxWeeklyHours: 48
+        reason: isAvailable ? null : 'El chofer ya tiene una asignación en esa fecha'
       }
     };
   }
@@ -421,12 +264,6 @@ class MockDriversService {
     const availableDrivers = [];
     
     for (const driver of mockDrivers) {
-      // Solo choferes activos
-      if (driver.status !== DRIVER_STATUS.ACTIVE) continue;
-      
-      // Con licencia vigente
-      if (driver.documents.license.status === DOCUMENT_STATUS.EXPIRED) continue;
-      
       // Si se especifica tipo de vehículo, verificar licencia compatible
       if (vehicleType) {
         const requiresSpecialLicense = ['bus', 'minibus'].includes(vehicleType);
@@ -437,14 +274,7 @@ class MockDriversService {
       
       // Simular disponibilidad
       if (Math.random() > 0.3) {
-        availableDrivers.push({
-          ...driver,
-          availability: {
-            date,
-            isAvailable: true,
-            hoursAvailable: 8
-          }
-        });
+        availableDrivers.push(driver);
       }
     }
     
@@ -476,14 +306,12 @@ class MockDriversService {
       };
     }
     
-    // Agregar asignación
+    // Crear asignación
     const assignment = {
       id: `ASSIGN${Date.now()}`,
       ...assignmentData,
       assignedAt: new Date().toISOString()
     };
-    
-    driver.currentAssignments.push(assignment);
     
     return {
       success: true,
@@ -492,57 +320,6 @@ class MockDriversService {
     };
   }
   
-  // Obtener estadísticas de choferes
-  async getDriversStatistics() {
-    await delay(200);
-    
-    const stats = {
-      total: mockDrivers.length,
-      byStatus: {},
-      byLicenseCategory: {},
-      byEmploymentType: {},
-      documentsExpiring: 0,
-      averageRating: 0,
-      totalTrips: 0
-    };
-    
-    let totalRating = 0;
-    let ratedDrivers = 0;
-    
-    mockDrivers.forEach(driver => {
-      // Por estado
-      stats.byStatus[driver.status] = (stats.byStatus[driver.status] || 0) + 1;
-      
-      // Por categoría de licencia
-      stats.byLicenseCategory[driver.licenseCategory] = (stats.byLicenseCategory[driver.licenseCategory] || 0) + 1;
-      
-      // Por tipo de empleo
-      stats.byEmploymentType[driver.employmentType] = (stats.byEmploymentType[driver.employmentType] || 0) + 1;
-      
-      // Documentos por vencer
-      Object.values(driver.documents).forEach(doc => {
-        if (doc.status === DOCUMENT_STATUS.EXPIRING_SOON) {
-          stats.documentsExpiring++;
-        }
-      });
-      
-      // Rating promedio
-      if (driver.metrics.averageRating > 0) {
-        totalRating += parseFloat(driver.metrics.averageRating);
-        ratedDrivers++;
-      }
-      
-      // Total de viajes
-      stats.totalTrips += driver.metrics.totalTrips;
-    });
-    
-    stats.averageRating = ratedDrivers > 0 ? (totalRating / ratedDrivers).toFixed(1) : 0;
-    
-    return {
-      success: true,
-      data: stats
-    };
-  }
 }
 
 export default new MockDriversService();

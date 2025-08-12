@@ -23,7 +23,6 @@ const History = lazy(() => import('./pages/History'));
 const Profile = lazy(() => import('./pages/Profile'));
 const Chat = lazy(() => import('./pages/Chat'));
 const Users = lazy(() => import('./pages/Users'));
-const Settings = lazy(() => import('./pages/Settings'));
 const Agenda = lazy(() => import('./pages/Agenda'));
 const TourAssignments = lazy(() => import('./pages/TourAssignments'));
 const Providers = lazy(() => import('./pages/Providers'));
@@ -51,6 +50,11 @@ const ServiceRequestDetail = lazy(() => import('./pages/marketplace/ServiceReque
 const ServiceReview = lazy(() => import('./pages/marketplace/ServiceReview'));
 const AgencyMarketplaceDashboard = lazy(() => import('./pages/marketplace/AgencyMarketplaceDashboard'));
 const GuideMarketplaceDashboard = lazy(() => import('./pages/marketplace/GuideMarketplaceDashboard'));
+
+// Rewards pages
+const RewardsManagement = lazy(() => import('./pages/admin/RewardsManagement'));
+const RewardsStore = lazy(() => import('./pages/agency/RewardsStore'));
+const TestRewards = lazy(() => import('./pages/TestRewards'));
 
 // WebSocket service
 import webSocketService from './services/websocket';
@@ -108,6 +112,7 @@ function App() {
             } 
           />
 
+
           {/* Rutas protegidas */}
           <Route
             path="/"
@@ -146,14 +151,6 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
                   <Users />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="settings" 
-              element={
-                <ProtectedRoute allowedRoles={['admin']}>
-                  <Settings />
                 </ProtectedRoute>
               } 
             />
@@ -277,6 +274,40 @@ function App() {
                 </ProtectedRoute>
               } 
             />
+            <Route 
+              path="admin/rewards" 
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <RewardsManagement />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="agency/rewards" 
+              element={
+                <ProtectedRoute allowedRoles={['agency']}>
+                  <RewardsStore />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="test-rewards" 
+              element={<TestRewards />}
+            />
+            <Route 
+              path="rewards-demo" 
+              element={<RewardsManagement />}
+            />
+            <Route 
+              path="rewards-store-demo" 
+              element={<RewardsStore />}
+            />
+            
+            {/* RUTAS DEMO CON BYPASS DE AUTENTICACIÓN */}
+            <Route path="demo-test" element={<TestRewards />} />
+            <Route path="demo-admin" element={<RewardsManagement />} />
+            <Route path="demo-agency" element={<RewardsStore />} />
+            
             <Route 
               path="guide/finances" 
               element={

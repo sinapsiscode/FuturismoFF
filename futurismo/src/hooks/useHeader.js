@@ -40,11 +40,6 @@ const useHeader = () => {
     setProfileMenuOpen(false);
   };
 
-  const navigateToSettings = () => {
-    navigate('/profile?tab=settings');
-    setProfileMenuOpen(false);
-  };
-
   const getUserInitial = () => {
     return user?.name?.charAt(0).toUpperCase() || 'U';
   };
@@ -75,7 +70,6 @@ const useHeader = () => {
     handleLogout,
     handleSearch,
     navigateToProfile,
-    navigateToSettings,
     toggleNotifications: toggleVisibility,
     
     // Computed values

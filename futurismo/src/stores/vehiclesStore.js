@@ -23,14 +23,8 @@ const useVehiclesStore = create(
         totalPages: 0
       },
       filters: {
-        status: '',
-        type: '',
-        fuelType: '',
-        minCapacity: '',
         search: ''
       },
-      statistics: null,
-      maintenanceRequired: [],
 
       // Actions
       

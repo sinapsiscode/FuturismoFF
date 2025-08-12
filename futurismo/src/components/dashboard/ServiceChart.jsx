@@ -65,7 +65,6 @@ const ServiceChart = () => {
         chartType={chartType}
         lineData={lineData}
         barData={barData}
-        pieData={pieData}
       />
 
       <ChartSummary summaryData={summaryData} />

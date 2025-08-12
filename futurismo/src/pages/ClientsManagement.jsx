@@ -244,8 +244,8 @@ const ClientsManagement = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Gestión de Clientes</h1>
-          <p className="text-gray-600">Administra agencias, empresas y clientes particulares</p>
+          <h1 className="text-2xl font-bold text-gray-900">Gestión de Agencias</h1>
+          <p className="text-gray-600">Administra agencias y empresas</p>
         </div>
         <button
           onClick={() => {
@@ -255,7 +255,7 @@ const ClientsManagement = () => {
           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
         >
           <PlusIcon className="h-5 w-5" />
-          <span>Nuevo Cliente</span>
+          <span>Nueva Agencia</span>
         </button>
       </div>
 
@@ -265,7 +265,7 @@ const ClientsManagement = () => {
           <div className="flex items-center">
             <UserGroupIcon className="h-8 w-8 text-blue-600" />
             <div className="ml-3">
-              <p className="text-sm font-medium text-gray-500">Total Clientes</p>
+              <p className="text-sm font-medium text-gray-500">Total Agencias</p>
               <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
             </div>
           </div>
@@ -359,7 +359,7 @@ const ClientsManagement = () => {
             <thead className="bg-gray-50 border-b">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Cliente
+                  Agencia
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Tipo
@@ -509,14 +509,14 @@ const ClientsManagement = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
             <h3 className="text-lg font-semibold text-gray-900 mb-6">
-              {editingClient ? 'Editar Cliente' : 'Nuevo Cliente'}
+              {editingClient ? 'Editar Agencia' : 'Nueva Agencia'}
             </h3>
 
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Tipo de cliente */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Tipo de Cliente
+                  Tipo de Agencia
                 </label>
                 <div className="grid grid-cols-3 gap-3">
                   {Object.entries(CLIENT_TYPE_LABELS).map(([value, label]) => (
@@ -734,7 +734,7 @@ const ClientsManagement = () => {
           <div className="bg-white rounded-lg p-6 max-w-3xl w-full mx-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-semibold text-gray-900">
-                Detalles del Cliente
+                Detalles de la Agencia
               </h3>
               <button
                 onClick={() => {
@@ -864,7 +864,7 @@ const ClientsManagement = () => {
 
               {/* Fechas */}
               <div className="flex items-center justify-between text-sm text-gray-500 pt-4 border-t">
-                <span>Cliente desde: {new Date(selectedClient.since || selectedClient.createdAt).toLocaleDateString()}</span>
+                <span>Agencia desde: {new Date(selectedClient.since || selectedClient.createdAt).toLocaleDateString()}</span>
                 <span>Última actualización: {new Date(selectedClient.updatedAt).toLocaleDateString()}</span>
               </div>
             </div>

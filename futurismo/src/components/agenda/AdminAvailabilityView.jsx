@@ -5,12 +5,14 @@ import {
   ClockIcon,
   CalendarDaysIcon,
   MapPinIcon,
-  ChatBubbleLeftRightIcon
+  ChatBubbleLeftRightIcon,
+  PhoneIcon
 } from '@heroicons/react/24/outline';
 import { Dialog, Transition } from '@headlessui/react';
 import React, { Fragment } from 'react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { useNavigate } from 'react-router-dom';
 import FantasticalLayout from '../calendar/FantasticalLayout';
 import CalendarSidebar from '../calendar/Sidebar/CalendarSidebar';
 import DayView from '../calendar/Views/DayView';
@@ -21,6 +23,7 @@ import useAuthStore from '../../stores/authStore';
 
 const AdminAvailabilityView = () => {
   const { user } = useAuthStore();
+  const navigate = useNavigate();
   const { 
     currentView,
     currentGuide,
@@ -97,6 +100,17 @@ const AdminAvailabilityView = () => {
       setCurrentGuide(guides[0].id);
     }
   }, [currentGuide, setCurrentGuide]);
+
+  // Función para abrir chat con el guía
+  const handleChatWithGuide = (guide) => {
+    const chatUrl = `/chat?guide=${guide.id}&name=${encodeURIComponent(guide.name)}`;
+    navigate(chatUrl);
+  };
+
+  // Función para llamar al guía
+  const handleCallGuide = (guide) => {
+    window.location.href = `tel:${guide.phone}`;
+  };
 
   const handleAssignTour = () => {
     if (!tourForm.title || !selectedTimeSlot || !currentGuide) return;
@@ -212,9 +226,19 @@ const AdminAvailabilityView = () => {
             </div>
 
             <div className="flex space-x-2 mt-3">
-              <button className="flex-1 flex items-center justify-center space-x-1 px-2 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600">
+              <button 
+                onClick={() => handleChatWithGuide(currentGuideInfo)}
+                className="flex-1 flex items-center justify-center space-x-1 px-2 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600 transition-colors"
+              >
                 <ChatBubbleLeftRightIcon className="w-3 h-3" />
                 <span>Chat</span>
+              </button>
+              <button 
+                onClick={() => handleCallGuide(currentGuideInfo)}
+                className="flex-1 flex items-center justify-center space-x-1 px-2 py-1 bg-green-500 text-white rounded text-xs hover:bg-green-600 transition-colors"
+              >
+                <PhoneIcon className="w-3 h-3" />
+                <span>Llamar</span>
               </button>
             </div>
           </div>
@@ -226,30 +250,60 @@ const AdminAvailabilityView = () => {
         <h4 className="text-sm font-medium text-gray-700 mb-3">Todos los Guías</h4>
         <div className="space-y-2">
           {guides.map(guide => (
-            <button
+            <div
               key={guide.id}
-              onClick={() => setCurrentGuide(guide.id)}
-              className={`w-full flex items-center space-x-2 p-2 rounded-lg text-left transition-colors ${
+              className={`w-full rounded-lg border transition-colors ${
                 currentGuide === guide.id 
-                  ? 'bg-blue-50 border border-blue-200' 
-                  : 'hover:bg-gray-50'
+                  ? 'bg-blue-50 border-blue-200' 
+                  : 'bg-white border-gray-200 hover:bg-gray-50'
               }`}
             >
-              <div className="relative">
-                <div className="w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center">
-                  <span className="text-xs font-medium text-gray-600">
-                    {guide.name.split(' ').map(n => n[0]).join('')}
-                  </span>
+              <button
+                onClick={() => setCurrentGuide(guide.id)}
+                className="w-full flex items-center space-x-2 p-2 text-left"
+              >
+                <div className="relative">
+                  <div className="w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center">
+                    <span className="text-xs font-medium text-gray-600">
+                      {guide.name.split(' ').map(n => n[0]).join('')}
+                    </span>
+                  </div>
+                  {guide.online && (
+                    <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-green-400 border border-white rounded-full" />
+                  )}
                 </div>
-                {guide.online && (
-                  <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-green-400 border border-white rounded-full" />
-                )}
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-medium text-gray-900 truncate">{guide.name}</p>
+                  <p className="text-xs text-gray-500">⭐ {guide.rating}</p>
+                </div>
+              </button>
+              
+              {/* Botones de acción rápida */}
+              <div className="flex space-x-1 px-2 pb-2">
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleChatWithGuide(guide);
+                  }}
+                  className="flex-1 flex items-center justify-center space-x-1 px-1 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600 transition-colors"
+                  title={`Chat con ${guide.name}`}
+                >
+                  <ChatBubbleLeftRightIcon className="w-2.5 h-2.5" />
+                  <span className="hidden sm:inline">Chat</span>
+                </button>
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleCallGuide(guide);
+                  }}
+                  className="flex-1 flex items-center justify-center space-x-1 px-1 py-1 bg-green-500 text-white rounded text-xs hover:bg-green-600 transition-colors"
+                  title={`Llamar a ${guide.name}`}
+                >
+                  <PhoneIcon className="w-2.5 h-2.5" />
+                  <span className="hidden sm:inline">Llamar</span>
+                </button>
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-xs font-medium text-gray-900 truncate">{guide.name}</p>
-                <p className="text-xs text-gray-500">⭐ {guide.rating}</p>
-              </div>
-            </button>
+            </div>
           ))}
         </div>
       </div>

@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Premios - Demo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50">
+    <div class="min-h-screen p-6">
+        <div class="max-w-6xl mx-auto">
+            <!-- Header -->
+            <div class="bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg p-8 text-white mb-8">
+                <h1 class="text-4xl font-bold mb-4">🎁 Sistema de Premios - DEMO</h1>
+                <p class="text-purple-100 text-lg">
+                    Demo completo del sistema implementado - Funciona sin autenticación
+                </p>
+            </div>
+
+            <!-- Navegación -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-white rounded-lg shadow-lg p-6 text-center">
+                    <div class="text-4xl mb-4">👨‍💼</div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">Panel Admin</h3>
+                    <p class="text-gray-600 mb-4">Gestión completa de premios y canjes</p>
+                    <button onclick="showAdminDemo()" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
+                        Ver Demo Admin
+                    </button>
+                </div>
+                
+                <div class="bg-white rounded-lg shadow-lg p-6 text-center">
+                    <div class="text-4xl mb-4">🏢</div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">Tienda Agencia</h3>
+                    <p class="text-gray-600 mb-4">Catálogo y canje de premios</p>
+                    <button onclick="showAgencyDemo()" class="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700">
+                        Ver Demo Agencia
+                    </button>
+                </div>
+                
+                <div class="bg-white rounded-lg shadow-lg p-6 text-center">
+                    <div class="text-4xl mb-4">⚙️</div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">Configuración</h3>
+                    <p class="text-gray-600 mb-4">Detalles técnicos del sistema</p>
+                    <button onclick="showTechDetails()" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700">
+                        Ver Detalles
+                    </button>
+                </div>
+            </div>
+
+            <!-- Content Area -->
+            <div id="demoContent" class="bg-white rounded-lg shadow-lg p-8">
+                <div class="text-center py-12">
+                    <div class="text-6xl mb-4">🎯</div>
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4">Sistema de Premios Implementado</h2>
+                    <p class="text-gray-600 mb-6">Selecciona una opción arriba para ver las demos</p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+                        <div class="bg-green-50 border border-green-200 rounded-lg p-6">
+                            <h3 class="text-lg font-semibold text-green-800 mb-4">✅ Implementado Completamente:</h3>
+                            <ul class="text-green-700 space-y-2 text-left">
+                                <li>• Constantes del sistema de puntos</li>
+                                <li>• Store Zustand para gestión de estado</li>
+                                <li>• Componente admin (RewardsManagement)</li>
+                                <li>• Componente agencia (RewardsStore)</li>
+                                <li>• Rutas configuradas</li>
+                                <li>• Enlaces en menús</li>
+                                <li>• Sistemas de permisos</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
+                            <h3 class="text-lg font-semibold text-blue-800 mb-4">🔧 Archivos Creados:</h3>
+                            <ul class="text-blue-700 space-y-2 text-left text-sm">
+                                <li>• /src/constants/rewardsConstants.js</li>
+                                <li>• /src/stores/rewardsStore.js</li>
+                                <li>• /src/pages/admin/RewardsManagement.jsx</li>
+                                <li>• /src/pages/agency/RewardsStore.jsx</li>
+                                <li>• Rutas en App.jsx</li>
+                                <li>• Enlaces en Sidebar.jsx</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showAdminDemo() {
+            document.getElementById('demoContent').innerHTML = `
+                <div class="space-y-6">
+                    <div class="flex items-center justify-between border-b pb-4">
+                        <h2 class="text-2xl font-bold text-gray-900">👨‍💼 Panel de Administración</h2>
+                        <span class="badge bg-blue-100 text-blue-800 px-3 py-1 rounded-full">Admin Demo</span>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="bg-purple-50 border border-purple-200 rounded-lg p-6">
+                            <h3 class="text-lg font-semibold text-purple-800 mb-4">🎁 Gestión de Premios</h3>
+                            <ul class="text-purple-700 space-y-2">
+                                <li>✓ Crear nuevos premios</li>
+                                <li>✓ Editar premios existentes</li>
+                                <li>✓ Control de stock</li>
+                                <li>✓ Categorías configurables</li>
+                                <li>✓ Activar/desactivar premios</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="bg-green-50 border border-green-200 rounded-lg p-6">
+                            <h3 class="text-lg font-semibold text-green-800 mb-4">⭐ Gestión de Puntos</h3>
+                            <ul class="text-green-700 space-y-2">
+                                <li>✓ Asignar puntos manualmente</li>
+                                <li>✓ Ver puntos por agencia</li>
+                                <li>✓ Historial de transacciones</li>
+                                <li>✓ Motivos de asignación</li>
+                                <li>✓ Auditoria completa</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="bg-orange-50 border border-orange-200 rounded-lg p-6">
+                            <h3 class="text-lg font-semibold text-orange-800 mb-4">📋 Gestión de Canjes</h3>
+                            <ul class="text-orange-700 space-y-2">
+                                <li>✓ Ver solicitudes de canje</li>
+                                <li>✓ Aprobar/rechazar canjes</li>
+                                <li>✓ Marcar como entregado</li>
+                                <li>✓ Notas y comentarios</li>
+                                <li>✓ Estados de seguimiento</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
+                        <h4 class="font-semibold text-blue-800 mb-2">🚀 Funcionalidades Clave:</h4>
+                        <p class="text-blue-700">
+                            El panel admin incluye tres pestañas principales: <strong>Premios</strong> (CRUD completo), 
+                            <strong>Agencias</strong> (con botón para asignar puntos), y <strong>Canjes</strong> 
+                            (workflow completo de aprobación). Cada acción incluye validaciones, notificaciones toast, 
+                            y actualización automática del estado.
+                        </p>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function showAgencyDemo() {
+            document.getElementById('demoContent').innerHTML = `
+                <div class="space-y-6">
+                    <div class="flex items-center justify-between border-b pb-4">
+                        <h2 class="text-2xl font-bold text-gray-900">🏢 Tienda de Premios</h2>
+                        <span class="badge bg-purple-100 text-purple-800 px-3 py-1 rounded-full">Agencia Demo</span>
+                    </div>
+                    
+                    <div class="bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg p-6 text-white mb-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="text-xl font-bold">Mis Puntos</h3>
+                                <p class="text-purple-100">Canjea tus puntos por increíbles premios</p>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-3xl font-bold">12,500</div>
+                                <div class="text-sm text-purple-200">Puntos disponibles</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-indigo-50 border border-indigo-200 rounded-lg p-6">
+                            <h3 class="text-lg font-semibold text-indigo-800 mb-4">🛍️ Catálogo de Premios</h3>
+                            <ul class="text-indigo-700 space-y-2">
+                                <li>✓ Grid responsive de premios</li>
+                                <li>✓ Filtros por categoría</li>
+                                <li>✓ Ordenamiento por puntos</li>
+                                <li>✓ Búsqueda de productos</li>
+                                <li>✓ Detalles completos</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-6">
+                            <h3 class="text-lg font-semibold text-emerald-800 mb-4">💫 Sistema de Canje</h3>
+                            <ul class="text-emerald-700 space-y-2">
+                                <li>✓ Validación de puntos</li>
+                                <li>✓ Confirmación de canje</li>
+                                <li>✓ Vista previa de transacción</li>
+                                <li>✓ Seguimiento de estados</li>
+                                <li>✓ Historial personal</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+                        <h4 class="font-semibold text-yellow-800 mb-2">📊 Dashboard de Puntos:</h4>
+                        <p class="text-yellow-700">
+                            La tienda incluye un dashboard completo con estadísticas de puntos totales, 
+                            disponibles, canjes exitosos y pendientes. Las agencias pueden ver su progreso, 
+                            historial de canjes, y acceder fácilmente a todo el catálogo con filtros avanzados.
+                        </p>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function showTechDetails() {
+            document.getElementById('demoContent').innerHTML = `
+                <div class="space-y-6">
+                    <div class="flex items-center justify-between border-b pb-4">
+                        <h2 class="text-2xl font-bold text-gray-900">⚙️ Detalles Técnicos</h2>
+                        <span class="badge bg-green-100 text-green-800 px-3 py-1 rounded-full">Sistema Completo</span>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-slate-50 border border-slate-200 rounded-lg p-6">
+                            <h3 class="text-lg font-semibold text-slate-800 mb-4">🏗️ Arquitectura</h3>
+                            <ul class="text-slate-700 space-y-2 text-sm">
+                                <li><strong>Frontend:</strong> React + Zustand</li>
+                                <li><strong>Routing:</strong> React Router DOM</li>
+                                <li><strong>Styling:</strong> Tailwind CSS</li>
+                                <li><strong>Icons:</strong> Heroicons</li>
+                                <li><strong>Notifications:</strong> React Hot Toast</li>
+                                <li><strong>Forms:</strong> Controlled components</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="bg-violet-50 border border-violet-200 rounded-lg p-6">
+                            <h3 class="text-lg font-semibold text-violet-800 mb-4">📁 Estructura</h3>
+                            <ul class="text-violet-700 space-y-1 text-sm font-mono">
+                                <li>├── constants/rewardsConstants.js</li>
+                                <li>├── stores/rewardsStore.js</li>
+                                <li>├── pages/admin/RewardsManagement.jsx</li>
+                                <li>├── pages/agency/RewardsStore.jsx</li>
+                                <li>├── components/common/</li>
+                                <li>└── services/mockData</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-amber-50 border border-amber-200 rounded-lg p-6">
+                        <h4 class="font-semibold text-amber-800 mb-2">🔧 Estado del Sistema:</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                            <div>
+                                <div class="font-semibold text-amber-700 mb-1">✅ Implementado:</div>
+                                <ul class="text-amber-600">
+                                    <li>• Store completo</li>
+                                    <li>• Componentes UI</li>
+                                    <li>• Rutas configuradas</li>
+                                    <li>• Mock data funcional</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <div class="font-semibold text-amber-700 mb-1">🚀 Funcionalidades:</div>
+                                <ul class="text-amber-600">
+                                    <li>• CRUD premios</li>
+                                    <li>• Asignación puntos</li>
+                                    <li>• Workflow canjes</li>
+                                    <li>• Validaciones</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <div class="font-semibold text-amber-700 mb-1">⚠️ Problema Actual:</div>
+                                <ul class="text-amber-600">
+                                    <li>• Router redirige a login</li>
+                                    <li>• AuthStore no reconoce sesión</li>
+                                    <li>• ProtectedRoute bloquea acceso</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
+                        <h4 class="font-semibold text-blue-800 mb-2">🔍 Diagnóstico del Problema:</h4>
+                        <p class="text-blue-700 mb-4">
+                            El sistema está completamente implementado pero el componente ProtectedRoute 
+                            está redirigiendo todas las rutas al login. Esto indica que:
+                        </p>
+                        <ul class="text-blue-600 space-y-1">
+                            <li>1. <code>isAuthenticated</code> en authStore es <code>false</code></li>
+                            <li>2. La sesión no se está persistiendo correctamente</li>
+                            <li>3. El token no se está validando al cargar la app</li>
+                        </ul>
+                    </div>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>

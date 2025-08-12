@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
-import { MapPinIcon, UserGroupIcon, CheckIcon, ChevronRightIcon, ChevronLeftIcon } from '@heroicons/react/24/outline';
+import { MapPinIcon, UserGroupIcon, CheckIcon, ChevronRightIcon, ChevronLeftIcon, PlusIcon } from '@heroicons/react/24/outline';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useReservationsStore } from '../../stores/reservationsStore';

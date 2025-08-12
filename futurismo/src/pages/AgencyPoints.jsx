@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { StarIcon, ArrowTrendingUpIcon, TrophyIcon, GiftIcon, CalendarIcon, UserIcon, CreditCardIcon, FunnelIcon, ArrowDownTrayIcon, ClockIcon } from '@heroicons/react/24/outline';
+import { StarIcon, ArrowTrendingUpIcon, TrophyIcon, GiftIcon, CalendarIcon, UserIcon, CreditCardIcon, FunnelIcon, ArrowDownTrayIcon, ClockIcon, ShoppingBagIcon } from '@heroicons/react/24/outline';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { Link } from 'react-router-dom';
 import useAgencyStore from '../stores/agencyStore';
 
 const AgencyPoints = () => {
@@ -60,14 +61,45 @@ const AgencyPoints = () => {
           </p>
         </div>
 
-        <button
-          onClick={exportHistory}
-          className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors flex items-center space-x-2"
-        >
-          <ArrowDownTrayIcon className="w-4 h-4" />
-          <span>Exportar</span>
-        </button>
+        <div className="flex items-center space-x-3">
+          <Link
+            to="/agency/rewards"
+            className="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors flex items-center space-x-2"
+          >
+            <ShoppingBagIcon className="w-4 h-4" />
+            <span>Tienda de Premios</span>
+          </Link>
+          
+          <button
+            onClick={exportHistory}
+            className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors flex items-center space-x-2"
+          >
+            <ArrowDownTrayIcon className="w-4 h-4" />
+            <span>Exportar</span>
+          </button>
+        </div>
       </div>
+
+      {/* Call to Action para Tienda de Premios */}
+      {pointsBalance.balance > 0 && (
+        <div className="bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg p-6 mb-6 text-white">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-xl font-semibold mb-2">🎁 ¡Tienes {pointsBalance.balance.toLocaleString()} puntos disponibles!</h3>
+              <p className="text-purple-100">
+                Canjea tus puntos por increíbles premios en nuestra tienda de recompensas.
+              </p>
+            </div>
+            <Link
+              to="/agency/rewards"
+              className="bg-white text-purple-600 px-6 py-3 rounded-lg font-semibold hover:bg-purple-50 transition-colors flex items-center space-x-2"
+            >
+              <ShoppingBagIcon className="w-5 h-5" />
+              <span>Ir a la Tienda</span>
+            </Link>
+          </div>
+        </div>
+      )}
 
       {/* Información sobre puntos automáticos */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
