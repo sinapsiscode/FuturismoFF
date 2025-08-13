@@ -86,18 +86,18 @@ export const guideProfileSchema = yup.object().shape({
   pricing: yup.object().shape({
     hourlyRate: yup.number()
       .required('La tarifa por hora es requerida')
-      .min(10, 'La tarifa mínima es $10')
-      .max(200, 'La tarifa máxima es $200'),
+      .min(10, 'La tarifa mínima es S/10')
+      .max(200, 'La tarifa máxima es S/200'),
     
     fullDayRate: yup.number()
       .required('La tarifa por día completo es requerida')
-      .min(50, 'La tarifa mínima es $50')
-      .max(1000, 'La tarifa máxima es $1000'),
+      .min(50, 'La tarifa mínima es S/50')
+      .max(1000, 'La tarifa máxima es S/1000'),
     
     halfDayRate: yup.number()
       .required('La tarifa por medio día es requerida')
-      .min(30, 'La tarifa mínima es $30')
-      .max(500, 'La tarifa máxima es $500'),
+      .min(30, 'La tarifa mínima es S/30')
+      .max(500, 'La tarifa máxima es S/500'),
     
     specialRates: yup.array()
       .of(yup.object().shape({
@@ -228,7 +228,7 @@ export const serviceRequestSchema = yup.object().shape({
       .required('Los términos de pago son requeridos'),
     
     currency: yup.string()
-      .oneOf(['USD', 'PEN'])
+      .oneOf(['PEN', 'USD'])
       .required('La moneda es requerida')
   })
 });

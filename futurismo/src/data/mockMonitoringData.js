@@ -26,6 +26,8 @@ export const getMockTourData = (tourId) => ({
       arrivalTime: new Date(Date.now() - 6300000),
       departureTime: new Date(Date.now() - 6000000),
       status: TOUR_STATUS.COMPLETED,
+      coordinates: { latitude: -12.046374, longitude: -77.042793 }, // Plaza de Armas Lima
+      isRequired: true, // Punto obligatorio para fotos
       photos: [
         {
           id: 1,
@@ -51,6 +53,8 @@ export const getMockTourData = (tourId) => ({
       arrivalTime: new Date(Date.now() - 5700000),
       departureTime: new Date(Date.now() - 5400000),
       status: TOUR_STATUS.COMPLETED,
+      coordinates: { latitude: -12.043333, longitude: -77.028611 }, // Catedral de Lima
+      isRequired: true, // Punto obligatorio para fotos
       photos: [
         {
           id: 3,
@@ -70,6 +74,8 @@ export const getMockTourData = (tourId) => ({
       arrivalTime: new Date(Date.now() - 300000),
       departureTime: null,
       status: TOUR_STATUS.IN_PROGRESS,
+      coordinates: { latitude: -12.048889, longitude: -77.036111 }, // Palacio de Gobierno
+      isRequired: false, // Punto opcional
       photos: [],
       incidents: [
         {
@@ -88,6 +94,8 @@ export const getMockTourData = (tourId) => ({
       arrivalTime: null,
       departureTime: null,
       status: TOUR_STATUS.PENDING,
+      coordinates: { latitude: -12.063889, longitude: -77.030556 }, // Convento de San Francisco
+      isRequired: true, // Punto obligatorio para fotos
       photos: [],
       incidents: []
     },
@@ -100,6 +108,8 @@ export const getMockTourData = (tourId) => ({
       arrivalTime: null,
       departureTime: null,
       status: TOUR_STATUS.PENDING,
+      coordinates: { latitude: -12.047500, longitude: -77.034167 }, // Casa de Aliaga (Centro histórico)
+      isRequired: false, // Punto opcional
       photos: [],
       incidents: []
     }

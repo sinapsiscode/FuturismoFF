@@ -166,7 +166,7 @@
       "tipDescription": "Los archivos se descargarán automáticamente con la fecha actual en el nombre",
       "reservations": "reservas",
       "filterNote": "Solo se exportarán las reservas con estado \"{{status}}\"",
-      "success": "✅ {{status}} exportada exitosamente!\n\n📊 Datos exportados:\n• {{count}} reservas\n• {{tourists}} turistas\n• ${{revenue}} en ingresos\n• Formato: {{format}}\n\n📁 El archivo se descargó automáticamente.",
+      "success": "✅ {{status}} exportada exitosamente!\n\n📊 Datos exportados:\n• {{count}} reservas\n• {{tourists}} turistas\n• S/{{revenue}} en ingresos\n• Formato: {{format}}\n\n📁 El archivo se descargó automáticamente.",
       "error": "Error al exportar los datos. Intenta nuevamente.",
       "statusOptions": {
         "all": "Información Completa",
@@ -247,7 +247,7 @@
       "selectChartType": "Seleccionar tipo de gráfico",
       "reservations": "Reservas",
       "tourists": "Turistas",
-      "revenue": "Ingresos ($)",
+      "revenue": "Ingresos (S/)",
       "timeRange": {
         "week": "Última semana",
         "month": "Último mes",
@@ -350,7 +350,7 @@
     "confirmPaymentNotImplemented": "La confirmación de pago aún no está implementada",
     "noTouristsToRate": "No hay turistas registrados para valorar",
     "noDataToExport": "No hay reservas para exportar con el filtro actual",
-    "exportSuccess": "✅ Exportación completada exitosamente - {{count}} reservas, {{tourists}} turistas, ${{revenue}} en ingresos",
+    "exportSuccess": "✅ Exportación completada exitosamente - {{count}} reservas, {{tourists}} turistas, S/{{revenue}} en ingresos",
     "minPassengers": "Mín. pasajeros",
     "maxPassengers": "Máx. pasajeros",
     "en_proceso": "en proceso",
@@ -1296,7 +1296,7 @@
       "workingHours": "Horarios de Trabajo",
       "startTime": "Hora de Inicio",
       "endTime": "Hora de Fin",
-      "priceRanges": "Rangos de Precios (USD)",
+      "priceRanges": "Rangos de Precios (PEN)",
       "additionalSettings": "Configuraciones Adicionales",
       "allowPartialPayments": "Permitir pagos parciales",
       "requireGuideAssignment": "Requerir asignación de guía",
@@ -1739,7 +1739,7 @@
         "hourly": "Por Hora"
       },
       "currencies": {
-        "USD": "Dólar Americano",
+        "USD": "Sol Peruano",
         "PEN": "Sol Peruano",
         "EUR": "Euro"
       }

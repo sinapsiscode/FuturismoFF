@@ -46,7 +46,7 @@ export const getMockProviders = () => [
     pricing: {
       basePrice: 250,
       type: PRICING_TYPES.PER_PERSON,
-      currency: CURRENCIES.USD
+      currency: CURRENCIES.PEN
     },
     rating: 4.8,
     capacity: 50,

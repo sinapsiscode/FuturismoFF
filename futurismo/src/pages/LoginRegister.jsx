@@ -3,126 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import toast from 'react-hot-toast';
-import { EyeIcon, EyeSlashIcon, ArrowPathIcon, BuildingOffice2Icon, MapIcon, ShieldCheckIcon, UserCircleIcon, UserPlusIcon, StarIcon, MagnifyingGlassIcon, XMarkIcon, PlusIcon, ChevronDownIcon, LanguageIcon, TrashIcon } from '@heroicons/react/24/outline';
-import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
+import { EyeIcon, EyeSlashIcon, ArrowPathIcon, BuildingOffice2Icon, MapIcon, ShieldCheckIcon, UserCircleIcon, UserPlusIcon, XMarkIcon, PlusIcon, ChevronDownIcon, LanguageIcon } from '@heroicons/react/24/outline';
 import { useTranslation } from 'react-i18next';
 
-// Componente de calificación con estrellas y experiencia multi-idioma (fuera del componente principal)
-const StarRating = ({ museum, rating, experiences, onRatingChange, onExperienceChange, onAddLanguage, onRemoveLanguage, t }) => {
-  const availableLanguages = [
-    { code: 'es', name: t('auth.spanishExperience'), flag: '🇪🇸' },
-    { code: 'en', name: t('auth.englishExperience'), flag: '🇺🇸' }
-  ];
-
-  const currentLanguages = (experiences && typeof experiences === 'object') ? Object.keys(experiences) : [];
-  const unusedLanguages = availableLanguages.filter(lang => !currentLanguages.includes(lang.code));
-
-  return (
-    <div className="space-y-4 mt-2">
-      {/* Calificación con estrellas */}
-      <div className="flex items-center gap-1">
-        <span className="text-xs text-gray-600 mr-2">{t('auth.rateExperience')}</span>
-        {[1, 2, 3, 4, 5].map((star) => (
-          <button
-            key={star}
-            type="button"
-            onClick={() => onRatingChange(museum, star)}
-            className="p-1 hover:scale-110 transition-transform"
-          >
-            {star <= (rating || 0) ? (
-              <StarIconSolid className="w-4 h-4 text-yellow-400" />
-            ) : (
-              <StarIcon className="w-4 h-4 text-gray-300 hover:text-yellow-400" />
-            )}
-          </button>
-        ))}
-        <span className="text-xs text-gray-500 ml-1">
-          {rating ? `${rating} ${t('auth.stars')}` : ''}
-        </span>
-      </div>
-
-      {/* Experiencias por idioma */}
-      <div className="space-y-3">
-        <label className="text-xs text-gray-600 block">{t('auth.describeExperience')}</label>
-        
-        {/* Experiencias existentes */}
-        {currentLanguages.map((langCode) => {
-          const language = availableLanguages.find(l => l.code === langCode);
-          return (
-            <div key={langCode} className="border border-gray-200 rounded-lg p-3 bg-gray-50">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  <span className="text-lg">{language?.flag}</span>
-                  <span className="text-xs font-medium text-gray-700">{language?.name}</span>
-                </div>
-                {currentLanguages.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => onRemoveLanguage(museum, langCode)}
-                    className="text-red-500 hover:text-red-700 p-1 rounded transition-colors"
-                    title={t('auth.removeLanguageExperience')}
-                  >
-                    <TrashIcon className="h-3 w-3" />
-                  </button>
-                )}
-              </div>
-              <textarea
-                value={(experiences && experiences[langCode]) || ''}
-                onChange={(e) => onExperienceChange(museum, langCode, e.target.value)}
-                className="w-full text-sm border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 resize-none"
-                rows="3"
-                placeholder={t('auth.experiencePlaceholder')}
-              />
-            </div>
-          );
-        })}
-
-        {/* Botón para agregar otro idioma */}
-        {unusedLanguages.length > 0 && (
-          <div className="border-2 border-dashed border-gray-300 rounded-lg p-3">
-            <div className="text-center">
-              <p className="text-xs text-gray-500 mb-2">{t('auth.addLanguageExperience')}</p>
-              <div className="flex justify-center gap-2">
-                {unusedLanguages.map((language) => (
-                  <button
-                    key={language.code}
-                    type="button"
-                    onClick={() => onAddLanguage(museum, language.code)}
-                    className="flex items-center gap-1 px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-xs hover:bg-orange-200 transition-colors"
-                  >
-                    <span>{language.flag}</span>
-                    <span>{language.name}</span>
-                    <PlusIcon className="h-3 w-3" />
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Si no hay experiencias, inicializar automáticamente español */}
-        {currentLanguages.length === 0 && (
-          <div className="border border-gray-200 rounded-lg p-3 bg-gray-50">
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-lg">🇪🇸</span>
-              <span className="text-xs font-medium text-gray-700">{t('auth.spanishExperience')}</span>
-            </div>
-            <textarea
-              value=""
-              onChange={(e) => {
-                // Inicializar español automáticamente
-                onExperienceChange(museum, 'es', e.target.value);
-              }}
-              className="w-full text-sm border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 resize-none"
-              rows="3"
-              placeholder={t('auth.experiencePlaceholder')}
-            />
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
 
 import useAuthStore from '../stores/authStore';
 import { loginSchema, freelanceGuideRegisterSchema } from '../utils/validators';
@@ -137,13 +20,8 @@ const LoginRegister = () => {
   const [selectedLanguages, setSelectedLanguages] = useState([]);
   const [selectedSpecialties, setSelectedSpecialties] = useState([]);
   const [selectedMuseums, setSelectedMuseums] = useState([]);
-  const [museumRatings, setMuseumRatings] = useState({});
-  const [museumExperiences, setMuseumExperiences] = useState({});
-  const [museumSearchTerm, setMuseumSearchTerm] = useState('');
-  const [showMuseumDropdown, setShowMuseumDropdown] = useState(false);
   const [profileImage, setProfileImage] = useState(null);
   const [imageError, setImageError] = useState(null);
-  const museumDropdownRef = useRef(null);
   const { t } = useTranslation();
 
   const {
@@ -178,19 +56,7 @@ const LoginRegister = () => {
     }
   });
 
-  // Cerrar dropdown al hacer clic fuera
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (museumDropdownRef.current && !museumDropdownRef.current.contains(event.target)) {
-        setShowMuseumDropdown(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
+  // useEffect eliminado - ya no se usa dropdown de museos
 
   const onSubmit = async (data) => {
     try {
@@ -267,16 +133,6 @@ const LoginRegister = () => {
     { value: 'religious', label: t('auth.religiousTours') }
   ];
 
-  const museumOptions = [
-    { value: 'larco', label: t('auth.larcoMuseum') },
-    { value: 'gold', label: t('auth.goldMuseum') },
-    { value: 'national', label: t('auth.nationalMuseum') },
-    { value: 'art', label: t('auth.artMuseum') },
-    { value: 'archaeology', label: t('auth.archaeologyMuseum') },
-    { value: 'history', label: t('auth.historyMuseum') },
-    { value: 'contemporary', label: t('auth.contemporaryArt') },
-    { value: 'colonial', label: t('auth.colonialArt') }
-  ];
 
   const handleLanguageToggle = (language) => {
     const updatedLanguages = selectedLanguages.includes(language)
@@ -294,93 +150,7 @@ const LoginRegister = () => {
     setValue('specialties', updatedSpecialties);
   };
 
-  const handleAddMuseum = (museum) => {
-    if (!selectedMuseums.includes(museum)) {
-      const updatedMuseums = [...selectedMuseums, museum];
-      setSelectedMuseums(updatedMuseums);
-      setValue('museums', updatedMuseums);
 
-      // Inicializar experiencia en español por defecto
-      const updatedExperiences = {
-        ...museumExperiences,
-        [museum]: {
-          es: ''
-        }
-      };
-      setMuseumExperiences(updatedExperiences);
-      setValue('museumExperiences', updatedExperiences);
-    }
-    setMuseumSearchTerm('');
-    setShowMuseumDropdown(false);
-  };
-
-  const handleRemoveMuseum = (museum) => {
-    const updatedMuseums = selectedMuseums.filter(m => m !== museum);
-    setSelectedMuseums(updatedMuseums);
-    setValue('museums', updatedMuseums);
-
-    // Eliminar calificación y experiencia del museo removido
-    const updatedRatings = { ...museumRatings };
-    const updatedExperiences = { ...museumExperiences };
-    delete updatedRatings[museum];
-    delete updatedExperiences[museum];
-    setMuseumRatings(updatedRatings);
-    setMuseumExperiences(updatedExperiences);
-    setValue('museumRatings', updatedRatings);
-    setValue('museumExperiences', updatedExperiences);
-  };
-
-  // Filtrar museos basado en la búsqueda
-  const filteredMuseums = museumOptions.filter(museum =>
-    !selectedMuseums.includes(museum.value) &&
-    museum.label.toLowerCase().includes(museumSearchTerm.toLowerCase())
-  );
-
-  const handleRatingChange = (museum, rating) => {
-    const updatedRatings = {
-      ...museumRatings,
-      [museum]: rating
-    };
-    setMuseumRatings(updatedRatings);
-    setValue('museumRatings', updatedRatings);
-  };
-
-  const handleExperienceChange = (museum, language, experience) => {
-    const updatedExperiences = {
-      ...museumExperiences,
-      [museum]: {
-        ...(museumExperiences[museum] || {}),
-        [language]: experience
-      }
-    };
-    setMuseumExperiences(updatedExperiences);
-    setValue('museumExperiences', updatedExperiences);
-  };
-
-  const addExperienceLanguage = (museum, language) => {
-    const updatedExperiences = {
-      ...museumExperiences,
-      [museum]: {
-        ...(museumExperiences[museum] || {}),
-        [language]: ''
-      }
-    };
-    setMuseumExperiences(updatedExperiences);
-    setValue('museumExperiences', updatedExperiences);
-  };
-
-  const removeExperienceLanguage = (museum, language) => {
-    const updatedExperiences = { ...museumExperiences };
-    if (updatedExperiences[museum]) {
-      delete updatedExperiences[museum][language];
-      // Si no quedan idiomas, eliminar el museo completamente
-      if (Object.keys(updatedExperiences[museum]).length === 0) {
-        delete updatedExperiences[museum];
-      }
-    }
-    setMuseumExperiences(updatedExperiences);
-    setValue('museumExperiences', updatedExperiences);
-  };
 
   const handleImageSelect = (file, error) => {
     if (error) {
@@ -657,88 +427,108 @@ const LoginRegister = () => {
                   )}
                 </div>
 
-                {/* Experiencia en Museos */}
+                {/* Experiencia en Museos - Entrada Manual */}
                 <div className="md:col-span-2">
                   <label className="label">{t('auth.museumExperience')}</label>
+                  <p className="text-sm text-gray-600 mb-3">
+                    Agrega manualmente los museos donde tienes experiencia, años trabajados y tu nivel de expertise
+                  </p>
                   
-                  {/* Select con búsqueda */}
-                  <div className="relative mt-2" ref={museumDropdownRef}>
-                    <div className="relative">
-                      <input
-                        type="text"
-                        value={museumSearchTerm}
-                        onChange={(e) => {
-                          setMuseumSearchTerm(e.target.value);
-                          setShowMuseumDropdown(true);
-                        }}
-                        onFocus={() => setShowMuseumDropdown(true)}
-                        className="w-full input pr-10"
-                        placeholder={t('auth.searchMuseums')}
-                      />
-                      <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                        <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
-                      </div>
-                    </div>
-                    
-                    {/* Dropdown de museos */}
-                    {showMuseumDropdown && filteredMuseums.length > 0 && (
-                      <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
-                        {filteredMuseums.map((museum) => (
-                          <button
-                            key={museum.value}
-                            type="button"
-                            onClick={() => handleAddMuseum(museum.value)}
-                            className="w-full px-4 py-2 text-left hover:bg-orange-50 flex items-center gap-2 transition-colors"
-                          >
-                            <PlusIcon className="h-4 w-4 text-orange-600" />
-                            {museum.label}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Museos seleccionados */}
+                  {/* Lista de museos agregados */}
                   {selectedMuseums.length > 0 && (
-                    <div className="space-y-4 mt-4">
-                      {selectedMuseums.map((museumValue) => {
-                        const museum = museumOptions.find(m => m.value === museumValue);
-                        return (
-                          <div key={museumValue} className="border border-orange-200 rounded-lg bg-orange-50">
-                            {/* Header del museo seleccionado */}
-                            <div className="flex items-center justify-between p-3 border-b border-orange-200">
-                              <div className="flex items-center gap-2">
-                                <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-                                <span className="font-medium text-orange-700">{museum?.label}</span>
-                              </div>
-                              <button
-                                type="button"
-                                onClick={() => handleRemoveMuseum(museumValue)}
-                                className="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-50 transition-colors"
-                                title={t('auth.removeMuseum')}
-                              >
-                                <XMarkIcon className="h-4 w-4" />
-                              </button>
-                            </div>
-                            
-                            {/* Calificación y experiencia */}
-                            <div className="p-3">
-                              <StarRating
-                                museum={museumValue}
-                                rating={museumRatings[museumValue]}
-                                experiences={museumExperiences[museumValue]}
-                                onRatingChange={handleRatingChange}
-                                onExperienceChange={handleExperienceChange}
-                                onAddLanguage={addExperienceLanguage}
-                                onRemoveLanguage={removeExperienceLanguage}
-                                t={t}
+                    <div className="space-y-3 mb-4">
+                      {selectedMuseums.map((museum, index) => (
+                        <div key={index} className="border border-orange-200 rounded-lg bg-orange-50 p-4">
+                          <div className="flex items-center justify-between mb-3">
+                            <span className="font-medium text-orange-700">Museo #{index + 1}</span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const updatedMuseums = selectedMuseums.filter((_, i) => i !== index);
+                                setSelectedMuseums(updatedMuseums);
+                              }}
+                              className="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-50 transition-colors"
+                            >
+                              <XMarkIcon className="h-4 w-4" />
+                            </button>
+                          </div>
+                          
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <div className="md:col-span-2">
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Nombre del Museo *
+                              </label>
+                              <input
+                                type="text"
+                                value={museum.name || ''}
+                                onChange={(e) => {
+                                  const updatedMuseums = selectedMuseums.map((m, i) => 
+                                    i === index ? { ...m, name: e.target.value } : m
+                                  );
+                                  setSelectedMuseums(updatedMuseums);
+                                }}
+                                className="w-full input text-sm"
+                                placeholder="Ej: Museo Nacional de Arqueología"
                               />
                             </div>
+                            
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Años de Experiencia
+                              </label>
+                              <input
+                                type="number"
+                                min="0"
+                                max="50"
+                                value={museum.years || ''}
+                                onChange={(e) => {
+                                  const updatedMuseums = selectedMuseums.map((m, i) => 
+                                    i === index ? { ...m, years: parseInt(e.target.value) || 0 } : m
+                                  );
+                                  setSelectedMuseums(updatedMuseums);
+                                }}
+                                className="w-full input text-sm"
+                                placeholder="5"
+                              />
+                            </div>
+                            
+                            <div className="md:col-span-3">
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Nivel de Expertise
+                              </label>
+                              <select
+                                value={museum.expertise || 'basico'}
+                                onChange={(e) => {
+                                  const updatedMuseums = selectedMuseums.map((m, i) => 
+                                    i === index ? { ...m, expertise: e.target.value } : m
+                                  );
+                                  setSelectedMuseums(updatedMuseums);
+                                }}
+                                className="w-full input text-sm"
+                              >
+                                <option value="basico">Básico</option>
+                                <option value="intermedio">Intermedio</option>
+                                <option value="avanzado">Avanzado</option>
+                                <option value="experto">Experto</option>
+                              </select>
+                            </div>
                           </div>
-                        );
-                      })}
+                        </div>
+                      ))}
                     </div>
                   )}
+                  
+                  {/* Botón para agregar museo */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedMuseums([...selectedMuseums, { name: '', years: 1, expertise: 'basico' }]);
+                    }}
+                    className="w-full border-2 border-dashed border-orange-300 rounded-lg py-3 px-4 text-orange-600 hover:bg-orange-50 hover:border-orange-400 transition-colors flex items-center justify-center gap-2"
+                  >
+                    <PlusIcon className="h-5 w-5" />
+                    Agregar Experiencia en Museo
+                  </button>
 
                   {errors.museums && (
                     <p className="mt-1 text-sm text-red-600">{errors.museums.message}</p>

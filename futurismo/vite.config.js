@@ -5,10 +5,12 @@ import path from 'path'
 export default defineConfig({
   plugins: [react()],
   server: {
-    port: 3000,
-    host: true,
+    port: 3001,
+    host: '0.0.0.0',
+    strictPort: true,
     hmr: {
-      port: 3000
+      port: 3001,
+      host: 'localhost'
     }
   },
   resolve: {

@@ -39,8 +39,8 @@ const useRewardsStore = create((set, get) => ({
     },
     {
       id: '3',
-      name: 'Gift Card Amazon $100',
-      description: 'Tarjeta regalo de Amazon por $100 USD',
+      name: 'Gift Card Amazon S/300',
+      description: 'Tarjeta regalo de Amazon por S/300 PEN',
       points: 5000,
       category: REWARD_CATEGORIES.GIFT_CARDS,
       image: '/api/placeholder/300/200',

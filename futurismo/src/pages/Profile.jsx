@@ -6,6 +6,9 @@ import { useAuthStore } from '../stores/authStore';
 import CompanyDataSection from '../components/profile/CompanyDataSection';
 import ContactDataSection from '../components/profile/ContactDataSection';
 import PaymentDataSection from '../components/profile/PaymentDataSection';
+import FreelancerPersonalDataSection from '../components/profile/FreelancerPersonalDataSection';
+import FreelancerProfessionalDataSection from '../components/profile/FreelancerProfessionalDataSection';
+import FreelancerBankingDataSection from '../components/profile/FreelancerBankingDataSection';
 import AdminCompanyDataSection from '../components/profile/AdminCompanyDataSection';
 import AdminContactDataSection from '../components/profile/AdminContactDataSection';
 import AdminPaymentDataSection from '../components/profile/AdminPaymentDataSection';
@@ -116,14 +119,30 @@ const Profile = () => {
           {/* Header del perfil - dinámico según el rol */}
           {getProfileHeader()}
 
-          {/* Datos de empresa */}
-          {user?.role === 'admin' ? <AdminCompanyDataSection /> : <CompanyDataSection />}
+          {/* Componentes específicos por rol */}
+          {user?.role === 'admin' && (
+            <>
+              <AdminCompanyDataSection />
+              <AdminContactDataSection />
+              <AdminPaymentDataSection />
+            </>
+          )}
 
-          {/* Datos de contacto */}
-          {user?.role === 'admin' ? <AdminContactDataSection /> : <ContactDataSection />}
+          {user?.role === 'agency' && (
+            <>
+              <CompanyDataSection />
+              <ContactDataSection />
+              <PaymentDataSection />
+            </>
+          )}
 
-          {/* Datos de pago */}
-          {user?.role === 'admin' ? <AdminPaymentDataSection /> : <PaymentDataSection />}
+          {user?.role === 'guide' && (
+            <>
+              <FreelancerPersonalDataSection />
+              <FreelancerProfessionalDataSection />
+              <FreelancerBankingDataSection />
+            </>
+          )}
 
           {/* Estado de la cuenta - No para admin */}
           {user?.role !== 'admin' && <AccountStatusSection />}

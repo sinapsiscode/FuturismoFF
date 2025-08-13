@@ -435,6 +435,73 @@ class ToursService extends BaseService {
     return this.delete(`/${tourId}/assignment/${assignmentType}`);
   }
 
+  /**
+   * Obtener tours asignados a un guía específico
+   * @param {string} guideId - ID del guía
+   * @param {Object} filters - Filtros opcionales
+   * @returns {Promise<Object>}
+   */
+  async getGuideTours(guideId, filters = {}) {
+    if (this.isUsingMockData) {
+      // Mock data para tours del guía
+      return {
+        success: true,
+        data: [
+          {
+            id: 1,
+            name: 'Tour Lima Histórica',
+            status: 'asignado',
+            date: new Date().toISOString().split('T')[0],
+            time: '09:00',
+            tourists: 8,
+            agency: 'Turismo Aventura',
+            location: 'Plaza de Armas',
+            estimatedDuration: '3 horas',
+            isActive: false,
+            guideId: guideId
+          },
+          {
+            id: 2,
+            name: 'Tour Barranco Bohemio',
+            status: 'asignado',
+            date: new Date().toISOString().split('T')[0],
+            time: '14:30',
+            tourists: 6,
+            agency: 'Lima Tours',
+            location: 'Puente de los Suspiros',
+            estimatedDuration: '2.5 horas',
+            isActive: false,
+            guideId: guideId
+          }
+        ]
+      };
+    }
+
+    return this.get('/guide-tours', { guideId, ...filters });
+  }
+
+  /**
+   * Actualizar estado de tour del guía
+   * @param {string} tourId - ID del tour
+   * @param {string} status - Nuevo estado
+   * @param {string} guideId - ID del guía
+   * @returns {Promise<Object>}
+   */
+  async updateTourStatus(tourId, status, guideId) {
+    if (this.isUsingMockData) {
+      return {
+        success: true,
+        data: {
+          tourId,
+          status,
+          updatedAt: new Date().toISOString()
+        }
+      };
+    }
+
+    return this.put(`/${tourId}/status`, { status, guideId });
+  }
+
   // Método auxiliar para generar CSV
   generateCSV(tours) {
     const headers = ['Código', 'Nombre', 'Categoría', 'Precio', 'Duración', 'Capacidad', 'Estado'];

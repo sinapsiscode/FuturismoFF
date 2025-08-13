@@ -193,7 +193,7 @@ const ServiceRequestForm = () => {
           proposedRate: calculatedPrice,
           finalRate: calculatedPrice,
           paymentTerms: getPaymentTermsLabel(data.paymentTerms),
-          currency: 'USD'
+          currency: 'PEN'
         }
       };
 

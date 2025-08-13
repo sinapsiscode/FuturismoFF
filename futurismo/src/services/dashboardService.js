@@ -1,124 +1,168 @@
-import api from './api';
+/**
+ * Servicio de dashboard
+ * Maneja las estadísticas y métricas del dashboard
+ */
 
-// Mock data temporalmente hasta conectar con el backend
-const mockChartData = {
-  lineData: [
-    { name: 'Ene', reservas: 65, turistas: 780, ingresos: 27300 },
-    { name: 'Feb', reservas: 78, turistas: 936, ingresos: 32760 },
-    { name: 'Mar', reservas: 92, turistas: 1104, ingresos: 38640 },
-    { name: 'Abr', reservas: 81, turistas: 972, ingresos: 34020 },
-    { name: 'May', reservas: 98, turistas: 1176, ingresos: 41160 },
-    { name: 'Jun', reservas: 105, turistas: 1260, ingresos: 44100 },
-    { name: 'Jul', reservas: 112, turistas: 1344, ingresos: 47040 }
-  ],
-  barData: [
-    { tour: 'City Tour Lima', reservas: 45, ingresos: 15750 },
-    { tour: 'Tour Gastronómico', reservas: 38, ingresos: 24700 },
-    { tour: 'Islas Palomino', reservas: 32, ingresos: 27200 },
-    { tour: 'Pachacámac', reservas: 28, ingresos: 12600 },
-    { tour: 'Líneas de Nazca', reservas: 22, ingresos: 17600 }
-  ],
-  pieData: [
-    { name: 'Tours Regulares', value: 65, color: '#1E40AF' },
-    { name: 'Tours Privados', value: 25, color: '#F59E0B' },
-    { name: 'Traslados', value: 10, color: '#10B981' }
-  ],
-  kpiData: {
-    totalReservas: {
-      actual: 112,
-      anterior: 98,
-      crecimiento: 14.3
-    },
-    totalTuristas: {
-      actual: 1344,
-      anterior: 1176,
-      crecimiento: 14.3
-    },
-    ingresosTotales: {
-      actual: 47040,
-      anterior: 41160,
-      crecimiento: 14.3
-    }
-  },
-  summaryData: {
-    popularTour: 'City Tour Lima',
-    avgPerBooking: 420,
-    bestDay: 'Sábados',
-    conversionRate: 23.5
+import BaseService from './baseService';
+
+class DashboardService extends BaseService {
+  constructor() {
+    super('/dashboard');
   }
-};
 
-const dashboardService = {
-  // Obtener estadísticas del dashboard
-  async getDashboardStats(timeRange = 'month') {
-    try {
-      // TODO: Cambiar por llamada real al backend
-      // const response = await api.get(`/dashboard/stats?timeRange=${timeRange}`);
-      // return response.data;
-      
-      // Simular delay de red
-      await new Promise(resolve => setTimeout(resolve, 300));
-      return mockChartData;
-    } catch (error) {
-      console.error('Error fetching dashboard stats:', error);
-      throw error;
-    }
-  },
+  /**
+   * Obtener estadísticas del dashboard según el rol del usuario
+   * @param {string} userId - ID del usuario
+   * @param {string} role - Rol del usuario (guide, agency, admin)
+   * @returns {Promise<Object>}
+   */
+  async getStats(userId, role) {
+    if (this.isUsingMockData) {
+      // Mock data específico por rol
+      const today = new Date();
+      const nextWeek = new Date(today);
+      nextWeek.setDate(today.getDate() + 7);
 
-  // Obtener KPIs principales
-  async getKPIs(timeRange = 'month') {
-    try {
-      // TODO: Cambiar por llamada real al backend
-      // const response = await api.get(`/dashboard/kpis?timeRange=${timeRange}`);
-      // return response.data;
-      
-      await new Promise(resolve => setTimeout(resolve, 200));
-      return mockChartData.kpiData;
-    } catch (error) {
-      console.error('Error fetching KPIs:', error);
-      throw error;
-    }
-  },
+      switch (role) {
+        case 'guide':
+          return {
+            success: true,
+            data: {
+              toursThisWeek: Math.floor(Math.random() * 10) + 3,
+              completedToday: Math.floor(Math.random() * 3),
+              nextTour: nextWeek,
+              personalRating: 4.2 + Math.random() * 0.8,
+              toursCompleted: 120 + Math.floor(Math.random() * 50),
+              monthlyIncome: 2800 + Math.floor(Math.random() * 1000)
+            }
+          };
 
-  // Obtener datos de gráficos
-  async getChartData(chartType, timeRange = 'month') {
-    try {
-      // TODO: Cambiar por llamada real al backend
-      // const response = await api.get(`/dashboard/charts/${chartType}?timeRange=${timeRange}`);
-      // return response.data;
-      
-      await new Promise(resolve => setTimeout(resolve, 200));
-      
-      switch (chartType) {
-        case 'line':
-          return mockChartData.lineData;
-        case 'bar':
-          return mockChartData.barData;
-        case 'pie':
-          return mockChartData.pieData;
+        case 'agency':
+          return {
+            success: true,
+            data: {
+              activeServices: 8 + Math.floor(Math.random() * 10),
+              completedToday: Math.floor(Math.random() * 12),
+              totalRevenue: 12000 + Math.floor(Math.random() * 8000),
+              punctualityRate: 88 + Math.random() * 10,
+              totalReservations: 100 + Math.floor(Math.random() * 50),
+              totalTourists: 250 + Math.floor(Math.random() * 200),
+              monthlyRevenue: 75000 + Math.floor(Math.random() * 30000)
+            }
+          };
+
+        case 'admin':
         default:
-          return mockChartData.lineData;
+          return {
+            success: true,
+            data: {
+              activeServices: 35 + Math.floor(Math.random() * 20),
+              totalAgencies: 8 + Math.floor(Math.random() * 8),
+              totalGuides: 25 + Math.floor(Math.random() * 15),
+              totalReservations: 1500 + Math.floor(Math.random() * 500),
+              totalTourists: 3800 + Math.floor(Math.random() * 1000),
+              totalRevenue: 220000 + Math.floor(Math.random() * 100000)
+            }
+          };
       }
-    } catch (error) {
-      console.error('Error fetching chart data:', error);
-      throw error;
     }
-  },
 
-  // Obtener resumen de estadísticas
-  async getSummaryData(timeRange = 'month') {
-    try {
-      // TODO: Cambiar por llamada real al backend
-      // const response = await api.get(`/dashboard/summary?timeRange=${timeRange}`);
-      // return response.data;
-      
-      await new Promise(resolve => setTimeout(resolve, 100));
-      return mockChartData.summaryData;
-    } catch (error) {
-      console.error('Error fetching summary data:', error);
-      throw error;
-    }
+    return this.get('/stats', { userId, role });
   }
-};
+
+  /**
+   * Obtener datos para gráficos mensuales
+   * @param {string} userId - ID del usuario
+   * @param {string} role - Rol del usuario
+   * @param {number} months - Número de meses hacia atrás
+   * @returns {Promise<Object>}
+   */
+  async getMonthlyData(userId, role, months = 6) {
+    if (this.isUsingMockData) {
+      const monthNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+      const today = new Date();
+      const data = [];
+
+      for (let i = months - 1; i >= 0; i--) {
+        const date = new Date(today);
+        date.setMonth(today.getMonth() - i);
+        const monthName = monthNames[date.getMonth()];
+
+        switch (role) {
+          case 'guide':
+            data.push({
+              name: monthName,
+              tours: 15 + Math.floor(Math.random() * 20),
+              income: 2000 + Math.floor(Math.random() * 2000),
+              rating: 4.0 + Math.random() * 1.0
+            });
+            break;
+
+          case 'agency':
+            data.push({
+              name: monthName,
+              reservations: 80 + Math.floor(Math.random() * 60),
+              revenue: 60000 + Math.floor(Math.random() * 40000),
+              tourists: 200 + Math.floor(Math.random() * 150)
+            });
+            break;
+
+          case 'admin':
+          default:
+            data.push({
+              name: monthName,
+              services: 300 + Math.floor(Math.random() * 200),
+              revenue: 180000 + Math.floor(Math.random() * 120000),
+              users: 80 + Math.floor(Math.random() * 40)
+            });
+            break;
+        }
+      }
+
+      return {
+        success: true,
+        data
+      };
+    }
+
+    return this.get('/monthly-data', { userId, role, months });
+  }
+
+  // Mantener compatibilidad con métodos existentes
+  async getDashboardStats(timeRange = 'month') {
+    const monthlyData = await this.getMonthlyData('current', 'admin', 7);
+    return {
+      lineData: monthlyData.data,
+      barData: [],
+      pieData: [],
+      kpiData: {},
+      summaryData: {}
+    };
+  }
+
+  async getKPIs(timeRange = 'month') {
+    return {
+      totalReservas: { actual: 112, anterior: 98, crecimiento: 14.3 },
+      totalTuristas: { actual: 1344, anterior: 1176, crecimiento: 14.3 },
+      ingresosTotales: { actual: 47040, anterior: 41160, crecimiento: 14.3 }
+    };
+  }
+
+  async getChartData(chartType, timeRange = 'month') {
+    const monthlyData = await this.getMonthlyData('current', 'admin');
+    return monthlyData.data;
+  }
+
+  async getSummaryData(timeRange = 'month') {
+    return {
+      popularTour: 'City Tour Lima',
+      avgPerBooking: 420,
+      bestDay: 'Sábados',
+      conversionRate: 23.5
+    };
+  }
+}
+
+const dashboardService = new DashboardService();
 
 export default dashboardService;

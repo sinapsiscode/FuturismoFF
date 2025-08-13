@@ -14,6 +14,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { formatters } from '../../utils/formatters';
 import PhotoUpload from '../common/PhotoUpload';
+import TourPhotoUpload from './TourPhotoUpload';
 import { TOUR_STATUS, MAX_PHOTOS_PER_STOP } from '../../constants/monitoringConstants';
 
 const TourStopItem = ({ 
@@ -138,11 +139,33 @@ const TourStopItem = ({
               </div>
 
               {canUploadPhotos(stop) ? (
-                <PhotoUpload
-                  photos={stop.photos}
-                  onPhotosChange={(newPhotos) => onPhotosChange(stop.id, newPhotos)}
-                  maxPhotos={MAX_PHOTOS_PER_STOP}
-                />
+                <div className="space-y-4">
+                  {/* Sistema nuevo de fotos con geolocalización */}
+                  <TourPhotoUpload
+                    stopId={stop.id}
+                    stopName={stop.name}
+                    requiredLocation={stop.coordinates}
+                    isRequired={stop.isRequired || false}
+                    onPhotoUploaded={(photoData) => {
+                      const newPhotos = [...(stop.photos || []), photoData];
+                      onPhotosChange(stop.id, newPhotos);
+                    }}
+                  />
+                  
+                  {/* Sistema original como fallback */}
+                  <details className="mt-4">
+                    <summary className="text-sm text-gray-600 cursor-pointer hover:text-gray-800">
+                      📁 Subir desde galería (sin verificación de ubicación)
+                    </summary>
+                    <div className="mt-2">
+                      <PhotoUpload
+                        photos={stop.photos}
+                        onPhotosChange={(newPhotos) => onPhotosChange(stop.id, newPhotos)}
+                        maxPhotos={MAX_PHOTOS_PER_STOP}
+                      />
+                    </div>
+                  </details>
+                </div>
               ) : (
                 <>
                   {stop.photos.length > 0 ? (

@@ -27,7 +27,7 @@ const DEFAULT_SETTINGS = {
     companyEmail: DEFAULT_COMPANY_INFO.EMAIL,
     companyAddress: DEFAULT_COMPANY_INFO.ADDRESS,
     companyWebsite: DEFAULT_COMPANY_INFO.WEBSITE,
-    currency: CURRENCIES.USD.value,
+    currency: CURRENCIES.PEN.value,
     timezone: TIMEZONES.LIMA.value,
     language: LANGUAGES.ES.value,
     dateFormat: DATE_FORMATS.DD_MM_YYYY,
@@ -60,7 +60,7 @@ const DEFAULT_SETTINGS = {
     requireContractSigning: true,
     maxActiveReservations: DEFAULT_AGENCIES_CONFIG.MAX_ACTIVE_RESERVATIONS,
     enablePoints: true,
-    pointsConversionRate: 100, // 1 USD = 100 puntos
+    pointsConversionRate: 100, // 1 PEN = 100 puntos
     updatedAt: '2024-03-08T09:45:00Z'
   },
   guides: {

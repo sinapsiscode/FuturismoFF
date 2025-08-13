@@ -2,22 +2,22 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 
-const ChartSummary = ({ summaryData }) => {
+const ChartSummary = ({ summaryData = {} }) => {
   const { t } = useTranslation();
 
   const summaryItems = [
     {
       label: t('dashboard.chart.summary.popularTour'),
-      value: summaryData.popularTour,
+      value: summaryData.popularTour || 'N/A',
       highlight: true
     },
     {
       label: t('dashboard.chart.summary.avgPerBooking'),
-      value: `$${summaryData.avgPerBooking}`
+      value: `S/${summaryData.avgPerBooking || 0}`
     },
     {
       label: t('dashboard.chart.summary.bestDay'),
-      value: summaryData.bestDay
+      value: summaryData.bestDay || 'N/A'
     }
   ];
 
@@ -39,11 +39,11 @@ const ChartSummary = ({ summaryData }) => {
 
 ChartSummary.propTypes = {
   summaryData: PropTypes.shape({
-    popularTour: PropTypes.string.isRequired,
-    avgPerBooking: PropTypes.number.isRequired,
-    bestDay: PropTypes.string.isRequired,
-    conversionRate: PropTypes.number.isRequired
-  }).isRequired
+    popularTour: PropTypes.string,
+    avgPerBooking: PropTypes.number,
+    bestDay: PropTypes.string,
+    conversionRate: PropTypes.number
+  })
 };
 
 export default ChartSummary;

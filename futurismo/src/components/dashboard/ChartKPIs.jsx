@@ -34,7 +34,7 @@ const ChartKPIs = ({ kpiData }) => {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
       {kpiConfigs.map((config) => {
-        const data = kpiData[config.key];
+        const data = kpiData[config.key] || { actual: 0, anterior: 0, crecimiento: 0 };
         const isPositive = data.crecimiento >= 0;
         
         return (
@@ -55,13 +55,13 @@ const ChartKPIs = ({ kpiData }) => {
               </div>
             </div>
             <p className={`text-3xl font-bold ${config.textClass}-900`}>
-              {config.showCurrency && '$'}
-              {config.showCurrency ? formatters.formatCurrency(data.actual) : data.actual.toLocaleString()}
+              {config.showCurrency && 'S/'}
+              {config.showCurrency ? data.actual.toLocaleString() : data.actual.toLocaleString()}
               {config.isPercentage && '%'}
             </p>
             <p className={`text-sm ${config.textClass}-600 mt-2`}>
               {t('dashboard.chart.kpis.vs')} 
-              {config.showCurrency ? formatters.formatCurrency(data.anterior) : data.anterior.toLocaleString()}
+              {config.showCurrency ? `S/${data.anterior.toLocaleString()}` : data.anterior.toLocaleString()}
               {' '}{t('dashboard.chart.kpis.previousMonth')}
             </p>
             <div className={`absolute -right-4 -bottom-4 ${config.textClass}-100 opacity-20`}>
@@ -87,21 +87,21 @@ const ChartKPIs = ({ kpiData }) => {
 ChartKPIs.propTypes = {
   kpiData: PropTypes.shape({
     totalReservas: PropTypes.shape({
-      actual: PropTypes.number.isRequired,
-      anterior: PropTypes.number.isRequired,
-      crecimiento: PropTypes.number.isRequired
-    }).isRequired,
+      actual: PropTypes.number,
+      anterior: PropTypes.number,
+      crecimiento: PropTypes.number
+    }),
     totalTuristas: PropTypes.shape({
-      actual: PropTypes.number.isRequired,
-      anterior: PropTypes.number.isRequired,
-      crecimiento: PropTypes.number.isRequired
-    }).isRequired,
+      actual: PropTypes.number,
+      anterior: PropTypes.number,
+      crecimiento: PropTypes.number
+    }),
     ingresosTotales: PropTypes.shape({
-      actual: PropTypes.number.isRequired,
-      anterior: PropTypes.number.isRequired,
-      crecimiento: PropTypes.number.isRequired
-    }).isRequired
-  }).isRequired
+      actual: PropTypes.number,
+      anterior: PropTypes.number,
+      crecimiento: PropTypes.number
+    })
+  })
 };
 
 export default ChartKPIs;

@@ -14,7 +14,7 @@
  */
 export const CURRENCIES = {
   PEN: { value: 'PEN', symbol: 'S/', name: 'Peruvian Sol' },
-  USD: { value: 'USD', symbol: '$', name: 'US Dollar' },
+  USD: { value: 'USD', symbol: 'S/', name: 'Peruvian Sol' },
   EUR: { value: 'EUR', symbol: '€', name: 'Euro' }
 };
 

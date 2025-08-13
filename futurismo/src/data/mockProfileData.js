@@ -22,7 +22,7 @@ export const getMockPaymentMethods = () => [
     bank: 'profile.payment.banks.interbank',
     accountNumber: '200-9876543-2-10',
     accountType: ACCOUNT_TYPES.CHECKING,
-    currency: CURRENCIES.USD,
+    currency: CURRENCIES.PEN,
     holderName: 'profile.payment.mockHolder',
     isMain: false
   },

@@ -26,8 +26,8 @@ import { CURRENCIES as SHARED_CURRENCIES } from './sharedConstants';
 
 // Re-export currencies from shared constants
 export const CURRENCIES = {
-  USD: { value: SHARED_CURRENCIES.USD.value, symbol: SHARED_CURRENCIES.USD.symbol },
   PEN: { value: SHARED_CURRENCIES.PEN.value, symbol: SHARED_CURRENCIES.PEN.symbol },
+  USD: { value: SHARED_CURRENCIES.USD.value, symbol: SHARED_CURRENCIES.USD.symbol },
   EUR: { value: SHARED_CURRENCIES.EUR.value, symbol: SHARED_CURRENCIES.EUR.symbol }
 };
 
