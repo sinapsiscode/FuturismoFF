@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { MapIcon, UserGroupIcon, ChartBarIcon, FunnelIcon, CameraIcon, PlayIcon, PauseIcon, CheckIcon } from '@heroicons/react/24/outline';
+import { MapIcon, UserGroupIcon, CameraIcon, PlayIcon, PauseIcon, CheckIcon, PhotoIcon, MapPinIcon, ClockIcon } from '@heroicons/react/24/outline';
 import { useTranslation } from 'react-i18next';
 import LiveMapResponsive from '../components/monitoring/LiveMapResponsive';
 import TourProgress from '../components/monitoring/TourProgress';
@@ -16,8 +16,10 @@ const Monitoring = () => {
   const isGuide = user?.role === 'guide';
   const isAdmin = user?.role === 'admin';
   
-  const [activeView, setActiveView] = useState(isGuide ? 'tours' : 'map');
+  const [activeView, setActiveView] = useState('map');
   const [selectedTour, setSelectedTour] = useState(null);
+  const [showCheckpoints, setShowCheckpoints] = useState({});
+  const [capturedPhotos, setCapturedPhotos] = useState({});
 
   // Hook para manejar tours del guía (reemplaza datos hardcodeados)
   const {
@@ -59,16 +61,103 @@ const Monitoring = () => {
     }
   };
 
+  const toggleCheckpoints = (tourId) => {
+    setShowCheckpoints(prev => ({
+      ...prev,
+      [tourId]: !prev[tourId]
+    }));
+  };
+
+  const handleTakePhoto = async (tourId, checkpointId) => {
+    try {
+      // Verificar si el navegador soporta la API de cámara
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        toast.error('La cámara no está disponible en este dispositivo');
+        return;
+      }
+
+      // Obtener acceso a la cámara
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { facingMode: 'environment' } // Usar cámara trasera si está disponible
+      });
+      
+      // Crear elemento video temporal
+      const video = document.createElement('video');
+      video.srcObject = stream;
+      video.play();
+      
+      // Esperar a que el video esté listo
+      video.onloadedmetadata = () => {
+        // Crear canvas para capturar la foto
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const ctx = canvas.getContext('2d');
+        
+        // Capturar frame actual
+        ctx.drawImage(video, 0, 0);
+        
+        // Convertir a blob
+        canvas.toBlob((blob) => {
+          // Guardar foto capturada
+          const photoUrl = URL.createObjectURL(blob);
+          setCapturedPhotos(prev => ({
+            ...prev,
+            [`${tourId}-${checkpointId}`]: {
+              url: photoUrl,
+              timestamp: new Date().toISOString(),
+              coordinates: null // Se podría añadir geolocalización aquí
+            }
+          }));
+          
+          toast.success('Foto capturada correctamente');
+          
+          // Detener stream
+          stream.getTracks().forEach(track => track.stop());
+        }, 'image/jpeg', 0.8);
+      };
+      
+    } catch (error) {
+      console.error('Error al acceder a la cámara:', error);
+      if (error.name === 'NotAllowedError') {
+        toast.error('Permiso de cámara denegado. Permite el acceso para tomar fotos.');
+      } else {
+        toast.error('Error al acceder a la cámara');
+      }
+    }
+  };
+
+  const calculateDistance = (lat1, lon1, lat2, lon2) => {
+    // Fórmula de Haversine para calcular distancia entre coordenadas
+    const R = 6371; // Radio de la Tierra en km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    const distance = R * c * 1000; // Convertir a metros
+    return distance;
+  };
+
+  const isNearCheckpoint = (checkpointLocation, userLocation, threshold = 100) => {
+    if (!userLocation) return false;
+    const distance = calculateDistance(
+      userLocation.lat, userLocation.lng,
+      checkpointLocation.lat, checkpointLocation.lng
+    );
+    return distance <= threshold;
+  };
+
   // Configuración de vistas según el rol
   const viewConfig = isGuide 
     ? [
+        { key: 'map', label: t('monitoring.views.liveMap'), icon: MapIcon },
         { key: 'tours', label: t('monitoring.views.myTours'), icon: UserGroupIcon },
-        { key: 'stats', label: t('monitoring.views.statistics'), icon: ChartBarIcon },
       ]
     : [
         { key: 'map', label: t('monitoring.views.liveMap'), icon: MapIcon },
         { key: 'tours', label: t('monitoring.views.activeTours'), icon: UserGroupIcon },
-        { key: 'stats', label: t('monitoring.views.statistics'), icon: ChartBarIcon },
         { key: 'photos', label: t('monitoring.views.photos'), icon: CameraIcon },
       ];
 
@@ -116,8 +205,8 @@ const Monitoring = () => {
 
       {/* Content Area */}
       <div className="bg-white rounded-lg shadow">
-        {/* Vista de Mapa - Solo para Admin */}
-        {activeView === 'map' && isAdmin && (
+        {/* Vista de Mapa - Para todos los roles */}
+        {activeView === 'map' && (
           <div className="p-6">
             <LiveMapResponsive />
           </div>
@@ -189,46 +278,163 @@ const Monitoring = () => {
                         </div>
 
                         {/* Controles del tour */}
-                        <div className="flex gap-2 mt-4">
-                          {tour.status === 'asignado' && (
-                            <button
-                              onClick={() => handleStartTour(tour.id)}
-                              className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-green-600 text-white text-sm rounded hover:bg-green-700"
-                            >
-                              <PlayIcon className="w-4 h-4" />
-                              {t('monitoring.actions.start')}
-                            </button>
-                          )}
-                          
-                          {tour.status === 'iniciado' && (
-                            <>
+                        <div className="space-y-3 mt-4">
+                          <div className="flex gap-2">
+                            {tour.status === 'asignado' && (
                               <button
-                                onClick={() => handlePauseTour(tour.id)}
-                                className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-yellow-600 text-white text-sm rounded hover:bg-yellow-700"
+                                onClick={() => handleStartTour(tour.id)}
+                                className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-green-600 text-white text-sm rounded hover:bg-green-700"
                               >
-                                <PauseIcon className="w-4 h-4" />
-                                {t('monitoring.actions.pause')}
+                                <PlayIcon className="w-4 h-4" />
+                                {t('monitoring.actions.start')}
                               </button>
+                            )}
+                            
+                            {tour.status === 'iniciado' && (
+                              <>
+                                <button
+                                  onClick={() => handlePauseTour(tour.id)}
+                                  className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-yellow-600 text-white text-sm rounded hover:bg-yellow-700"
+                                >
+                                  <PauseIcon className="w-4 h-4" />
+                                  {t('monitoring.actions.pause')}
+                                </button>
+                                <button
+                                  onClick={() => handleCompleteTour(tour.id)}
+                                  className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
+                                >
+                                  <CheckIcon className="w-4 h-4" />
+                                  {t('monitoring.actions.complete')}
+                                </button>
+                              </>
+                            )}
+                            
+                            {tour.status === 'pausado' && (
                               <button
-                                onClick={() => handleCompleteTour(tour.id)}
-                                className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
+                                onClick={() => handleStartTour(tour.id)}
+                                className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-green-600 text-white text-sm rounded hover:bg-green-700"
                               >
-                                <CheckIcon className="w-4 h-4" />
-                                {t('monitoring.actions.complete')}
+                                <PlayIcon className="w-4 h-4" />
+                                {t('monitoring.actions.resume')}
                               </button>
-                            </>
-                          )}
-                          
-                          {tour.status === 'pausado' && (
+                            )}
+                          </div>
+
+                          {/* Botón para mostrar/ocultar checkpoints */}
+                          {tour.checkpoints && tour.checkpoints.length > 0 && (
                             <button
-                              onClick={() => handleStartTour(tour.id)}
-                              className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-green-600 text-white text-sm rounded hover:bg-green-700"
+                              onClick={() => toggleCheckpoints(tour.id)}
+                              className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-purple-100 text-purple-700 text-sm rounded hover:bg-purple-200 transition-colors"
                             >
-                              <PlayIcon className="w-4 h-4" />
-                              {t('monitoring.actions.resume')}
+                              <CameraIcon className="w-4 h-4" />
+                              <span>
+                                {showCheckpoints[tour.id] ? 'Ocultar' : 'Ver'} Puntos de Control ({tour.checkpoints.length})
+                              </span>
                             </button>
                           )}
                         </div>
+
+                        {/* Lista de checkpoints expandible */}
+                        {showCheckpoints[tour.id] && tour.checkpoints && (
+                          <div className="mt-4 border-t pt-4 space-y-3">
+                            <h5 className="text-sm font-medium text-gray-900 flex items-center gap-1">
+                              <MapPinIcon className="w-4 h-4 text-purple-600" />
+                              Puntos de Control
+                            </h5>
+                            {tour.checkpoints.map((checkpoint, index) => {
+                              const photoKey = `${tour.id}-${checkpoint.id}`;
+                              const hasPhoto = capturedPhotos[photoKey];
+                              const isRecommended = checkpoint.isRecommended;
+                              
+                              return (
+                                <div 
+                                  key={checkpoint.id} 
+                                  className={`p-3 rounded-lg border-2 ${
+                                    hasPhoto 
+                                      ? 'border-green-200 bg-green-50' 
+                                      : isRecommended
+                                      ? 'border-purple-200 bg-purple-50'
+                                      : 'border-gray-200 bg-gray-50'
+                                  }`}
+                                >
+                                  <div className="flex items-center justify-between mb-2">
+                                    <div className="flex items-center gap-2">
+                                      <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
+                                        hasPhoto 
+                                          ? 'bg-green-600 text-white'
+                                          : isRecommended
+                                          ? 'bg-purple-600 text-white' 
+                                          : 'bg-gray-400 text-white'
+                                      }`}>
+                                        {checkpoint.order}
+                                      </span>
+                                      <span className="text-sm font-medium text-gray-900">
+                                        {checkpoint.name}
+                                      </span>
+                                      {isRecommended && !hasPhoto && (
+                                        <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full">
+                                          Recomendado
+                                        </span>
+                                      )}
+                                      {hasPhoto && (
+                                        <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
+                                          ✓ Completado
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
+                                  
+                                  <p className="text-xs text-gray-600 mb-3">
+                                    {checkpoint.description}
+                                  </p>
+                                  
+                                  {hasPhoto ? (
+                                    /* Mostrar foto capturada */
+                                    <div className="space-y-2">
+                                      <img 
+                                        src={capturedPhotos[photoKey].url}
+                                        alt={`Foto de ${checkpoint.name}`}
+                                        className="w-full h-32 object-cover rounded border"
+                                      />
+                                      <div className="flex items-center justify-between text-xs text-gray-500">
+                                        <span className="flex items-center gap-1">
+                                          <ClockIcon className="w-3 h-3" />
+                                          {new Date(capturedPhotos[photoKey].timestamp).toLocaleTimeString()}
+                                        </span>
+                                        <button 
+                                          onClick={() => handleTakePhoto(tour.id, checkpoint.id)}
+                                          className="text-purple-600 hover:text-purple-800"
+                                        >
+                                          Retomar
+                                        </button>
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    /* Botón para tomar foto */
+                                    <button
+                                      onClick={() => handleTakePhoto(tour.id, checkpoint.id)}
+                                      className={`w-full flex items-center justify-center gap-2 px-3 py-2 text-sm rounded transition-colors ${
+                                        isRecommended
+                                          ? 'bg-purple-600 text-white hover:bg-purple-700'
+                                          : 'bg-gray-600 text-white hover:bg-gray-700'
+                                      }`}
+                                    >
+                                      <PhotoIcon className="w-4 h-4" />
+                                      Tomar Foto
+                                    </button>
+                                  )}
+                                </div>
+                              );
+                            })}
+                            
+                            {/* Resumen de progreso */}
+                            <div className="mt-3 p-2 bg-gray-100 rounded text-center">
+                              <span className="text-xs text-gray-600">
+                                Fotos tomadas: {tour.checkpoints.filter(cp => capturedPhotos[`${tour.id}-${cp.id}`]).length} / {tour.checkpoints.length}
+                              </span>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -241,94 +447,6 @@ const Monitoring = () => {
           </div>
         )}
 
-        {/* Vista de Estadísticas */}
-        {activeView === 'stats' && (
-          <div className="p-6">
-            {isGuide ? (
-              /* Estadísticas del guía */
-              <div className="space-y-6">
-                <h3 className="text-lg font-medium text-gray-900">
-                  {t('monitoring.personalStats')}
-                </h3>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  <div className="bg-blue-50 rounded-lg p-4">
-                    <div className="flex items-center">
-                      <div className="flex-shrink-0">
-                        <UserGroupIcon className="w-8 h-8 text-blue-600" />
-                      </div>
-                      <div className="ml-4">
-                        <div className="text-sm font-medium text-blue-600">
-                          {t('monitoring.stats.activeTours')}
-                        </div>
-                        <div className="text-2xl font-bold text-blue-900">
-                          {guideStats.activeTours}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="bg-green-50 rounded-lg p-4">
-                    <div className="flex items-center">
-                      <div className="flex-shrink-0">
-                        <CheckIcon className="w-8 h-8 text-green-600" />
-                      </div>
-                      <div className="ml-4">
-                        <div className="text-sm font-medium text-green-600">
-                          {t('monitoring.stats.completedToday')}
-                        </div>
-                        <div className="text-2xl font-bold text-green-900">
-                          {guideStats.completedToday}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="bg-yellow-50 rounded-lg p-4">
-                    <div className="flex items-center">
-                      <div className="flex-shrink-0">
-                        <ChartBarIcon className="w-8 h-8 text-yellow-600" />
-                      </div>
-                      <div className="ml-4">
-                        <div className="text-sm font-medium text-yellow-600">
-                          {t('monitoring.stats.weeklyHours')}
-                        </div>
-                        <div className="text-2xl font-bold text-yellow-900">
-                          {guideStats.weeklyHours}h
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="bg-purple-50 rounded-lg p-4">
-                    <div className="flex items-center">
-                      <div className="flex-shrink-0">
-                        <span className="text-2xl">⭐</span>
-                      </div>
-                      <div className="ml-4">
-                        <div className="text-sm font-medium text-purple-600">
-                          {t('monitoring.stats.rating')}
-                        </div>
-                        <div className="text-2xl font-bold text-purple-900">
-                          {guideStats.rating}/5
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              /* Estadísticas generales para admin */
-              <div>
-                <h3 className="text-lg font-medium text-gray-900 mb-4">
-                  {t('monitoring.generalStats')}
-                </h3>
-                {/* Aquí iría el componente de estadísticas generales */}
-                <p className="text-gray-500">{t('monitoring.statsComingSoon')}</p>
-              </div>
-            )}
-          </div>
-        )}
 
         {/* Vista de Fotos - Solo para Admin */}
         {activeView === 'photos' && isAdmin && (

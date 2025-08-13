@@ -458,7 +458,39 @@ class ToursService extends BaseService {
             location: 'Plaza de Armas',
             estimatedDuration: '3 horas',
             isActive: false,
-            guideId: guideId
+            guideId: guideId,
+            checkpoints: [
+              {
+                id: 'cp-1',
+                name: 'Plaza de Armas',
+                description: 'Punto de encuentro inicial',
+                location: { lat: -12.0464, lng: -77.0428 },
+                order: 1,
+                photoTaken: false,
+                photoUrl: null,
+                isRecommended: true
+              },
+              {
+                id: 'cp-2', 
+                name: 'Catedral de Lima',
+                description: 'Visita a la catedral principal',
+                location: { lat: -12.0458, lng: -77.0428 },
+                order: 2,
+                photoTaken: false,
+                photoUrl: null,
+                isRecommended: true
+              },
+              {
+                id: 'cp-3',
+                name: 'Palacio de Gobierno',
+                description: 'Cambio de guardia',
+                location: { lat: -12.0461, lng: -77.0434 },
+                order: 3,
+                photoTaken: false,
+                photoUrl: null,
+                isRecommended: true
+              }
+            ]
           },
           {
             id: 2,
@@ -471,7 +503,29 @@ class ToursService extends BaseService {
             location: 'Puente de los Suspiros',
             estimatedDuration: '2.5 horas',
             isActive: false,
-            guideId: guideId
+            guideId: guideId,
+            checkpoints: [
+              {
+                id: 'cp-4',
+                name: 'Puente de los Suspiros',
+                description: 'Icónico puente de Barranco',
+                location: { lat: -12.1485, lng: -77.0203 },
+                order: 1,
+                photoTaken: false,
+                photoUrl: null,
+                isRecommended: true
+              },
+              {
+                id: 'cp-5',
+                name: 'Iglesia La Ermita',
+                description: 'Iglesia histórica del distrito',
+                location: { lat: -12.1489, lng: -77.0195 },
+                order: 2,
+                photoTaken: false,
+                photoUrl: null,
+                isRecommended: true
+              }
+            ]
           }
         ]
       };
