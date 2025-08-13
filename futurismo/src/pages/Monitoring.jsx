@@ -162,14 +162,14 @@ const Monitoring = () => {
       ];
 
   return (
-    <div className="space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">
+      <div className="flex flex-col gap-3 sm:gap-0 sm:flex-row sm:items-center sm:justify-between">
+        <div className="text-center sm:text-left">
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 break-words">
             {isGuide ? t('monitoring.myToursTitle') : t('monitoring.title')}
           </h1>
-          <p className="mt-2 text-sm text-gray-700">
+          <p className="mt-1 sm:mt-2 text-sm sm:text-base text-gray-700">
             {isGuide 
               ? t('monitoring.guideDescription') 
               : t('monitoring.description')
@@ -179,23 +179,24 @@ const Monitoring = () => {
       </div>
 
       {/* Navigation Tabs */}
-      <div className="border-b border-gray-200">
-        <nav className="-mb-px flex space-x-8">
+      <div className="border-b border-gray-200 overflow-x-auto">
+        <nav className="-mb-px flex space-x-4 sm:space-x-8 min-w-max px-1">
           {viewConfig.map((view) => {
             const Icon = view.icon;
             return (
               <button
                 key={view.key}
                 onClick={() => setActiveView(view.key)}
-                className={`py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
+                className={`py-2 px-2 sm:px-1 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap transition-colors ${
                   activeView === view.key
                     ? 'border-blue-500 text-blue-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 }`}
               >
-                <div className="flex items-center space-x-2">
-                  <Icon className="w-5 h-5" />
-                  <span>{view.label}</span>
+                <div className="flex items-center space-x-1 sm:space-x-2">
+                  <Icon className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+                  <span className="hidden sm:inline">{view.label}</span>
+                  <span className="sm:hidden text-xs">{view.key === 'map' ? 'Mapa' : view.key === 'tours' ? 'Tours' : 'Fotos'}</span>
                 </div>
               </button>
             );
@@ -204,48 +205,48 @@ const Monitoring = () => {
       </div>
 
       {/* Content Area */}
-      <div className="bg-white rounded-lg shadow">
+      <div className="bg-white rounded-lg shadow overflow-hidden">
         {/* Vista de Mapa - Para todos los roles */}
         {activeView === 'map' && (
-          <div className="p-6">
+          <div className="p-4 sm:p-6">
             <LiveMapResponsive />
           </div>
         )}
 
         {/* Vista de Tours */}
         {activeView === 'tours' && (
-          <div className="p-6">
+          <div className="p-4 sm:p-6">
             {isGuide ? (
               /* Vista de guía - Sus propios tours */
-              <div className="space-y-6">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-medium text-gray-900">
+              <div className="space-y-4 sm:space-y-6">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                  <h3 className="text-base sm:text-lg font-medium text-gray-900">
                     {t('monitoring.myTours')}
                   </h3>
-                  <div className="text-sm text-gray-500">
+                  <div className="text-xs sm:text-sm text-gray-500">
                     {toursLoading ? t('common.loading') : `${guideTours.length} ${t('monitoring.toursTotal')}`}
                   </div>
                 </div>
 
                 {toursLoading ? (
                   <div className="flex justify-center py-8">
-                    <div className="animate-spin w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full"></div>
+                    <div className="animate-spin w-6 h-6 sm:w-8 sm:h-8 border-2 border-blue-500 border-t-transparent rounded-full"></div>
                   </div>
                 ) : guideTours.length === 0 ? (
                   <div className="text-center py-8 text-gray-500">
-                    <UserGroupIcon className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                    <p>{t('monitoring.noToursAssigned')}</p>
+                    <UserGroupIcon className="w-8 h-8 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 text-gray-300" />
+                    <p className="text-sm sm:text-base">{t('monitoring.noToursAssigned')}</p>
                   </div>
                 ) : (
-                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  <div className="grid gap-4 sm:gap-4 md:grid-cols-2 xl:grid-cols-3">
                     {guideTours.map((tour) => (
-                      <div key={tour.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
-                        <div className="flex items-start justify-between mb-3">
-                          <div>
-                            <h4 className="font-medium text-gray-900">{tour.name}</h4>
-                            <p className="text-sm text-gray-500">{tour.agency}</p>
+                      <div key={tour.id} className="border rounded-lg p-3 sm:p-4 hover:shadow-md transition-shadow">
+                        <div className="flex items-start justify-between mb-3 gap-2">
+                          <div className="flex-1 min-w-0">
+                            <h4 className="text-sm sm:text-base font-medium text-gray-900 break-words">{tour.name}</h4>
+                            <p className="text-xs sm:text-sm text-gray-500 truncate">{tour.agency}</p>
                           </div>
-                          <span className={`px-2 py-1 text-xs rounded-full ${
+                          <span className={`px-2 py-1 text-xs rounded-full whitespace-nowrap flex-shrink-0 ${
                             tour.status === 'completado'
                               ? 'bg-green-100 text-green-800'
                               : tour.status === 'iniciado'
@@ -258,7 +259,7 @@ const Monitoring = () => {
                           </span>
                         </div>
 
-                        <div className="space-y-2 text-sm text-gray-600">
+                        <div className="space-y-1 sm:space-y-2 text-xs sm:text-sm text-gray-600">
                           <div className="flex justify-between">
                             <span>{t('monitoring.date')}:</span>
                             <span>{tour.date}</span>
@@ -271,22 +272,23 @@ const Monitoring = () => {
                             <span>{t('monitoring.tourists')}:</span>
                             <span>{tour.tourists}</span>
                           </div>
-                          <div className="flex justify-between">
-                            <span>{t('monitoring.location')}:</span>
-                            <span className="truncate">{tour.location}</span>
+                          <div className="flex justify-between gap-2">
+                            <span className="flex-shrink-0">{t('monitoring.location')}:</span>
+                            <span className="truncate text-right">{tour.location}</span>
                           </div>
                         </div>
 
                         {/* Controles del tour */}
-                        <div className="space-y-3 mt-4">
-                          <div className="flex gap-2">
+                        <div className="space-y-2 sm:space-y-3 mt-3 sm:mt-4">
+                          <div className="flex gap-1 sm:gap-2">
                             {tour.status === 'asignado' && (
                               <button
                                 onClick={() => handleStartTour(tour.id)}
-                                className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-green-600 text-white text-sm rounded hover:bg-green-700"
+                                className="flex-1 flex items-center justify-center gap-1 px-2 sm:px-3 py-2 bg-green-600 text-white text-xs sm:text-sm rounded hover:bg-green-700 transition-colors"
                               >
-                                <PlayIcon className="w-4 h-4" />
-                                {t('monitoring.actions.start')}
+                                <PlayIcon className="w-3 h-3 sm:w-4 sm:h-4" />
+                                <span className="hidden sm:inline">{t('monitoring.actions.start')}</span>
+                                <span className="sm:hidden">Iniciar</span>
                               </button>
                             )}
                             
@@ -294,17 +296,19 @@ const Monitoring = () => {
                               <>
                                 <button
                                   onClick={() => handlePauseTour(tour.id)}
-                                  className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-yellow-600 text-white text-sm rounded hover:bg-yellow-700"
+                                  className="flex-1 flex items-center justify-center gap-1 px-2 sm:px-3 py-2 bg-yellow-600 text-white text-xs sm:text-sm rounded hover:bg-yellow-700 transition-colors"
                                 >
-                                  <PauseIcon className="w-4 h-4" />
-                                  {t('monitoring.actions.pause')}
+                                  <PauseIcon className="w-3 h-3 sm:w-4 sm:h-4" />
+                                  <span className="hidden sm:inline">{t('monitoring.actions.pause')}</span>
+                                  <span className="sm:hidden">Pausar</span>
                                 </button>
                                 <button
                                   onClick={() => handleCompleteTour(tour.id)}
-                                  className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
+                                  className="flex-1 flex items-center justify-center gap-1 px-2 sm:px-3 py-2 bg-blue-600 text-white text-xs sm:text-sm rounded hover:bg-blue-700 transition-colors"
                                 >
-                                  <CheckIcon className="w-4 h-4" />
-                                  {t('monitoring.actions.complete')}
+                                  <CheckIcon className="w-3 h-3 sm:w-4 sm:h-4" />
+                                  <span className="hidden sm:inline">{t('monitoring.actions.complete')}</span>
+                                  <span className="sm:hidden">Finalizar</span>
                                 </button>
                               </>
                             )}
@@ -324,11 +328,11 @@ const Monitoring = () => {
                           {tour.checkpoints && tour.checkpoints.length > 0 && (
                             <button
                               onClick={() => toggleCheckpoints(tour.id)}
-                              className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-purple-100 text-purple-700 text-sm rounded hover:bg-purple-200 transition-colors"
+                              className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-purple-100 text-purple-700 text-xs sm:text-sm rounded hover:bg-purple-200 transition-colors"
                             >
-                              <CameraIcon className="w-4 h-4" />
-                              <span>
-                                {showCheckpoints[tour.id] ? 'Ocultar' : 'Ver'} Puntos de Control ({tour.checkpoints.length})
+                              <CameraIcon className="w-3 h-3 sm:w-4 sm:h-4" />
+                              <span className="text-center">
+                                {showCheckpoints[tour.id] ? 'Ocultar' : 'Ver'} Puntos ({tour.checkpoints.length})
                               </span>
                             </button>
                           )}
@@ -336,9 +340,9 @@ const Monitoring = () => {
 
                         {/* Lista de checkpoints expandible */}
                         {showCheckpoints[tour.id] && tour.checkpoints && (
-                          <div className="mt-4 border-t pt-4 space-y-3">
-                            <h5 className="text-sm font-medium text-gray-900 flex items-center gap-1">
-                              <MapPinIcon className="w-4 h-4 text-purple-600" />
+                          <div className="mt-3 sm:mt-4 border-t pt-3 sm:pt-4 space-y-2 sm:space-y-3">
+                            <h5 className="text-xs sm:text-sm font-medium text-gray-900 flex items-center gap-1">
+                              <MapPinIcon className="w-3 h-3 sm:w-4 sm:h-4 text-purple-600" />
                               Puntos de Control
                             </h5>
                             {tour.checkpoints.map((checkpoint, index) => {
@@ -349,7 +353,7 @@ const Monitoring = () => {
                               return (
                                 <div 
                                   key={checkpoint.id} 
-                                  className={`p-3 rounded-lg border-2 ${
+                                  className={`p-2 sm:p-3 rounded-lg border-2 ${
                                     hasPhoto 
                                       ? 'border-green-200 bg-green-50' 
                                       : isRecommended
@@ -357,9 +361,9 @@ const Monitoring = () => {
                                       : 'border-gray-200 bg-gray-50'
                                   }`}
                                 >
-                                  <div className="flex items-center justify-between mb-2">
-                                    <div className="flex items-center gap-2">
-                                      <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
+                                  <div className="flex items-center justify-between mb-2 gap-2">
+                                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                                      <span className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${
                                         hasPhoto 
                                           ? 'bg-green-600 text-white'
                                           : isRecommended
@@ -368,23 +372,25 @@ const Monitoring = () => {
                                       }`}>
                                         {checkpoint.order}
                                       </span>
-                                      <span className="text-sm font-medium text-gray-900">
+                                      <span className="text-xs sm:text-sm font-medium text-gray-900 truncate">
                                         {checkpoint.name}
                                       </span>
-                                      {isRecommended && !hasPhoto && (
-                                        <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full">
-                                          Recomendado
-                                        </span>
-                                      )}
-                                      {hasPhoto && (
-                                        <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
-                                          ✓ Completado
-                                        </span>
-                                      )}
+                                      <div className="flex flex-col sm:flex-row gap-1 flex-shrink-0">
+                                        {isRecommended && !hasPhoto && (
+                                          <span className="text-xs bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded-full whitespace-nowrap">
+                                            Recomendado
+                                          </span>
+                                        )}
+                                        {hasPhoto && (
+                                          <span className="text-xs bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full whitespace-nowrap">
+                                            ✓ Completado
+                                          </span>
+                                        )}
+                                      </div>
                                     </div>
                                   </div>
                                   
-                                  <p className="text-xs text-gray-600 mb-3">
+                                  <p className="text-xs sm:text-sm text-gray-600 mb-2 sm:mb-3">
                                     {checkpoint.description}
                                   </p>
                                   
@@ -394,16 +400,16 @@ const Monitoring = () => {
                                       <img 
                                         src={capturedPhotos[photoKey].url}
                                         alt={`Foto de ${checkpoint.name}`}
-                                        className="w-full h-32 object-cover rounded border"
+                                        className="w-full h-24 sm:h-32 object-cover rounded border"
                                       />
                                       <div className="flex items-center justify-between text-xs text-gray-500">
                                         <span className="flex items-center gap-1">
                                           <ClockIcon className="w-3 h-3" />
-                                          {new Date(capturedPhotos[photoKey].timestamp).toLocaleTimeString()}
+                                          <span className="truncate">{new Date(capturedPhotos[photoKey].timestamp).toLocaleTimeString()}</span>
                                         </span>
                                         <button 
                                           onClick={() => handleTakePhoto(tour.id, checkpoint.id)}
-                                          className="text-purple-600 hover:text-purple-800"
+                                          className="text-purple-600 hover:text-purple-800 text-xs px-2 py-1 hover:bg-purple-50 rounded transition-colors"
                                         >
                                           Retomar
                                         </button>
@@ -413,13 +419,13 @@ const Monitoring = () => {
                                     /* Botón para tomar foto */
                                     <button
                                       onClick={() => handleTakePhoto(tour.id, checkpoint.id)}
-                                      className={`w-full flex items-center justify-center gap-2 px-3 py-2 text-sm rounded transition-colors ${
+                                      className={`w-full flex items-center justify-center gap-2 px-3 py-2 text-xs sm:text-sm rounded transition-colors ${
                                         isRecommended
                                           ? 'bg-purple-600 text-white hover:bg-purple-700'
                                           : 'bg-gray-600 text-white hover:bg-gray-700'
                                       }`}
                                     >
-                                      <PhotoIcon className="w-4 h-4" />
+                                      <PhotoIcon className="w-3 h-3 sm:w-4 sm:h-4" />
                                       Tomar Foto
                                     </button>
                                   )}
@@ -428,9 +434,9 @@ const Monitoring = () => {
                             })}
                             
                             {/* Resumen de progreso */}
-                            <div className="mt-3 p-2 bg-gray-100 rounded text-center">
+                            <div className="mt-2 sm:mt-3 p-2 bg-gray-100 rounded text-center">
                               <span className="text-xs text-gray-600">
-                                Fotos tomadas: {tour.checkpoints.filter(cp => capturedPhotos[`${tour.id}-${cp.id}`]).length} / {tour.checkpoints.length}
+                                Fotos: {tour.checkpoints.filter(cp => capturedPhotos[`${tour.id}-${cp.id}`]).length} / {tour.checkpoints.length}
                               </span>
                             </div>
                           </div>
@@ -449,8 +455,10 @@ const Monitoring = () => {
 
 
         {/* Vista de Fotos - Solo para Admin */}
-        {activeView === 'photos' && isAdmin && (
-          <TourPhotosGallery />
+        {activeView === 'photos' && !isGuide && (
+          <div className="p-4 sm:p-6">
+            <TourPhotosGallery />
+          </div>
         )}
       </div>
     </div>

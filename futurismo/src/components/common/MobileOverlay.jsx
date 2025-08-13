@@ -6,9 +6,20 @@ const MobileOverlay = ({ isVisible, onClick }) => {
 
   return (
     <div 
-      className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+      className="
+        fixed inset-0 
+        bg-black bg-opacity-50 
+        z-40 
+        lg:hidden
+        transition-opacity duration-300 ease-in-out
+        backdrop-blur-sm
+        touch-manipulation
+      "
       onClick={onClick}
+      onTouchEnd={onClick}
       aria-hidden="true"
+      role="button"
+      tabIndex={-1}
     />
   );
 };

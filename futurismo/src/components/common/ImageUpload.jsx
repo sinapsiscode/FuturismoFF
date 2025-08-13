@@ -22,27 +22,33 @@ const ImageUpload = ({ onImageSelect, initialImage = null, error = null }) => {
   } = useImageUpload(onImageSelect, initialImage);
 
   return (
-    <div className="w-full">
-      <label className="label">{t('upload.profilePhoto')}</label>
+    <div className="w-full space-y-2 sm:space-y-3">
+      {/* Mobile-first responsive label */}
+      <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
+        {t('upload.profilePhoto')}
+      </label>
       
-      {preview ? (
-        <ImagePreview
-          preview={preview}
-          onRemove={removeImage}
-          onChangeImage={openFileSelector}
-        />
-      ) : (
-        <ImageDropZone
-          dragActive={dragActive}
-          uploading={uploading}
-          error={error}
-          onDragEnter={handleDrag}
-          onDragLeave={handleDrag}
-          onDragOver={handleDrag}
-          onDrop={handleDrop}
-          onClick={openFileSelector}
-        />
-      )}
+      {/* Mobile-first responsive container */}
+      <div className="relative">
+        {preview ? (
+          <ImagePreview
+            preview={preview}
+            onRemove={removeImage}
+            onChangeImage={openFileSelector}
+          />
+        ) : (
+          <ImageDropZone
+            dragActive={dragActive}
+            uploading={uploading}
+            error={error}
+            onDragEnter={handleDrag}
+            onDragLeave={handleDrag}
+            onDragOver={handleDrag}
+            onDrop={handleDrop}
+            onClick={openFileSelector}
+          />
+        )}
+      </div>
 
       {/* Hidden file input */}
       <input
@@ -54,18 +60,22 @@ const ImageUpload = ({ onImageSelect, initialImage = null, error = null }) => {
         aria-label={t('upload.selectFile')}
       />
 
-      {/* Error message */}
+      {/* Mobile-first responsive error message */}
       {error && (
-        <div className="mt-2 flex items-center gap-2 text-sm text-red-600">
-          <ExclamationTriangleIcon className="w-4 h-4" />
-          {error}
+        <div className="mt-2 flex items-start sm:items-center gap-2 p-2 sm:p-3 bg-red-50 rounded-lg border border-red-200">
+          <ExclamationTriangleIcon className="w-4 h-4 sm:w-5 sm:h-5 text-red-600 flex-shrink-0 mt-0.5 sm:mt-0" />
+          <span className="text-xs sm:text-sm text-red-600 leading-tight">
+            {error}
+          </span>
         </div>
       )}
 
-      {/* Additional help */}
-      <p className="mt-2 text-xs text-gray-500">
-        {t('upload.recommendation')}
-      </p>
+      {/* Mobile-first responsive help text */}
+      <div className="mt-2 p-2 sm:p-3 bg-gray-50 rounded-lg">
+        <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
+          {t('upload.recommendation')}
+        </p>
+      </div>
     </div>
   );
 };

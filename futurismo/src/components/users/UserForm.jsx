@@ -181,8 +181,8 @@ const UserForm = ({ user = null, onSubmit, onCancel, isLoading = false }) => {
 
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4 sm:space-y-6">
         {/* Tabs */}
         <UserFormTabs activeTab={activeTab} setActiveTab={setActiveTab} />
 
@@ -211,11 +211,11 @@ const UserForm = ({ user = null, onSubmit, onCancel, isLoading = false }) => {
         )}
 
         {/* Botones de acción */}
-        <div className="flex justify-end space-x-3 pt-6 border-t">
+        <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4 sm:pt-6 border-t">
           <button
             type="button"
             onClick={onCancel}
-            className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            className="w-full sm:w-auto px-4 py-2 sm:py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-sm sm:text-base font-medium"
             disabled={isLoading}
           >
             <XMarkIcon className="h-4 w-4 mr-2 inline" />
@@ -224,7 +224,7 @@ const UserForm = ({ user = null, onSubmit, onCancel, isLoading = false }) => {
           
           <button
             type="submit"
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
+            className="w-full sm:w-auto px-4 py-2 sm:py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 text-sm sm:text-base font-medium"
             disabled={isLoading}
           >
             <CheckIcon className="h-4 w-4 mr-2 inline" />

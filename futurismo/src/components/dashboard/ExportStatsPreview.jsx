@@ -29,17 +29,17 @@ const ExportStatsPreview = ({ stats }) => {
   ];
 
   return (
-    <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-      <h4 className="text-sm font-medium text-gray-700 mb-3">
+    <div className="mb-4 p-3 bg-gray-50 rounded-lg sm:mb-6 sm:p-4">
+      <h4 className="text-xs font-medium text-gray-700 mb-2 sm:text-sm sm:mb-3">
         {t('dashboard.export.dataPreview')}
       </h4>
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         {statItems.map((item, index) => (
-          <div key={index} className="text-center">
-            <div className={`text-lg font-bold ${item.color}`}>
+          <div key={index} className="text-center p-2 bg-white rounded-md sm:p-0 sm:bg-transparent">
+            <div className={`text-sm font-bold sm:text-lg ${item.color}`}>
               {item.value}
             </div>
-            <div className="text-xs text-gray-600">
+            <div className="text-xs text-gray-600 mt-1">
               {item.label}
             </div>
           </div>

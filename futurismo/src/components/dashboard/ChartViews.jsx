@@ -33,22 +33,34 @@ const ChartViews = ({ chartType, lineData, barData }) => {
   const { t } = useTranslation();
 
   return (
-    <div className="h-80">
+    <div className="h-64 sm:h-80 lg:h-96">
       {chartType === 'line' && (
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={lineData}>
+          <LineChart data={lineData} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-            <XAxis dataKey="name" stroke="#6B7280" />
-            <YAxis stroke="#6B7280" />
+            <XAxis 
+              dataKey="name" 
+              stroke="#6B7280" 
+              fontSize={12}
+              className="text-xs sm:text-sm"
+            />
+            <YAxis 
+              stroke="#6B7280" 
+              fontSize={12}
+              className="text-xs sm:text-sm"
+            />
             <Tooltip content={<CustomTooltip />} />
-            <Legend />
+            <Legend 
+              wrapperStyle={{ fontSize: '12px' }}
+              className="text-xs sm:text-sm"
+            />
             <Line 
               type="monotone" 
               dataKey="reservas" 
               stroke="#1E40AF" 
               strokeWidth={2}
-              dot={{ fill: '#1E40AF', strokeWidth: 2, r: 4 }}
-              activeDot={{ r: 6 }}
+              dot={{ fill: '#1E40AF', strokeWidth: 2, r: 3 }}
+              activeDot={{ r: 5 }}
               name={t('dashboard.chart.reservations')}
             />
             <Line 
@@ -56,8 +68,8 @@ const ChartViews = ({ chartType, lineData, barData }) => {
               dataKey="turistas" 
               stroke="#F59E0B" 
               strokeWidth={2}
-              dot={{ fill: '#F59E0B', strokeWidth: 2, r: 4 }}
-              activeDot={{ r: 6 }}
+              dot={{ fill: '#F59E0B', strokeWidth: 2, r: 3 }}
+              activeDot={{ r: 5 }}
               name={t('dashboard.chart.tourists')}
             />
           </LineChart>
@@ -66,13 +78,36 @@ const ChartViews = ({ chartType, lineData, barData }) => {
 
       {chartType === 'bar' && (
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={barData}>
+          <BarChart data={barData} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-            <XAxis dataKey="tour" stroke="#6B7280" />
-            <YAxis yAxisId="left" stroke="#6B7280" />
-            <YAxis yAxisId="right" orientation="right" stroke="#6B7280" tickFormatter={(value) => `$${(value/1000).toFixed(0)}k`} />
+            <XAxis 
+              dataKey="tour" 
+              stroke="#6B7280" 
+              fontSize={12}
+              className="text-xs sm:text-sm"
+              angle={-45}
+              textAnchor="end"
+              height={60}
+            />
+            <YAxis 
+              yAxisId="left" 
+              stroke="#6B7280" 
+              fontSize={12}
+              className="text-xs sm:text-sm"
+            />
+            <YAxis 
+              yAxisId="right" 
+              orientation="right" 
+              stroke="#6B7280" 
+              fontSize={12}
+              className="text-xs sm:text-sm"
+              tickFormatter={(value) => `$${(value/1000).toFixed(0)}k`} 
+            />
             <Tooltip content={<CustomTooltip />} />
-            <Legend />
+            <Legend 
+              wrapperStyle={{ fontSize: '12px' }}
+              className="text-xs sm:text-sm"
+            />
             <Bar yAxisId="left" dataKey="reservas" fill="#1E40AF" name={t('dashboard.chart.reservations')} />
             <Bar yAxisId="right" dataKey="ingresos" fill="#10B981" name={t('dashboard.chart.revenue')} />
           </BarChart>

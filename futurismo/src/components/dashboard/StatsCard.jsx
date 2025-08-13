@@ -50,51 +50,51 @@ const StatsCard = ({
 
   if (loading) {
     return (
-      <div className="bg-white rounded-lg shadow p-6 animate-pulse">
+      <div className="bg-white rounded-lg shadow p-4 animate-pulse sm:p-6">
         <div className="flex items-center justify-between">
-          <div className="flex-1">
-            <div className="h-4 bg-gray-200 rounded w-24 mb-2"></div>
-            <div className="h-8 bg-gray-200 rounded w-32"></div>
-            <div className="h-4 bg-gray-200 rounded w-40 mt-2"></div>
+          <div className="flex-1 min-w-0">
+            <div className="h-3 bg-gray-200 rounded w-20 mb-2 sm:h-4 sm:w-24"></div>
+            <div className="h-6 bg-gray-200 rounded w-24 sm:h-8 sm:w-32"></div>
+            <div className="h-3 bg-gray-200 rounded w-32 mt-2 sm:h-4 sm:w-40"></div>
           </div>
-          <div className="h-12 w-12 bg-gray-200 rounded-lg"></div>
+          <div className="h-10 w-10 bg-gray-200 rounded-lg flex-shrink-0 sm:h-12 sm:w-12"></div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow">
-      <div className="flex items-center justify-between">
-        <div className="flex-1">
-          <p className="text-sm font-medium text-gray-600">{title}</p>
-          <p className="text-2xl font-bold text-gray-900 mt-2">{value}</p>
+    <div className="bg-white rounded-lg shadow p-4 hover:shadow-lg transition-shadow sm:p-6">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex-1 min-w-0">
+          <p className="text-xs font-medium text-gray-600 sm:text-sm truncate">{title}</p>
+          <p className="text-xl font-bold text-gray-900 mt-1 sm:text-2xl sm:mt-2 truncate">{value}</p>
           
           {subtitle && (
-            <p className="text-xs text-gray-500 mt-1">{subtitle}</p>
+            <p className="text-xs text-gray-500 mt-1 truncate">{subtitle}</p>
           )}
           
           {trend && (
-            <div className="flex items-center mt-2">
+            <div className="flex items-center mt-1 sm:mt-2 min-w-0">
               {isPositiveTrend ? (
-                <ArrowTrendingUpIcon className="w-4 h-4 text-green-500 mr-1" />
+                <ArrowTrendingUpIcon className="w-3 h-3 text-green-500 mr-1 flex-shrink-0 sm:w-4 sm:h-4" />
               ) : (
-                <ArrowTrendingDownIcon className="w-4 h-4 text-red-500 mr-1" />
+                <ArrowTrendingDownIcon className="w-3 h-3 text-red-500 mr-1 flex-shrink-0 sm:w-4 sm:h-4" />
               )}
-              <span className={`text-sm font-medium ${
+              <span className={`text-xs font-medium flex-shrink-0 sm:text-sm ${
                 isPositiveTrend ? 'text-green-600' : 'text-red-600'
               }`}>
                 {trend}
               </span>
-              <span className="text-sm text-gray-500 ml-1">
+              <span className="text-xs text-gray-500 ml-1 truncate sm:text-sm">
                 {translationText}
               </span>
             </div>
           )}
         </div>
         
-        <div className={`p-3 rounded-lg ${colorClasses[color]}`}>
-          <Icon className="w-6 h-6" />
+        <div className={`p-2 rounded-lg flex-shrink-0 sm:p-3 ${colorClasses[color]}`}>
+          <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
         </div>
       </div>
     </div>

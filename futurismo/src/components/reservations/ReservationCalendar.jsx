@@ -159,57 +159,57 @@ const ReservationCalendar = ({ onNewReservation }) => {
   return (
     <div className="h-full flex flex-col bg-white rounded-lg shadow-lg">
       {/* Header del calendario */}
-      <div className="px-6 py-4 border-b border-gray-200">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <h2 className="text-xl font-semibold text-gray-900">
+      <div className="px-3 py-4 sm:px-6 border-b border-gray-200">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 text-center sm:text-left">
               {format(currentDate, 'MMMM yyyy', { locale: es })}
             </h2>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center justify-center gap-1 sm:justify-start">
               <button
                 onClick={handlePreviousMonth}
-                className="p-1 rounded hover:bg-gray-100 transition-colors"
+                className="p-1.5 sm:p-1 rounded hover:bg-gray-100 transition-colors"
               >
-                <ChevronLeftIcon className="w-5 h-5" />
+                <ChevronLeftIcon className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
               <button
                 onClick={handleToday}
-                className="px-3 py-1 text-sm font-medium rounded hover:bg-gray-100 transition-colors"
+                className="px-3 py-1.5 sm:py-1 text-sm font-medium rounded hover:bg-gray-100 transition-colors"
               >
                 Hoy
               </button>
               <button
                 onClick={handleNextMonth}
-                className="p-1 rounded hover:bg-gray-100 transition-colors"
+                className="p-1.5 sm:p-1 rounded hover:bg-gray-100 transition-colors"
               >
-                <ChevronRightIcon className="w-5 h-5" />
+                <ChevronRightIcon className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center justify-center sm:justify-end">
             <button 
               onClick={onNewReservation}
-              className="btn btn-primary flex items-center gap-2"
+              className="btn btn-primary flex items-center justify-center gap-2 w-full sm:w-auto text-sm"
             >
               <PlusIcon className="w-4 h-4" />
-              Nueva Reserva
+              <span className="sm:inline">Nueva Reserva</span>
             </button>
           </div>
         </div>
         
         {/* Filtros */}
-        <div className="mt-4 flex items-center gap-4">
-          <div className="flex items-center gap-2">
+        <div className="mt-4 space-y-3 sm:space-y-0 sm:flex sm:items-center sm:gap-4">
+          <div className="flex items-center gap-2 sm:flex-shrink-0">
             <FunnelIcon className="w-4 h-4 text-gray-500" />
             <span className="text-sm font-medium text-gray-700">Filtros:</span>
           </div>
           
-          <div className="flex items-center gap-3 flex-1">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3 sm:flex-1">
             <select 
               value={filters.guide}
               onChange={(e) => setFilters({...filters, guide: e.target.value})}
-              className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+              className="px-3 py-2 sm:py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 sm:w-auto"
             >
               <option value="all">Todos los guías</option>
               {uniqueGuides.map(guide => (
@@ -220,7 +220,7 @@ const ReservationCalendar = ({ onNewReservation }) => {
             <select 
               value={filters.tourType}
               onChange={(e) => setFilters({...filters, tourType: e.target.value})}
-              className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+              className="px-3 py-2 sm:py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 sm:w-auto"
             >
               <option value="all">Todos los tours</option>
               {uniqueTourTypes.map(tour => (
@@ -231,7 +231,7 @@ const ReservationCalendar = ({ onNewReservation }) => {
             <select 
               value={filters.status}
               onChange={(e) => setFilters({...filters, status: e.target.value})}
-              className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+              className="px-3 py-2 sm:py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 sm:w-auto"
             >
               <option value="all">Todos los estados</option>
               <option value="confirmada">Confirmadas</option>
@@ -242,7 +242,7 @@ const ReservationCalendar = ({ onNewReservation }) => {
             {(filters.guide !== 'all' || filters.tourType !== 'all' || filters.status !== 'all') && (
               <button 
                 onClick={() => setFilters({ guide: 'all', tourType: 'all', status: 'all' })}
-                className="text-sm text-primary-600 hover:text-primary-700 font-medium"
+                className="text-sm text-primary-600 hover:text-primary-700 font-medium text-center sm:text-left"
               >
                 Limpiar filtros
               </button>
@@ -252,13 +252,13 @@ const ReservationCalendar = ({ onNewReservation }) => {
       </div>
 
       {/* Calendario */}
-      <div className="flex-1 p-6">
+      <div className="flex-1 p-3 sm:p-6">
         {/* Días de la semana */}
         <div className="grid grid-cols-7 gap-px mb-2">
           {['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'].map((day) => (
             <div
               key={day}
-              className="text-center text-sm font-medium text-gray-600 py-2"
+              className="text-center text-xs sm:text-sm font-medium text-gray-600 py-1 sm:py-2"
             >
               {day}
             </div>
@@ -278,7 +278,7 @@ const ReservationCalendar = ({ onNewReservation }) => {
                 key={day.toISOString()}
                 onClick={() => handleDateClick(day)}
                 className={`
-                  bg-white min-h-[100px] p-2 cursor-pointer transition-colors
+                  bg-white min-h-[80px] sm:min-h-[100px] p-1 sm:p-2 cursor-pointer transition-colors
                   ${!isCurrentMonth ? 'text-gray-400 bg-gray-50' : ''}
                   ${isSelected ? 'ring-2 ring-primary-500' : ''}
                   ${isTodayDate ? 'bg-primary-50' : ''}
@@ -286,21 +286,21 @@ const ReservationCalendar = ({ onNewReservation }) => {
                 `}
               >
                 <div className="flex items-center justify-between mb-1">
-                  <span className={`text-sm font-medium ${
+                  <span className={`text-xs sm:text-sm font-medium ${
                     isTodayDate ? 'text-primary-600' : ''
                   }`}>
                     {format(day, 'd')}
                   </span>
                   {dayReservations.length > 0 && (
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-gray-500 bg-gray-200 rounded-full px-1 min-w-[16px] text-center">
                       {dayReservations.length}
                     </span>
                   )}
                 </div>
 
-                {/* Reservas del día */}
+                {/* Reservas del día - menos en móvil */}
                 <div className="space-y-1">
-                  {dayReservations.slice(0, 3).map((reservation) => (
+                  {dayReservations.slice(0, 2).map((reservation) => (
                     <div
                       key={reservation.id}
                       onClick={(e) => {
@@ -313,11 +313,38 @@ const ReservationCalendar = ({ onNewReservation }) => {
                       `}
                       style={{ backgroundColor: reservation.color + '20', color: reservation.color }}
                     >
-                      <div className="font-medium truncate">{reservation.time} - {reservation.tourName}</div>
+                      <div className="font-medium truncate">
+                        <span className="hidden sm:inline">{reservation.time} - </span>
+                        {reservation.tourName}
+                      </div>
                     </div>
                   ))}
+                  {/* En desktop mostrar más reservas */}
+                  <div className="hidden sm:block">
+                    {dayReservations.slice(2, 3).map((reservation) => (
+                      <div
+                        key={reservation.id}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleViewReservation(reservation);
+                        }}
+                        className={`
+                          text-xs p-1 rounded truncate cursor-pointer
+                          hover:opacity-80 transition-opacity
+                        `}
+                        style={{ backgroundColor: reservation.color + '20', color: reservation.color }}
+                      >
+                        <div className="font-medium truncate">{reservation.time} - {reservation.tourName}</div>
+                      </div>
+                    ))}
+                  </div>
+                  {dayReservations.length > 2 && (
+                    <div className="text-xs text-gray-500 text-center sm:hidden">
+                      +{dayReservations.length - 2} más
+                    </div>
+                  )}
                   {dayReservations.length > 3 && (
-                    <div className="text-xs text-gray-500 text-center">
+                    <div className="text-xs text-gray-500 text-center hidden sm:block">
                       +{dayReservations.length - 3} más
                     </div>
                   )}
@@ -329,8 +356,8 @@ const ReservationCalendar = ({ onNewReservation }) => {
 
         {/* Resumen del día seleccionado */}
         {selectedDate && (
-          <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-            <h3 className="font-medium text-gray-900 mb-3">
+          <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-gray-50 rounded-lg">
+            <h3 className="font-medium text-gray-900 mb-3 text-sm sm:text-base">
               {format(selectedDate, "d 'de' MMMM", { locale: es })}
             </h3>
             {getReservationsForDate(selectedDate).length === 0 ? (
@@ -340,16 +367,16 @@ const ReservationCalendar = ({ onNewReservation }) => {
                 {getReservationsForDate(selectedDate).map((reservation) => (
                   <div
                     key={reservation.id}
-                    className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200"
+                    className="flex items-center justify-between p-2 sm:p-3 bg-white rounded-lg border border-gray-200"
                   >
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
                       <div
-                        className="w-3 h-3 rounded-full"
+                        className="w-3 h-3 rounded-full flex-shrink-0"
                         style={{ backgroundColor: reservation.color }}
                       />
-                      <div>
-                        <p className="font-medium text-sm">{reservation.tourName}</p>
-                        <div className="flex items-center gap-3 text-xs text-gray-600">
+                      <div className="min-w-0 flex-1">
+                        <p className="font-medium text-sm truncate">{reservation.tourName}</p>
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 text-xs text-gray-600">
                           <span className="flex items-center gap-1">
                             <ClockIcon className="w-3 h-3" />
                             {reservation.time}
@@ -358,13 +385,13 @@ const ReservationCalendar = ({ onNewReservation }) => {
                             <UserGroupIcon className="w-3 h-3" />
                             {reservation.adults + (reservation.children || 0)} pax
                           </span>
-                          <span>{reservation.clientName}</span>
+                          <span className="truncate">{reservation.clientName}</span>
                         </div>
                       </div>
                     </div>
                     <button
                       onClick={() => handleViewReservation(reservation)}
-                      className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                      className="p-1.5 sm:p-2 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0"
                     >
                       <EyeIcon className="w-4 h-4 text-gray-600" />
                     </button>
@@ -377,9 +404,9 @@ const ReservationCalendar = ({ onNewReservation }) => {
       </div>
 
       {/* Leyenda */}
-      <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4 text-sm">
+      <div className="px-3 py-4 sm:px-6 border-t border-gray-200 bg-gray-50">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-sm">
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-green-500"></div>
               <span className="text-gray-600">Confirmadas</span>
@@ -393,12 +420,12 @@ const ReservationCalendar = ({ onNewReservation }) => {
               <span className="text-gray-600">Canceladas</span>
             </div>
           </div>
-          <div className="text-sm text-gray-600">
-            Total reservas del mes: {filteredReservations.filter(r => 
+          <div className="text-sm text-gray-600 text-center sm:text-right">
+            <span className="block sm:inline">Total del mes: {filteredReservations.filter(r => 
               isSameMonth(r.date, currentDate)
-            ).length}
+            ).length}</span>
             {(filters.guide !== 'all' || filters.tourType !== 'all' || filters.status !== 'all') && 
-              <span className="text-xs text-gray-500"> (filtrado)</span>
+              <span className="text-xs text-gray-500 block sm:inline"> (filtrado)</span>
             }
           </div>
         </div>

@@ -42,41 +42,58 @@ const ProfileMenu = ({ user, viewport, onLogout }) => {
     <div className="relative" ref={menuRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100 transition-colors"
+        className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100 active:bg-gray-200 transition-colors touch-manipulation"
       >
-        <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-          <span className="text-white text-sm font-medium">
+        <div className="w-8 h-8 sm:w-9 sm:h-9 bg-blue-600 rounded-full flex items-center justify-center shadow-sm">
+          <span className="text-white text-sm sm:text-base font-medium">
             {getUserInitial()}
           </span>
         </div>
-        {viewport.isDesktop && (
+        {!viewport.isMobile && (
           <>
-            <span className="text-sm font-medium text-gray-900">
+            <span className="text-sm sm:text-base font-medium text-gray-900 truncate max-w-24 sm:max-w-32">
               {getUserName()}
             </span>
-            <ChevronDownIcon className="w-4 h-4 text-gray-500" />
+            <ChevronDownIcon className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${
+              isOpen ? 'rotate-180' : ''
+            }`} />
           </>
         )}
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-1 z-50">
+        <div className={`
+          absolute right-0 mt-2 w-56 sm:w-48 bg-white rounded-xl sm:rounded-lg 
+          shadow-lg border border-gray-200 py-2 z-50
+          ${viewport.isMobile ? 'mr-2' : ''}
+        `}>
+          <div className="px-4 py-3 border-b border-gray-100">
+            <p className="text-sm font-medium text-gray-900 truncate">
+              {getUserName()}
+            </p>
+            <p className="text-xs text-gray-500 truncate">
+              {user?.email || t('common.user')}
+            </p>
+          </div>
+          
           <button
             onClick={() => {
               navigate('/profile');
               setIsOpen(false);
             }}
-            className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full"
+            className="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 active:bg-gray-100 w-full transition-colors touch-manipulation"
           >
-            <UserIcon className="w-4 h-4 mr-3" />
+            <UserIcon className="w-5 h-5 mr-3 text-gray-400" />
             {t('profile.myProfile')}
           </button>
-          <hr className="my-1" />
+          
+          <div className="border-t border-gray-100 my-1" />
+          
           <button
             onClick={handleLogout}
-            className="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full"
+            className="flex items-center px-4 py-3 text-sm text-red-600 hover:bg-red-50 active:bg-red-100 w-full transition-colors touch-manipulation"
           >
-            <ArrowRightOnRectangleIcon className="w-4 h-4 mr-3" />
+            <ArrowRightOnRectangleIcon className="w-5 h-5 mr-3 text-red-500" />
             {t('profile.logout')}
           </button>
         </div>

@@ -5,8 +5,8 @@ const UserAgencyFields = ({ formData, handleChange, errors }) => {
   const { t } = useTranslation();
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t">
-      <h4 className="col-span-full text-lg font-medium text-gray-900 mb-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 pt-4 sm:pt-6 border-t">
+      <h4 className="col-span-full text-lg sm:text-xl font-medium text-gray-900 mb-2 sm:mb-4">
         {t('users.form.agencyInfo')}
       </h4>
       
@@ -19,7 +19,7 @@ const UserAgencyFields = ({ formData, handleChange, errors }) => {
           name="ruc"
           value={formData.ruc}
           onChange={handleChange}
-          className={`px-4 py-2 w-full border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+          className={`px-4 py-2 sm:py-3 w-full border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base ${
             errors.ruc ? 'border-red-300' : 'border-gray-300'
           }`}
           placeholder={t('users.form.placeholders.ruc')}
@@ -38,7 +38,7 @@ const UserAgencyFields = ({ formData, handleChange, errors }) => {
           name="creditLimit"
           value={formData.creditLimit}
           onChange={handleChange}
-          className="px-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="px-4 py-2 sm:py-3 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
           placeholder={t('users.form.placeholders.creditLimit')}
         />
       </div>
@@ -52,7 +52,7 @@ const UserAgencyFields = ({ formData, handleChange, errors }) => {
           name="address"
           value={formData.address}
           onChange={handleChange}
-          className={`px-4 py-2 w-full border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+          className={`px-4 py-2 sm:py-3 w-full border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base ${
             errors.address ? 'border-red-300' : 'border-gray-300'
           }`}
           placeholder={t('users.form.placeholders.address')}

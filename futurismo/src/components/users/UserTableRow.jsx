@@ -25,25 +25,25 @@ const UserTableRow = ({
 
   return (
     <tr className="hover:bg-gray-50">
-      <td className="px-6 py-4 whitespace-nowrap">
+      <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
         <div className="flex items-center">
           <img
             src={user.avatar}
             alt={user.firstName}
-            className="h-10 w-10 rounded-full"
+            className="h-8 w-8 lg:h-10 lg:w-10 rounded-full flex-shrink-0"
           />
-          <div className="ml-4">
-            <div className="text-sm font-medium text-gray-900">
+          <div className="ml-2 lg:ml-4 min-w-0">
+            <div className="text-sm font-medium text-gray-900 truncate">
               {user.firstName} {user.lastName}
             </div>
-            <div className="text-sm text-gray-500">
+            <div className="text-sm text-gray-500 truncate">
               {user.email}
             </div>
-            <div className="text-xs text-gray-400">
+            <div className="text-xs text-gray-400 truncate">
               @{user.username}
             </div>
             {user.role === USER_ROLES.AGENCY && user.ruc && (
-              <div className="text-xs text-gray-400">
+              <div className="text-xs text-gray-400 truncate">
                 RUC: {user.ruc}
               </div>
             )}
@@ -51,7 +51,7 @@ const UserTableRow = ({
         </div>
       </td>
       
-      <td className="px-6 py-4 whitespace-nowrap">
+      <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-${getRoleColor(user.role, roles)}-100 text-${getRoleColor(user.role, roles)}-800`}>
           {getRoleName(user.role, roles)}
         </span>
@@ -68,33 +68,33 @@ const UserTableRow = ({
         )}
       </td>
       
-      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-        <div className="text-sm font-medium">{user.company}</div>
+      <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+        <div className="text-sm font-medium truncate">{user.company}</div>
         {user.role === USER_ROLES.GUIDE && user.specialties && (
-          <div className="text-xs text-gray-500">
+          <div className="text-xs text-gray-500 truncate">
             {user.specialties.slice(0, 2).join(', ')}
             {user.specialties.length > 2 && '...'}
           </div>
         )}
         {user.role === USER_ROLES.AGENCY && user.address && (
-          <div className="text-xs text-gray-500">
+          <div className="text-xs text-gray-500 truncate">
             {user.address}
           </div>
         )}
       </td>
       
-      <td className="px-6 py-4 whitespace-nowrap">
+      <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusClasses(user.status)}`}>
           {user.status === USER_STATUS.ACTIVE ? t('users.status.active') : t('users.status.inactive')}
         </span>
       </td>
       
-      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-        {formatLastLogin(user.lastLogin)}
+      <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+        <span className="truncate block">{formatLastLogin(user.lastLogin)}</span>
       </td>
       
-      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-        <div className="flex items-center justify-end space-x-2">
+      <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+        <div className="flex items-center justify-end space-x-1 lg:space-x-2">
           <button
             onClick={() => onView && onView(user)}
             className="text-gray-600 hover:text-gray-900 p-1 rounded"

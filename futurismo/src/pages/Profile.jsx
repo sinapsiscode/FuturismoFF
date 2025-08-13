@@ -73,15 +73,15 @@ const Profile = () => {
     const config = roleLabels[user?.role] || roleLabels.default;
     
     return (
-      <div className={`bg-gradient-to-r ${config.gradient} rounded-lg p-6 text-white`}>
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-bold mb-2">{config.title}</h2>
-            <p className="text-blue-100">{config.subtitle}</p>
+      <div className={`bg-gradient-to-r ${config.gradient} rounded-lg p-4 sm:p-6 text-white`}>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between text-center sm:text-left">
+          <div className="flex-1 min-w-0">
+            <h2 className="text-lg sm:text-xl lg:text-2xl font-bold mb-1 sm:mb-2 break-words">{config.title}</h2>
+            <p className="text-xs sm:text-sm text-blue-100 opacity-90">{config.subtitle}</p>
           </div>
-          <div className="text-right">
-            <p className="text-sm text-blue-100">{t('profile.activeUser')}</p>
-            <p className="text-lg font-semibold">{user?.name || 'Usuario'}</p>
+          <div className="text-center sm:text-right flex-shrink-0">
+            <p className="text-xs sm:text-sm text-blue-100 opacity-75">{t('profile.activeUser')}</p>
+            <p className="text-base sm:text-lg font-semibold break-words">{user?.name || 'Usuario'}</p>
           </div>
         </div>
       </div>
@@ -90,24 +90,25 @@ const Profile = () => {
 
 
   return (
-    <div>
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">{t('profile.administration')}</h1>
+    <div className="p-4 sm:p-6 lg:p-8">
+      <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-6 sm:mb-8 text-center sm:text-left break-words">{t('profile.administration')}</h1>
       
       {/* Tabs */}
-      <div className="mb-8">
-        <nav className="flex space-x-8">
+      <div className="mb-6 sm:mb-8">
+        <nav className="flex flex-col sm:flex-row gap-2 sm:gap-0 sm:space-x-8 overflow-x-auto">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+              className={`flex items-center justify-center sm:justify-start px-3 py-2 text-xs sm:text-sm font-medium rounded-lg transition-colors whitespace-nowrap ${
                 activeTab === tab.id
                   ? 'bg-blue-100 text-blue-700'
                   : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
               }`}
             >
-              <tab.icon className="h-5 w-5 mr-2" />
-              {tab.name}
+              <tab.icon className="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2" />
+              <span className="hidden sm:inline">{tab.name}</span>
+              <span className="sm:hidden">{tab.id === 'profile' ? 'Perfil' : 'Guías'}</span>
             </button>
           ))}
         </nav>
@@ -115,7 +116,7 @@ const Profile = () => {
 
       {/* Tab Content */}
       {activeTab === 'profile' && (
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {/* Header del perfil - dinámico según el rol */}
           {getProfileHeader()}
 

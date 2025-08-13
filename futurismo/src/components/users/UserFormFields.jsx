@@ -13,7 +13,7 @@ const UserFormFields = ({ formData, handleChange, errors, roles, isEdit }) => {
   const { t } = useTranslation();
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
       {/* Username */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -26,7 +26,7 @@ const UserFormFields = ({ formData, handleChange, errors, roles, isEdit }) => {
             name="username"
             value={formData.username}
             onChange={handleChange}
-            className={`pl-10 pr-4 py-2 w-full border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+            className={`pl-10 pr-4 py-2 sm:py-3 w-full border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base ${
               errors.username ? 'border-red-300' : 'border-gray-300'
             }`}
             placeholder={t('users.form.placeholders.username')}
@@ -49,7 +49,7 @@ const UserFormFields = ({ formData, handleChange, errors, roles, isEdit }) => {
             name="email"
             value={formData.email}
             onChange={handleChange}
-            className={`pl-10 pr-4 py-2 w-full border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+            className={`pl-10 pr-4 py-2 sm:py-3 w-full border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base ${
               errors.email ? 'border-red-300' : 'border-gray-300'
             }`}
             placeholder={t('users.form.placeholders.email')}
@@ -70,7 +70,7 @@ const UserFormFields = ({ formData, handleChange, errors, roles, isEdit }) => {
           name="firstName"
           value={formData.firstName}
           onChange={handleChange}
-          className={`px-4 py-2 w-full border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+          className={`px-4 py-2 sm:py-3 w-full border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base ${
             errors.firstName ? 'border-red-300' : 'border-gray-300'
           }`}
           placeholder={t('users.form.placeholders.firstName')}
@@ -90,7 +90,7 @@ const UserFormFields = ({ formData, handleChange, errors, roles, isEdit }) => {
           name="lastName"
           value={formData.lastName}
           onChange={handleChange}
-          className={`px-4 py-2 w-full border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+          className={`px-4 py-2 sm:py-3 w-full border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base ${
             errors.lastName ? 'border-red-300' : 'border-gray-300'
           }`}
           placeholder={t('users.form.placeholders.lastName')}
@@ -112,7 +112,7 @@ const UserFormFields = ({ formData, handleChange, errors, roles, isEdit }) => {
             name="phone"
             value={formData.phone}
             onChange={handleChange}
-            className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="pl-10 pr-4 py-2 sm:py-3 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
             placeholder={t('users.form.placeholders.phone')}
           />
         </div>
@@ -127,7 +127,7 @@ const UserFormFields = ({ formData, handleChange, errors, roles, isEdit }) => {
           name="role"
           value={formData.role}
           onChange={handleChange}
-          className={`px-4 py-2 w-full border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+          className={`px-4 py-2 sm:py-3 w-full border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base ${
             errors.role ? 'border-red-300' : 'border-gray-300'
           }`}
         >
@@ -155,7 +155,7 @@ const UserFormFields = ({ formData, handleChange, errors, roles, isEdit }) => {
             name="company"
             value={formData.company}
             onChange={handleChange}
-            className={`pl-10 pr-4 py-2 w-full border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+            className={`pl-10 pr-4 py-2 sm:py-3 w-full border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base ${
               errors.company ? 'border-red-300' : 'border-gray-300'
             }`}
             placeholder={t('users.form.placeholders.companyName')}
@@ -178,7 +178,7 @@ const UserFormFields = ({ formData, handleChange, errors, roles, isEdit }) => {
             name="position"
             value={formData.position}
             onChange={handleChange}
-            className={`pl-10 pr-4 py-2 w-full border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+            className={`pl-10 pr-4 py-2 sm:py-3 w-full border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base ${
               errors.position ? 'border-red-300' : 'border-gray-300'
             }`}
             placeholder={t('users.form.placeholders.position')}
@@ -198,7 +198,7 @@ const UserFormFields = ({ formData, handleChange, errors, roles, isEdit }) => {
           name="status"
           value={formData.status}
           onChange={handleChange}
-          className="px-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="px-4 py-2 sm:py-3 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
         >
           <option value={USER_STATUS.ACTIVE}>{t('users.status.active')}</option>
           <option value={USER_STATUS.INACTIVE}>{t('users.status.inactive')}</option>

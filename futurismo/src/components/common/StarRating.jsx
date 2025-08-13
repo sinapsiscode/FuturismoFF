@@ -16,12 +16,13 @@ const StarRating = ({
   const [hoverRating, setHoverRating] = useState(0);
   const [currentRating, setCurrentRating] = useState(rating);
 
+  // Mobile-first responsive sizes
   const sizes = {
-    xs: 'w-3 h-3',
-    sm: 'w-4 h-4', 
-    md: 'w-5 h-5',
-    lg: 'w-6 h-6',
-    xl: 'w-8 h-8'
+    xs: 'w-3 h-3 sm:w-3 sm:h-3',
+    sm: 'w-4 h-4 sm:w-4 sm:h-4', 
+    md: 'w-5 h-5 sm:w-5 sm:h-5',
+    lg: 'w-6 h-6 sm:w-7 sm:h-7',
+    xl: 'w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9'
   };
 
   const handleStarClick = (starValue) => {
@@ -61,10 +62,12 @@ const StarRating = ({
         key={starIndex}
         type="button"
         className={`
-          ${interactive && !disabled ? 'cursor-pointer hover:scale-110' : 'cursor-default'}
+          ${interactive && !disabled ? 'cursor-pointer hover:scale-110 active:scale-95' : 'cursor-default'}
           ${disabled ? 'opacity-50' : ''}
           transition-all duration-150 ease-in-out
           focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-opacity-50 rounded
+          touch-manipulation
+          p-1
         `}
         onClick={() => handleStarClick(starIndex)}
         onMouseEnter={() => handleStarHover(starIndex)}
@@ -82,15 +85,19 @@ const StarRating = ({
   };
 
   return (
-    <div className={`flex items-center gap-1 ${className}`}>
-      <div className="flex items-center">
+    <div className={`flex flex-col sm:flex-row items-center sm:items-center gap-1 sm:gap-2 ${className}`}>
+      {/* Mobile-first responsive stars container */}
+      <div className="flex items-center justify-center gap-0.5 sm:gap-1">
         {Array.from({ length: maxRating }, (_, index) => renderStar(index + 1))}
       </div>
       
+      {/* Mobile-first responsive value display */}
       {showValue && (
-        <span className="text-sm text-gray-600 ml-2">
-          {interactive ? currentRating : rating.toFixed(1)} / {maxRating}
-        </span>
+        <div className="flex items-center justify-center mt-1 sm:mt-0 sm:ml-2">
+          <span className="text-xs sm:text-sm text-gray-600 font-medium">
+            {interactive ? currentRating : rating.toFixed(1)} / {maxRating}
+          </span>
+        </div>
       )}
     </div>
   );

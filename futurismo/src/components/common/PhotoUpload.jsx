@@ -27,10 +27,10 @@ const PhotoUpload = ({
   } = usePhotoUpload(photos, onPhotosChange, maxPhotos);
 
   return (
-    <div className="space-y-3">
-      {/* Upload buttons */}
-      <div className="flex items-center gap-3 flex-wrap">
-        {/* Botón para cámara (solo en móviles) */}
+    <div className="space-y-3 sm:space-y-4">
+      {/* Mobile-first responsive upload buttons */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
+        {/* Mobile-first responsive camera button */}
         {/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) && (
           <button
             type="button"
@@ -41,7 +41,18 @@ const PhotoUpload = ({
               }
             }}
             disabled={uploading || !canAddMore}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+            className="
+              flex items-center justify-center
+              gap-2 px-3 sm:px-4 py-2.5 sm:py-2
+              bg-blue-600 text-white 
+              rounded-lg 
+              hover:bg-blue-700 active:bg-blue-800
+              disabled:opacity-50 disabled:cursor-not-allowed 
+              text-xs sm:text-sm font-medium
+              transition-all duration-200
+              touch-manipulation
+              shadow-sm hover:shadow-md
+            "
           >
             {uploading ? (
               <>
@@ -57,7 +68,7 @@ const PhotoUpload = ({
           </button>
         )}
         
-        {/* Botón para seleccionar de galería */}
+        {/* Mobile-first responsive gallery button */}
         <button
           type="button"
           onClick={() => {
@@ -67,7 +78,18 @@ const PhotoUpload = ({
             }
           }}
           disabled={uploading || !canAddMore}
-          className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+          className="
+            flex items-center justify-center
+            gap-2 px-3 sm:px-4 py-2.5 sm:py-2
+            border border-gray-300 bg-white
+            rounded-lg 
+            hover:bg-gray-50 active:bg-gray-100
+            disabled:opacity-50 disabled:cursor-not-allowed 
+            text-xs sm:text-sm font-medium text-gray-700
+            transition-all duration-200
+            touch-manipulation
+            shadow-sm hover:shadow-md
+          "
         >
           {uploading ? (
             <>
@@ -82,9 +104,12 @@ const PhotoUpload = ({
           )}
         </button>
         
-        <span className="text-sm text-gray-500">
-          {t('upload.photos.counter', { current: photos.length, max: maxPhotos })}
-        </span>
+        {/* Mobile-first responsive counter */}
+        <div className="flex items-center justify-center sm:justify-start mt-2 sm:mt-0">
+          <span className="text-xs sm:text-sm text-gray-500 font-medium">
+            {t('upload.photos.counter', { current: photos.length, max: maxPhotos })}
+          </span>
+        </div>
       </div>
 
       {/* Hidden file input */}
@@ -107,14 +132,20 @@ const PhotoUpload = ({
         />
       )}
 
-      {/* Empty state */}
+      {/* Mobile-first responsive empty state */}
       {photos.length === 0 && (
-        <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-          <PhotoIcon className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-          <p className="text-sm text-gray-600 mb-2">
+        <div className="
+          border-2 border-dashed border-gray-300 
+          rounded-lg 
+          p-4 sm:p-6 
+          text-center
+          bg-gray-50/50
+        ">
+          <PhotoIcon className="w-10 h-10 sm:w-12 sm:h-12 text-gray-400 mx-auto mb-2 sm:mb-3" />
+          <p className="text-xs sm:text-sm text-gray-600 mb-1 sm:mb-2 font-medium">
             {t('upload.photos.noPhotos')}
           </p>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-gray-500 leading-relaxed px-2">
             {t('upload.photos.photosHelp')}
           </p>
         </div>

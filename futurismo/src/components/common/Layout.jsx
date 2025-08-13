@@ -17,31 +17,41 @@ const Layout = () => {
   } = useLayout();
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-gray-50 relative">
+      {/* Mobile-first responsive overlay */}
       <MobileOverlay 
         isVisible={showMobileOverlay}
         onClick={closeSidebar}
       />
 
+      {/* Mobile-first responsive sidebar */}
       <SidebarEnhanced 
         isOpen={sidebarOpen} 
         toggleSidebar={toggleSidebar}
         isMobile={!isDesktop}
       />
 
-      <div className={mainContentClassName}>
+      {/* Mobile-first responsive main content area */}
+      <div className={`${mainContentClassName} min-w-0 flex-1`}>
         <Header 
           toggleSidebar={toggleSidebar}
           sidebarOpen={sidebarOpen}
         />
 
-        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
+        {/* Mobile-first responsive main content */}
+        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 relative">
+          <div className="
+            w-full max-w-none sm:max-w-screen-2xl mx-auto 
+            px-3 sm:px-4 md:px-6 lg:px-8 
+            py-3 sm:py-4 md:py-6 lg:py-8
+            min-h-full
+          ">
             <Outlet />
           </div>
         </main>
       </div>
 
+      {/* Mobile-first responsive notification center */}
       <NotificationCenter />
     </div>
   );

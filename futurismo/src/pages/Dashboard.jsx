@@ -36,27 +36,27 @@ const Dashboard = () => {
   }
 
   return (
-    <div>
+    <div className="p-4 sm:p-6 lg:p-8">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 break-words">
           {getGreeting()}, {user?.name || 'Usuario'}
         </h1>
-        <p className="text-gray-600 mt-2">
+        <p className="text-sm sm:text-base text-gray-600 mt-1 sm:mt-2">
           {t('dashboard.todaySummary')}
         </p>
       </div>
 
       {/* Stats Cards */}
-      <div className={`grid grid-cols-1 md:grid-cols-2 ${user?.role === 'admin' ? 'lg:grid-cols-3' : 'lg:grid-cols-4'} gap-6 mb-8`}>
+      <div className={`grid grid-cols-1 sm:grid-cols-2 ${user?.role === 'admin' ? 'lg:grid-cols-3' : 'lg:grid-cols-4'} gap-4 sm:gap-6 mb-6 sm:mb-8`}>
         {loading ? (
-          <div className="col-span-full flex justify-center">
-            <div className="animate-spin w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full"></div>
+          <div className="col-span-full flex justify-center py-8">
+            <div className="animate-spin w-6 h-6 sm:w-8 sm:h-8 border-2 border-blue-500 border-t-transparent rounded-full"></div>
           </div>
         ) : error ? (
-          <div className="col-span-full text-center text-red-600">
-            <p>Error: {error}</p>
-            <button onClick={refresh} className="btn btn-primary mt-2">Reintentar</button>
+          <div className="col-span-full text-center text-red-600 p-4">
+            <p className="text-sm sm:text-base mb-2">Error: {error}</p>
+            <button onClick={refresh} className="px-4 py-2 bg-blue-600 text-white rounded text-sm sm:text-base hover:bg-blue-700">Reintentar</button>
           </div>
         ) : (
           Object.entries(roleSpecificStats).map(([key, card]) => {
@@ -91,53 +91,58 @@ const Dashboard = () => {
 
 
       {/* Main Content - Different per role */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {user?.role === 'guide' ? (
           /* Guide specific content */
           <>
-            <div className="lg:col-span-2 space-y-6">
+            <div className="lg:col-span-2 space-y-4 sm:space-y-6">
               {/* Guide Personal Analytics - Solo Tours completados e Ingresos */}
-              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-6">Análisis Personal</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="bg-green-50 rounded-lg p-4">
+              <div className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6">
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4 sm:mb-6">Análisis Personal</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                  <div className="bg-green-50 rounded-lg p-3 sm:p-4">
                     <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm text-gray-600">Tours completados</p>
-                        <p className="text-2xl font-bold text-green-600">{stats.toursCompleted}</p>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs sm:text-sm text-gray-600">Tours completados</p>
+                        <p className="text-lg sm:text-2xl font-bold text-green-600 truncate">{stats.toursCompleted}</p>
                       </div>
-                      <div className="text-green-600">✅</div>
+                      <div className="text-green-600 text-lg sm:text-xl ml-2">✅</div>
                     </div>
                   </div>
-                  <div className="bg-purple-50 rounded-lg p-4">
+                  <div className="bg-purple-50 rounded-lg p-3 sm:p-4">
                     <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm text-gray-600">Ingresos del mes</p>
-                        <p className="text-2xl font-bold text-purple-600">S/{stats.monthlyIncome}</p>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs sm:text-sm text-gray-600">Ingresos del mes</p>
+                        <p className="text-lg sm:text-2xl font-bold text-purple-600 truncate">S/{stats.monthlyIncome}</p>
                       </div>
-                      <div className="text-purple-600">💰</div>
+                      <div className="text-purple-600 text-lg sm:text-xl ml-2">💰</div>
                     </div>
                   </div>
                 </div>
               </div>
 
               {/* Gráfico de Ingresos para Freelancer */}
-              <div className="bg-white rounded-lg shadow-lg p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900">Ingresos por Mes</h3>
-                  <CurrencyDollarIcon className="w-5 h-5 text-purple-600" />
+              <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6">
+                <div className="flex items-center justify-between mb-3 sm:mb-4">
+                  <h3 className="text-base sm:text-lg font-semibold text-gray-900">Ingresos por Mes</h3>
+                  <CurrencyDollarIcon className="w-4 h-4 sm:w-5 sm:h-5 text-purple-600 flex-shrink-0" />
                 </div>
-                <div className="h-64">
+                <div className="h-48 sm:h-64">
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={monthlyData}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis 
                         dataKey="month" 
-                        tick={{ fontSize: 12 }}
+                        tick={{ fontSize: 10 }}
+                        angle={-45}
+                        textAnchor="end"
+                        height={60}
+                        className="text-xs"
                       />
                       <YAxis 
-                        tick={{ fontSize: 12 }}
+                        tick={{ fontSize: 10 }}
                         tickFormatter={(value) => `S/${(value/1000).toFixed(0)}k`}
+                        className="text-xs"
                       />
                       <Tooltip 
                         formatter={(value) => [`S/${value.toLocaleString()}`, 'Ingresos']}
@@ -156,17 +161,17 @@ const Dashboard = () => {
                 </div>
               </div>
             </div>
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               {/* Espacio para futuros widgets */}
             </div>
           </>
         ) : (
           /* Agency/Admin content */
           <>
-            <div className="lg:col-span-2 space-y-6">
+            <div className="lg:col-span-2 space-y-4 sm:space-y-6">
               <ServiceChart />
             </div>
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               {(user?.role === 'agency' || user?.role === 'admin') && <ExportPanel />}
               
             </div>

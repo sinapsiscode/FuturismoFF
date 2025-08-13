@@ -8,20 +8,24 @@ const SidebarHeader = ({ isMobile, onClose }) => {
   const { t } = useTranslation();
 
   return (
-    <div className="p-6 border-b border-gray-200">
+    <div className="p-4 sm:p-5 lg:p-6 border-b border-gray-200 bg-white">
       <div className="flex items-center justify-between">
-        <div className="flex items-center">
-          <GlobeAltIcon className="w-8 h-8 text-primary-600" />
-          <h1 className="ml-3 text-xl font-bold text-gray-900">{APP_NAME}</h1>
+        <div className="flex items-center min-w-0 flex-1">
+          <div className="flex-shrink-0">
+            <GlobeAltIcon className="w-7 h-7 sm:w-8 sm:h-8 text-blue-600" />
+          </div>
+          <h1 className="ml-2 sm:ml-3 text-lg sm:text-xl font-bold text-gray-900 truncate">
+            {APP_NAME}
+          </h1>
         </div>
         
         {isMobile && (
           <button
             onClick={onClose}
-            className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            className="flex-shrink-0 ml-2 p-2 rounded-lg hover:bg-gray-100 active:bg-gray-200 transition-colors touch-manipulation"
             aria-label={t('common.closeMenu')}
           >
-            <XMarkIcon className="w-5 h-5 text-gray-500" />
+            <XMarkIcon className="w-6 h-6 text-gray-500" />
           </button>
         )}
       </div>

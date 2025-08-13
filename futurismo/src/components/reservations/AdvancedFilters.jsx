@@ -81,53 +81,55 @@ const AdvancedFilters = ({ onApplyFilters, onClose }) => {
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+      <div className="flex items-end justify-center min-h-screen px-2 pt-4 pb-2 text-center sm:block sm:p-0 sm:items-center">
         <div className="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" onClick={onClose}></div>
 
-        <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-3xl sm:w-full">
-          <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+        <div className="inline-block align-bottom bg-white rounded-t-lg sm:rounded-lg text-left overflow-hidden shadow-xl transform transition-all w-full sm:my-8 sm:align-middle sm:max-w-3xl sm:w-full">
+          <div className="bg-white px-3 pt-4 pb-3 sm:px-6 sm:pt-5 sm:pb-4">
             {/* Header */}
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-3">
-                <FunnelIcon className="h-6 w-6 text-gray-600" />
-                <h3 className="text-lg font-medium text-gray-900">
-                  Filtros Avanzados
+            <div className="flex items-center justify-between mb-4 sm:mb-6">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <FunnelIcon className="h-5 w-5 sm:h-6 sm:w-6 text-gray-600" />
+                <div>
+                  <h3 className="text-base sm:text-lg font-medium text-gray-900">
+                    Filtros Avanzados
+                  </h3>
                   {getActiveFiltersCount() > 0 && (
-                    <span className="ml-2 px-2 py-0.5 text-xs bg-blue-100 text-blue-700 rounded-full">
+                    <span className="mt-1 inline-block px-2 py-0.5 text-xs bg-blue-100 text-blue-700 rounded-full">
                       {getActiveFiltersCount()} activos
                     </span>
                   )}
-                </h3>
+                </div>
               </div>
               <button
                 onClick={onClose}
-                className="text-gray-400 hover:text-gray-500"
+                className="text-gray-400 hover:text-gray-500 p-1"
               >
-                <XMarkIcon className="h-6 w-6" />
+                <XMarkIcon className="h-5 w-5 sm:h-6 sm:w-6" />
               </button>
             </div>
 
             {/* Filtros */}
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {/* Filtro por Fechas */}
               <div className="border border-gray-200 rounded-lg">
                 <button
                   onClick={() => toggleSection('dates')}
-                  className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50"
+                  className="w-full px-3 py-3 sm:px-4 flex items-center justify-between hover:bg-gray-50"
                 >
                   <div className="flex items-center gap-2">
-                    <CalendarIcon className="h-5 w-5 text-gray-500" />
-                    <span className="font-medium text-gray-900">Rango de Fechas</span>
+                    <CalendarIcon className="h-4 w-4 sm:h-5 sm:w-5 text-gray-500" />
+                    <span className="font-medium text-gray-900 text-sm sm:text-base">Rango de Fechas</span>
                   </div>
                   {showFilters.dates ? (
-                    <ChevronUpIcon className="h-5 w-5 text-gray-400" />
+                    <ChevronUpIcon className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
                   ) : (
-                    <ChevronDownIcon className="h-5 w-5 text-gray-400" />
+                    <ChevronDownIcon className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
                   )}
                 </button>
                 {showFilters.dates && (
-                  <div className="px-4 py-3 border-t border-gray-200">
-                    <div className="grid grid-cols-2 gap-4">
+                  <div className="px-3 py-3 sm:px-4 border-t border-gray-200">
+                    <div className="space-y-3 sm:grid sm:grid-cols-2 sm:gap-4 sm:space-y-0">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                           Desde
@@ -136,7 +138,7 @@ const AdvancedFilters = ({ onApplyFilters, onClose }) => {
                           type="date"
                           value={filters.dateFrom}
                           onChange={(e) => handleInputChange('dateFrom', e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
                         />
                       </div>
                       <div>
@@ -147,7 +149,7 @@ const AdvancedFilters = ({ onApplyFilters, onClose }) => {
                           type="date"
                           value={filters.dateTo}
                           onChange={(e) => handleInputChange('dateTo', e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
                         />
                       </div>
                     </div>
@@ -159,20 +161,20 @@ const AdvancedFilters = ({ onApplyFilters, onClose }) => {
               <div className="border border-gray-200 rounded-lg">
                 <button
                   onClick={() => toggleSection('customers')}
-                  className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50"
+                  className="w-full px-3 py-3 sm:px-4 flex items-center justify-between hover:bg-gray-50"
                 >
                   <div className="flex items-center gap-2">
-                    <UserGroupIcon className="h-5 w-5 text-gray-500" />
-                    <span className="font-medium text-gray-900">Cliente / Tour</span>
+                    <UserGroupIcon className="h-4 w-4 sm:h-5 sm:w-5 text-gray-500" />
+                    <span className="font-medium text-gray-900 text-sm sm:text-base">Cliente / Tour</span>
                   </div>
                   {showFilters.customers ? (
-                    <ChevronUpIcon className="h-5 w-5 text-gray-400" />
+                    <ChevronUpIcon className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
                   ) : (
-                    <ChevronDownIcon className="h-5 w-5 text-gray-400" />
+                    <ChevronDownIcon className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
                   )}
                 </button>
                 {showFilters.customers && (
-                  <div className="px-4 py-3 border-t border-gray-200 space-y-3">
+                  <div className="px-3 py-3 sm:px-4 border-t border-gray-200 space-y-3">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Nombre del Cliente
@@ -182,7 +184,7 @@ const AdvancedFilters = ({ onApplyFilters, onClose }) => {
                         value={filters.customerName}
                         onChange={(e) => handleInputChange('customerName', e.target.value)}
                         placeholder="Ej: Juan Pérez"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
                       />
                     </div>
                     <div>
@@ -194,7 +196,7 @@ const AdvancedFilters = ({ onApplyFilters, onClose }) => {
                         value={filters.customerPhone}
                         onChange={(e) => handleInputChange('customerPhone', e.target.value)}
                         placeholder="Ej: +51 987654321"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
                       />
                     </div>
                     <div>
@@ -206,7 +208,7 @@ const AdvancedFilters = ({ onApplyFilters, onClose }) => {
                         value={filters.tourName}
                         onChange={(e) => handleInputChange('tourName', e.target.value)}
                         placeholder="Ej: City Tour Lima"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
                       />
                     </div>
                   </div>
@@ -217,21 +219,21 @@ const AdvancedFilters = ({ onApplyFilters, onClose }) => {
               <div className="border border-gray-200 rounded-lg">
                 <button
                   onClick={() => toggleSection('passengers')}
-                  className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50"
+                  className="w-full px-3 py-3 sm:px-4 flex items-center justify-between hover:bg-gray-50"
                 >
                   <div className="flex items-center gap-2">
-                    <UserGroupIcon className="h-5 w-5 text-gray-500" />
-                    <span className="font-medium text-gray-900">Cantidad de Pasajeros</span>
+                    <UserGroupIcon className="h-4 w-4 sm:h-5 sm:w-5 text-gray-500" />
+                    <span className="font-medium text-gray-900 text-sm sm:text-base">Cantidad de Pasajeros</span>
                   </div>
                   {showFilters.passengers ? (
-                    <ChevronUpIcon className="h-5 w-5 text-gray-400" />
+                    <ChevronUpIcon className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
                   ) : (
-                    <ChevronDownIcon className="h-5 w-5 text-gray-400" />
+                    <ChevronDownIcon className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
                   )}
                 </button>
                 {showFilters.passengers && (
-                  <div className="px-4 py-3 border-t border-gray-200">
-                    <div className="grid grid-cols-2 gap-4">
+                  <div className="px-3 py-3 sm:px-4 border-t border-gray-200">
+                    <div className="grid grid-cols-2 gap-3 sm:gap-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                           Mínimo
@@ -242,7 +244,7 @@ const AdvancedFilters = ({ onApplyFilters, onClose }) => {
                           value={filters.minPassengers}
                           onChange={(e) => handleInputChange('minPassengers', e.target.value)}
                           placeholder="1"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
                         />
                       </div>
                       <div>
@@ -255,7 +257,7 @@ const AdvancedFilters = ({ onApplyFilters, onClose }) => {
                           value={filters.maxPassengers}
                           onChange={(e) => handleInputChange('maxPassengers', e.target.value)}
                           placeholder="50"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
                         />
                       </div>
                     </div>
@@ -367,22 +369,22 @@ const AdvancedFilters = ({ onApplyFilters, onClose }) => {
           </div>
 
           {/* Footer */}
-          <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse gap-3">
+          <div className="bg-gray-50 px-3 py-3 sm:px-6 sm:py-3 flex flex-col sm:flex-row sm:flex-row-reverse gap-2 sm:gap-3">
             <button
               onClick={handleApply}
-              className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm"
+              className="w-full sm:w-auto inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2.5 sm:py-2 bg-blue-600 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
               Aplicar Filtros
             </button>
             <button
               onClick={handleReset}
-              className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+              className="w-full sm:w-auto inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2.5 sm:py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
               Limpiar
             </button>
             <button
               onClick={onClose}
-              className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:w-auto sm:text-sm"
+              className="w-full sm:w-auto inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2.5 sm:py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
               Cancelar
             </button>

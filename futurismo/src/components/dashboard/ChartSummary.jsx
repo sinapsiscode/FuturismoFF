@@ -22,12 +22,12 @@ const ChartSummary = ({ summaryData = {} }) => {
   ];
 
   return (
-    <div className="mt-8 pt-6 border-t border-gray-100">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div className="mt-6 pt-4 border-t border-gray-100 sm:mt-8 sm:pt-6">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-6">
         {summaryItems.map((item, index) => (
-          <div key={index} className="text-center">
-            <p className="text-sm font-medium text-gray-500 uppercase tracking-wider">{item.label}</p>
-            <p className={`mt-1 text-lg font-bold ${item.highlight ? 'text-blue-600' : 'text-gray-900'}`}>
+          <div key={index} className="text-center p-3 bg-gray-50 rounded-lg sm:bg-transparent sm:p-0">
+            <p className="text-xs font-medium text-gray-500 uppercase tracking-wider sm:text-sm">{item.label}</p>
+            <p className={`mt-1 text-base font-bold sm:text-lg ${item.highlight ? 'text-blue-600' : 'text-gray-900'}`}>
               {item.value}
             </p>
           </div>

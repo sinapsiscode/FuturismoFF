@@ -32,40 +32,40 @@ const ChartKPIs = ({ kpiData }) => {
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+    <div className="grid grid-cols-1 gap-4 mb-4 sm:grid-cols-2 sm:gap-6 sm:mb-6 lg:grid-cols-3">
       {kpiConfigs.map((config) => {
         const data = kpiData[config.key] || { actual: 0, anterior: 0, crecimiento: 0 };
         const isPositive = data.crecimiento >= 0;
         
         return (
-          <div key={config.key} className={`${config.bgClass} rounded-xl p-6 relative overflow-hidden`}>
-            <div className="flex items-center justify-between mb-3">
-              <p className={`text-sm font-semibold ${config.textClass}-700 uppercase tracking-wider`}>
+          <div key={config.key} className={`${config.bgClass} rounded-xl p-4 relative overflow-hidden sm:p-6`}>
+            <div className="flex items-start justify-between mb-3 sm:items-center">
+              <p className={`text-xs font-semibold ${config.textClass}-700 uppercase tracking-wider sm:text-sm`}>
                 {config.label}
               </p>
-              <div className={`flex items-center text-sm font-bold ${
+              <div className={`flex items-center text-xs font-bold sm:text-sm ${
                 isPositive ? 'text-green-600' : 'text-red-600'
               }`}>
                 {isPositive ? (
-                  <ArrowTrendingUpIcon className="w-4 h-4 mr-1" />
+                  <ArrowTrendingUpIcon className="w-3 h-3 mr-1 sm:w-4 sm:h-4" />
                 ) : (
-                  <ArrowTrendingDownIcon className="w-4 h-4 mr-1" />
+                  <ArrowTrendingDownIcon className="w-3 h-3 mr-1 sm:w-4 sm:h-4" />
                 )}
                 {Math.abs(data.crecimiento)}%
               </div>
             </div>
-            <p className={`text-3xl font-bold ${config.textClass}-900`}>
+            <p className={`text-2xl font-bold ${config.textClass}-900 sm:text-3xl`}>
               {config.showCurrency && 'S/'}
               {config.showCurrency ? data.actual.toLocaleString() : data.actual.toLocaleString()}
               {config.isPercentage && '%'}
             </p>
-            <p className={`text-sm ${config.textClass}-600 mt-2`}>
+            <p className={`text-xs ${config.textClass}-600 mt-2 sm:text-sm`}>
               {t('dashboard.chart.kpis.vs')} 
               {config.showCurrency ? `S/${data.anterior.toLocaleString()}` : data.anterior.toLocaleString()}
               {' '}{t('dashboard.chart.kpis.previousMonth')}
             </p>
-            <div className={`absolute -right-4 -bottom-4 ${config.textClass}-100 opacity-20`}>
-              <svg className="w-24 h-24" fill="currentColor" viewBox="0 0 24 24">
+            <div className={`absolute -right-3 -bottom-3 ${config.textClass}-100 opacity-20 sm:-right-4 sm:-bottom-4`}>
+              <svg className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24" fill="currentColor" viewBox="0 0 24 24">
                 {config.key === 'totalReservas' && (
                   <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/>
                 )}

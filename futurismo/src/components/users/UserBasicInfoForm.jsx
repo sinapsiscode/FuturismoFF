@@ -27,12 +27,12 @@ const UserBasicInfoForm = ({
   const departments = DEPARTMENTS;
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-sm border space-y-6">
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">
+    <div className="bg-white p-4 sm:p-6 rounded-lg shadow-sm border space-y-4 sm:space-y-6">
+      <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4">
         {isEdit ? t('users.form.editUser') : t('users.form.newUser')}
       </h3>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
         {/* Username */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -43,7 +43,7 @@ const UserBasicInfoForm = ({
             <input
               type="text"
               {...register('username')}
-              className={`pl-10 pr-4 py-2 w-full border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+              className={`pl-10 pr-4 py-2 sm:py-3 w-full border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base ${
                 errors.username ? 'border-red-300' : 'border-gray-300'
               }`}
               placeholder={t('users.form.placeholders.username')}
@@ -64,7 +64,7 @@ const UserBasicInfoForm = ({
             <input
               type="email"
               {...register('email')}
-              className={`pl-10 pr-4 py-2 w-full border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+              className={`pl-10 pr-4 py-2 sm:py-3 w-full border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base ${
                 errors.email ? 'border-red-300' : 'border-gray-300'
               }`}
               placeholder={t('users.form.placeholders.email')}
@@ -83,7 +83,7 @@ const UserBasicInfoForm = ({
           <input
             type="text"
             {...register('firstName')}
-            className={`px-4 py-2 w-full border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+            className={`px-4 py-2 sm:py-3 w-full border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base ${
               errors.firstName ? 'border-red-300' : 'border-gray-300'
             }`}
             placeholder={t('users.form.placeholders.firstName')}
@@ -101,7 +101,7 @@ const UserBasicInfoForm = ({
           <input
             type="text"
             {...register('lastName')}
-            className={`px-4 py-2 w-full border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+            className={`px-4 py-2 sm:py-3 w-full border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base ${
               errors.lastName ? 'border-red-300' : 'border-gray-300'
             }`}
             placeholder={t('users.form.placeholders.lastName')}
@@ -121,7 +121,7 @@ const UserBasicInfoForm = ({
             <input
               type="tel"
               {...register('phone')}
-              className={`pl-10 pr-4 py-2 w-full border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+              className={`pl-10 pr-4 py-2 sm:py-3 w-full border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base ${
                 errors.phone ? 'border-red-300' : 'border-gray-300'
               }`}
               placeholder={t('users.form.placeholders.phone')}
@@ -139,7 +139,7 @@ const UserBasicInfoForm = ({
           </label>
           <select
             {...register('role')}
-            className={`px-4 py-2 w-full border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+            className={`px-4 py-2 sm:py-3 w-full border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base ${
               errors.role ? 'border-red-300' : 'border-gray-300'
             }`}
           >
@@ -164,7 +164,7 @@ const UserBasicInfoForm = ({
             <BuildingOfficeIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             <select
               {...register('department')}
-              className={`pl-10 pr-4 py-2 w-full border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+              className={`pl-10 pr-4 py-2 sm:py-3 w-full border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base ${
                 errors.department ? 'border-red-300' : 'border-gray-300'
               }`}
             >
@@ -189,7 +189,7 @@ const UserBasicInfoForm = ({
             <input
               type="text"
               {...register('position')}
-              className={`pl-10 pr-4 py-2 w-full border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+              className={`pl-10 pr-4 py-2 sm:py-3 w-full border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base ${
                 errors.position ? 'border-red-300' : 'border-gray-300'
               }`}
               placeholder={t('users.form.placeholders.position')}
@@ -207,7 +207,7 @@ const UserBasicInfoForm = ({
           </label>
           <select
             {...register('status')}
-            className={`px-4 py-2 w-full border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+            className={`px-4 py-2 sm:py-3 w-full border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base ${
               errors.status ? 'border-red-300' : 'border-gray-300'
             }`}
           >
@@ -222,7 +222,7 @@ const UserBasicInfoForm = ({
 
       {/* Password fields */}
       {(!isEdit || showPassword) && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               {t('users.form.password')} {!isEdit && '*'}
@@ -232,7 +232,7 @@ const UserBasicInfoForm = ({
               <input
                 type={showPassword ? 'text' : 'password'}
                 {...register('password')}
-                className={`pl-10 pr-10 py-2 w-full border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                className={`pl-10 pr-10 py-2 sm:py-3 w-full border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base ${
                   errors.password ? 'border-red-300' : 'border-gray-300'
                 }`}
                 placeholder={t('users.form.placeholders.password')}
@@ -263,7 +263,7 @@ const UserBasicInfoForm = ({
               <input
                 type={showConfirmPassword ? 'text' : 'password'}
                 {...register('confirmPassword')}
-                className={`pl-10 pr-10 py-2 w-full border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                className={`pl-10 pr-10 py-2 sm:py-3 w-full border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base ${
                   errors.confirmPassword ? 'border-red-300' : 'border-gray-300'
                 }`}
                 placeholder={t('users.form.placeholders.password')}
@@ -293,7 +293,7 @@ const UserBasicInfoForm = ({
           <button
             type="button"
             onClick={() => setShowPassword(true)}
-            className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+            className="text-blue-600 hover:text-blue-800 text-sm sm:text-base font-medium px-2 py-1 rounded"
           >
             {t('users.form.changePassword')}
           </button>

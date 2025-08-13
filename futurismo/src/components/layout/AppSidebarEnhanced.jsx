@@ -177,51 +177,69 @@ const AppSidebarEnhanced = () => {
   };
 
   return (
-    <div className="h-full bg-white shadow-lg flex flex-col">
+    <div className="h-full bg-white shadow-xl lg:shadow-lg flex flex-col">
       <SidebarHeader 
         isMobile={viewport.isMobile} 
         onClose={closeSidebar} 
       />
 
       {/* Navigation con scroll mejorado */}
-      <nav className="flex-1 px-3 py-4 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-        {menuStructure.map((section, sectionIndex) => (
-          <div key={section.section} className={sectionIndex > 0 ? 'mt-8' : ''}>
-            {/* Título de sección */}
-            <h3 className="px-3 mb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
-              {section.section}
-            </h3>
-            
-            {/* Items de la sección */}
-            <ul className="space-y-1">
-              {section.items.map((item) => (
-                <li key={item.path}>
-                  <NavLink
-                    to={item.path}
-                    onClick={handleNavClick}
-                    className={({ isActive }) => `
-                      flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 group
-                      ${isActive 
-                        ? 'bg-blue-50 text-blue-700 shadow-sm' 
-                        : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
-                      }
-                    `}
-                  >
-                    <item.icon className={`w-5 h-5 transition-transform duration-200 group-hover:scale-110 ${
-                      window.location.pathname === item.path ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600'
-                    }`} />
-                    <span className="font-medium text-sm">{item.label}</span>
-                  </NavLink>
-                </li>
-              ))}
-            </ul>
-            
-            {/* Separador entre secciones (excepto la última) */}
-            {sectionIndex < menuStructure.length - 1 && (
-              <div className="mt-6 border-t border-gray-100"></div>
-            )}
-          </div>
-        ))}
+      <nav className="flex-1 px-2 sm:px-3 lg:px-4 py-3 sm:py-4 overflow-y-auto overscroll-contain">
+        <div className="space-y-6 sm:space-y-8">
+          {menuStructure.map((section, sectionIndex) => (
+            <div key={section.section}>
+              {/* Título de sección */}
+              <h3 className="px-2 sm:px-3 mb-2 sm:mb-3 text-xs sm:text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                {section.section}
+              </h3>
+              
+              {/* Items de la sección */}
+              <ul className="space-y-0.5 sm:space-y-1">
+                {section.items.map((item) => (
+                  <li key={item.path}>
+                    <NavLink
+                      to={item.path}
+                      onClick={handleNavClick}
+                      className={({ isActive }) => `
+                        flex items-center gap-2.5 sm:gap-3 px-2 sm:px-3 py-2.5 sm:py-3 
+                        rounded-xl sm:rounded-lg transition-all duration-200 
+                        touch-manipulation group relative
+                        ${isActive 
+                          ? 'bg-blue-50 text-blue-700 shadow-sm ring-1 ring-blue-100' 
+                          : 'text-gray-700 hover:bg-gray-50 active:bg-gray-100 hover:text-gray-900'
+                        }
+                      `}
+                    >
+                      {({ isActive }) => (
+                        <>
+                          <item.icon className={`
+                            w-5 h-5 sm:w-5 sm:h-5 flex-shrink-0
+                            transition-all duration-200
+                            ${isActive 
+                              ? 'text-blue-600 scale-110' 
+                              : 'text-gray-400 group-hover:text-gray-600 group-hover:scale-105'
+                            }
+                          `} />
+                          <span className="font-medium text-sm sm:text-sm truncate flex-1 min-w-0">
+                            {item.label}
+                          </span>
+                          {isActive && (
+                            <div className="absolute right-0 top-1/2 -translate-y-1/2 w-0.5 h-6 bg-blue-600 rounded-full" />
+                          )}
+                        </>
+                      )}
+                    </NavLink>
+                  </li>
+                ))}
+              </ul>
+              
+              {/* Separador entre secciones (excepto la última) */}
+              {sectionIndex < menuStructure.length - 1 && (
+                <div className="mt-4 sm:mt-6 border-t border-gray-100"></div>
+              )}
+            </div>
+          ))}
+        </div>
       </nav>
 
       <SidebarFooter />

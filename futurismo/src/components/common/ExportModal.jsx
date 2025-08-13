@@ -40,35 +40,35 @@ const ExportModal = ({
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
-      {/* Overlay */}
+      {/* Mobile-first responsive overlay */}
       <div 
         className="fixed inset-0 bg-black bg-opacity-50 transition-opacity backdrop-blur-sm"
         onClick={handleClose}
         aria-hidden="true"
       />
       
-      {/* Modal */}
-      <div className="flex min-h-full items-center justify-center p-4">
-        <div className="relative w-full max-w-2xl transform rounded-2xl bg-white shadow-2xl transition-all">
-          {/* Header */}
-          <div className="relative bg-gradient-to-r from-primary-600 to-primary-700 px-8 py-6 rounded-t-2xl">
+      {/* Mobile-first responsive modal */}
+      <div className="flex min-h-full items-end sm:items-center justify-center p-0 sm:p-4">
+        <div className="relative w-full max-w-none sm:max-w-2xl transform bg-white shadow-2xl transition-all rounded-t-2xl sm:rounded-2xl">
+          {/* Mobile-first responsive header */}
+          <div className="relative bg-gradient-to-r from-primary-600 to-primary-700 px-4 sm:px-8 py-4 sm:py-6 rounded-t-2xl">
             <button
               onClick={handleClose}
               disabled={isExporting}
-              className="absolute right-4 top-4 p-2 text-white hover:bg-white hover:bg-opacity-20 rounded-full transition-colors disabled:opacity-50"
+              className="absolute right-3 sm:right-4 top-3 sm:top-4 p-2 text-white hover:bg-white hover:bg-opacity-20 rounded-full transition-colors disabled:opacity-50 touch-manipulation"
             >
-              <XMarkIcon className="w-5 h-5" />
+              <XMarkIcon className="w-5 h-5 sm:w-6 sm:h-6" />
             </button>
             
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-white bg-opacity-20 rounded-xl">
-                <ArrowDownTrayIcon className="w-8 h-8 text-white" />
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 pr-12 sm:pr-16">
+              <div className="p-2 sm:p-3 bg-white bg-opacity-20 rounded-xl flex-shrink-0">
+                <ArrowDownTrayIcon className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
               </div>
-              <div>
-                <h2 className="text-2xl font-bold text-white">
+              <div className="min-w-0">
+                <h2 className="text-lg sm:text-2xl font-bold text-white leading-tight">
                   {t('common.export.title')}
                 </h2>
-                <p className="text-primary-100 mt-1">
+                <p className="text-primary-100 mt-1 text-xs sm:text-sm leading-relaxed">
                   {t('common.export.subtitle', { count: reservationCount })} • {t(getStatusLabel())}
                 </p>
               </div>
@@ -80,13 +80,13 @@ const ExportModal = ({
             <ExportStatsPreview stats={stats} reservationCount={reservationCount} />
           )}
 
-          {/* Format Selection */}
-          <div className="px-8 py-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+          {/* Mobile-first responsive format selection */}
+          <div className="px-4 sm:px-8 py-4 sm:py-6">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">
               {t('common.export.selectFormat')}
             </h3>
             
-            <div className="space-y-3">
+            <div className="space-y-2 sm:space-y-3">
               {formatOptions.map((format) => (
                 <ExportFormatOption
                   key={format.id}
@@ -98,18 +98,18 @@ const ExportModal = ({
             </div>
           </div>
 
-          {/* Footer */}
-          <div className="px-8 py-6 bg-gray-50 rounded-b-2xl">
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-gray-600">
+          {/* Mobile-first responsive footer */}
+          <div className="px-4 sm:px-8 py-4 sm:py-6 bg-gray-50 rounded-b-2xl">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 sm:justify-between">
+              <p className="text-xs sm:text-sm text-gray-600 text-center sm:text-left">
                 {t('common.export.downloadNote')}
               </p>
               
-              <div className="flex gap-3">
+              <div className="flex flex-col sm:flex-row gap-3">
                 <button
                   onClick={handleClose}
                   disabled={isExporting}
-                  className="px-6 py-2.5 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 font-medium transition-colors disabled:opacity-50"
+                  className="px-4 sm:px-6 py-2.5 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 font-medium transition-colors disabled:opacity-50 text-sm sm:text-base touch-manipulation"
                 >
                   {t('common.cancel')}
                 </button>
@@ -117,7 +117,7 @@ const ExportModal = ({
                 <button
                   onClick={handleExport}
                   disabled={!selectedFormat || isExporting}
-                  className={`px-6 py-2.5 text-white font-medium rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
+                  className={`px-4 sm:px-6 py-2.5 text-white font-medium rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:touch-manipulation ${
                     selectedFormat && !isExporting
                       ? 'bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 shadow-lg hover:shadow-xl transform hover:scale-105'
                       : 'bg-gray-400'

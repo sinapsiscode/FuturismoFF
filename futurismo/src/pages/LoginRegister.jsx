@@ -170,15 +170,15 @@ const LoginRegister = () => {
 
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-primary-100 flex items-center justify-center px-4 py-8">
-      <div className={`w-full ${isRegistering ? 'max-w-4xl' : 'max-w-md'}`}>
+    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-primary-100 flex items-center justify-center p-4">
+      <div className={`w-full ${isRegistering ? 'max-w-5xl' : 'max-w-md'}`}>
         {/* Logo y título */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-primary rounded-full mb-4">
-            <span className="text-3xl text-white">🌎</span>
+        <div className="text-center mb-6 sm:mb-8">
+          <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-primary rounded-full mb-3 sm:mb-4">
+            <span className="text-2xl sm:text-3xl text-white">🌎</span>
           </div>
-          <h1 className="text-4xl font-bold text-gray-900">Futurismo</h1>
-          <p className="text-gray-600 mt-2">{t('auth.systemTitle')}</p>
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900">Futurismo</h1>
+          <p className="text-sm sm:text-base text-gray-600 mt-1 sm:mt-2">{t('auth.systemTitle')}</p>
         </div>
 
         {/* Selector de idioma */}
@@ -187,9 +187,9 @@ const LoginRegister = () => {
         </div>
 
         {/* Formulario */}
-        <div className="bg-white rounded-2xl shadow-xl p-8">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-semibold text-gray-900">
+        <div className="bg-white rounded-xl sm:rounded-2xl shadow-xl p-4 sm:p-6 lg:p-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 gap-3 sm:gap-0">
+            <h2 className="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-900 text-center sm:text-left">
               {isRegistering ? t('auth.registerAsGuide') : t('auth.login')}
             </h2>
             <button
@@ -211,10 +211,10 @@ const LoginRegister = () => {
             </button>
           </div>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
             {isRegistering ? (
               // Formulario de registro
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                 {/* Nombre completo */}
                 <div className="md:col-span-2">
                   <label htmlFor="name" className="label">
@@ -457,8 +457,8 @@ const LoginRegister = () => {
                             </button>
                           </div>
                           
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                            <div className="md:col-span-2">
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            <div className="sm:col-span-2">
                               <label className="block text-sm font-medium text-gray-700 mb-1">
                                 Nombre del Museo *
                               </label>
@@ -496,7 +496,7 @@ const LoginRegister = () => {
                               />
                             </div>
                             
-                            <div className="md:col-span-3">
+                            <div className="sm:col-span-3">
                               <label className="block text-sm font-medium text-gray-700 mb-1">
                                 Nivel de Expertise
                               </label>

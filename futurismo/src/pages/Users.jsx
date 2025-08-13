@@ -202,15 +202,15 @@ const Users = () => {
 
         {/* Permisos */}
         {user.permissions && user.permissions.length > 0 && (
-          <div className="bg-white rounded-lg shadow-sm border p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+          <div className="bg-white rounded-lg shadow-sm border p-4 sm:p-6">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">
               Permisos Asignados
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
               {user.permissions.map((permission) => (
                 <span
                   key={permission}
-                  className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
+                  className="inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800 truncate"
                 >
                   {permission}
                 </span>
@@ -221,11 +221,11 @@ const Users = () => {
 
         {/* Preferencias */}
         {user.preferences && (
-          <div className="bg-white rounded-lg shadow-sm border p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+          <div className="bg-white rounded-lg shadow-sm border p-4 sm:p-6">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">
               Preferencias
             </h3>
-            <dl className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <dl className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               <div>
                 <dt className="text-sm font-medium text-gray-500">Idioma</dt>
                 <dd className="text-sm text-gray-900">
@@ -255,7 +255,7 @@ const Users = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gray-50 p-4 sm:p-6">
       <div className="max-w-7xl mx-auto">
         {renderHeader()}
 
@@ -282,16 +282,16 @@ const Users = () => {
 
         {/* Información adicional */}
         {currentView === 'list' && (
-          <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <div className="flex items-start">
-              <InformationCircleIcon className="h-5 w-5 text-blue-600 mt-0.5 mr-3 flex-shrink-0" />
-              <div className="text-sm text-blue-800">
-                <h4 className="font-medium mb-1">Gestión de Usuarios</h4>
-                <p>
+          <div className="mt-6 sm:mt-8 bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div className="flex flex-col sm:flex-row sm:items-start gap-3 sm:gap-0">
+              <InformationCircleIcon className="h-5 w-5 text-blue-600 mt-0.5 sm:mr-3 flex-shrink-0" />
+              <div className="text-xs sm:text-sm text-blue-800">
+                <h4 className="font-medium mb-1 sm:mb-2">Gestión de Usuarios</h4>
+                <p className="mb-2">
                   Desde aquí puedes administrar todos los usuarios del sistema. Puedes crear nuevos usuarios, 
                   editar información existente, asignar roles y permisos, y controlar el acceso al sistema.
                 </p>
-                <ul className="mt-2 list-disc list-inside space-y-1">
+                <ul className="mt-2 list-disc list-inside space-y-1 text-xs sm:text-sm">
                   <li>Los roles determinan los permisos base del usuario</li>
                   <li>Puedes personalizar permisos individuales para cada usuario</li>
                   <li>Los usuarios inactivos no pueden acceder al sistema</li>
