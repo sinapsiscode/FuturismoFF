@@ -1,14 +1,12 @@
-import { useEffect, useState } from 'react';
-import { ArrowTrendingUpIcon, CalendarIcon, CheckCircleIcon, ClockIcon, UserGroupIcon, CurrencyDollarIcon, ExclamationTriangleIcon, ChartBarIcon } from '@heroicons/react/24/outline';
+import React from 'react';
+import { CalendarIcon, CheckCircleIcon, ClockIcon, UserGroupIcon, CurrencyDollarIcon, ExclamationTriangleIcon, ChartBarIcon } from '@heroicons/react/24/outline';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
 import StatsCard from '../components/dashboard/StatsCard';
 import ServiceChart from '../components/dashboard/ServiceChart';
 import ExportPanel from '../components/dashboard/ExportPanel';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import { useAuthStore } from '../stores/authStore';
 import useDashboard from '../hooks/useDashboard';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
 
 const Dashboard = () => {
   const { user } = useAuthStore();
@@ -19,7 +17,6 @@ const Dashboard = () => {
     stats,
     loading,
     error,
-    monthlyData,
     roleSpecificStats,
     refresh
   } = useDashboard();
@@ -90,103 +87,6 @@ const Dashboard = () => {
         )}
       </div>
 
-      {/* Monthly Comparison Charts - Only for Agency and Admin */}
-      {(user?.role === 'agency' || user?.role === 'admin') && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          {/* Reservas por Mes */}
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">{t('dashboard.reservationsByMonth')}</h3>
-              <ChartBarIcon className="w-5 h-5 text-primary-600" />
-            </div>
-            <div className="h-48">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={monthlyData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis 
-                    dataKey="month" 
-                    tick={{ fontSize: 12 }}
-                  />
-                  <YAxis tick={{ fontSize: 12 }} />
-                  <Tooltip 
-                    formatter={(value) => [value, t('dashboard.reservations')]}
-                    labelStyle={{ color: '#374151' }}
-                  />
-                  <Bar 
-                    dataKey="reservations" 
-                    fill="#3B82F6" 
-                    radius={[4, 4, 0, 0]}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-
-          {/* Turistas por Mes */}
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">{t('dashboard.touristsByMonth')}</h3>
-              <UserGroupIcon className="w-5 h-5 text-green-600" />
-            </div>
-            <div className="h-48">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={monthlyData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis 
-                    dataKey="month" 
-                    tick={{ fontSize: 12 }}
-                  />
-                  <YAxis tick={{ fontSize: 12 }} />
-                  <Tooltip 
-                    formatter={(value) => [value, t('dashboard.tourists')]}
-                    labelStyle={{ color: '#374151' }}
-                  />
-                  <Bar 
-                    dataKey="tourists" 
-                    fill="#10B981" 
-                    radius={[4, 4, 0, 0]}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-
-          {/* Ingresos por Mes */}
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">{t('dashboard.incomeByMonth')}</h3>
-              <CurrencyDollarIcon className="w-5 h-5 text-purple-600" />
-            </div>
-            <div className="h-48">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={monthlyData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis 
-                    dataKey="month" 
-                    tick={{ fontSize: 12 }}
-                  />
-                  <YAxis 
-                    tick={{ fontSize: 12 }}
-                    tickFormatter={(value) => `S/${(value/1000).toFixed(0)}k`}
-                  />
-                  <Tooltip 
-                    formatter={(value) => [`S/${value.toLocaleString()}`, t('dashboard.totalIncome')]}
-                    labelStyle={{ color: '#374151' }}
-                  />
-                  <Line 
-                    type="monotone" 
-                    dataKey="revenue" 
-                    stroke="#8B5CF6" 
-                    strokeWidth={3}
-                    dot={{ fill: '#8B5CF6', strokeWidth: 2, r: 4 }}
-                    activeDot={{ r: 6, stroke: '#8B5CF6', strokeWidth: 2 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Main Content - Different per role */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -267,28 +167,6 @@ const Dashboard = () => {
             <div className="space-y-6">
               {(user?.role === 'agency' || user?.role === 'admin') && <ExportPanel />}
               
-              {/* Quick Access to Rewards - Solo para Agencias */}
-              {user?.role === 'agency' && (
-                <div className="bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg p-6 text-white">
-                  <h3 className="text-lg font-semibold mb-4">🎁 Sistema de Premios</h3>
-                  <div className="space-y-3">
-                    <div className="space-y-2">
-                      <Link
-                        to="/agency/rewards"
-                        className="block bg-white bg-opacity-20 hover:bg-opacity-30 transition-all duration-200 rounded-lg p-3 text-center"
-                      >
-                        🛍️ Tienda de Premios
-                      </Link>
-                      <Link
-                        to="/test-rewards"
-                        className="block bg-white bg-opacity-20 hover:bg-opacity-30 transition-all duration-200 rounded-lg p-3 text-center"
-                      >
-                        🧪 Test Rewards
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              )}
             </div>
           </>
         )}

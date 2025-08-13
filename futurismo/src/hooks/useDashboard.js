@@ -90,8 +90,7 @@ const useDashboard = () => {
         return {
           card1: { value: stats.activeServices, label: 'Servicios activos', icon: 'service' },
           card2: { value: stats.totalAgencies, label: 'Agencias totales', icon: 'building' },
-          card3: { value: stats.totalGuides, label: 'Guías totales', icon: 'user' },
-          card4: { value: stats.totalRevenue, label: 'Ingresos totales', icon: 'dollar', format: 'currency' }
+          card3: { value: stats.totalRevenue, label: 'Ingresos totales', icon: 'dollar', format: 'currency' }
         };
     }
   };
