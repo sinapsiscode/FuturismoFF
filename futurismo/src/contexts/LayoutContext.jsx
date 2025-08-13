@@ -75,12 +75,13 @@ export const LayoutProvider = ({ children }) => {
     };
   }, [handleResize]);
 
-  // Auto-cerrar sidebar en móvil cuando se navega
+  // Auto-cerrar sidebar cuando se cambia de móvil a desktop
   useEffect(() => {
-    if (viewport.isMobile && sidebarOpen) {
-      closeSidebar();
+    // Solo cerrar si estamos cambiando DE móvil A desktop
+    if (!viewport.isMobile && sidebarOpen) {
+      // Mantener abierto en desktop si ya estaba abierto
     }
-  }, [viewport.isMobile, sidebarOpen, closeSidebar]);
+  }, [viewport.isMobile]);
 
   // Prevenir scroll cuando sidebar está abierto en móvil
   useEffect(() => {
