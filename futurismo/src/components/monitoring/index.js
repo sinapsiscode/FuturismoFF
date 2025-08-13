@@ -12,3 +12,4 @@ export { default as LiveMapCDN } from './LiveMapCDN';
 export { default as LiveMapResponsive } from './LiveMapResponsive';
 export { default as LiveMapSimple } from './LiveMapSimple';
 export { default as ResponsiveMap } from './ResponsiveMap';
+export { default as TourPhotosGallery } from './TourPhotosGallery';

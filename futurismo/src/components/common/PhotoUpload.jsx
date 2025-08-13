@@ -28,11 +28,44 @@ const PhotoUpload = ({
 
   return (
     <div className="space-y-3">
-      {/* Upload button */}
-      <div className="flex items-center gap-3">
+      {/* Upload buttons */}
+      <div className="flex items-center gap-3 flex-wrap">
+        {/* Botón para cámara (solo en móviles) */}
+        {/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) && (
+          <button
+            type="button"
+            onClick={() => {
+              if (fileInputRef.current) {
+                fileInputRef.current.setAttribute('capture', 'environment');
+                fileInputRef.current.click();
+              }
+            }}
+            disabled={uploading || !canAddMore}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+          >
+            {uploading ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                {t('upload.photos.uploading')}
+              </>
+            ) : (
+              <>
+                <PhotoIcon className="w-4 h-4" />
+                {t('upload.photos.takePhoto')}
+              </>
+            )}
+          </button>
+        )}
+        
+        {/* Botón para seleccionar de galería */}
         <button
           type="button"
-          onClick={openFileSelector}
+          onClick={() => {
+            if (fileInputRef.current) {
+              fileInputRef.current.removeAttribute('capture');
+              fileInputRef.current.click();
+            }
+          }}
           disabled={uploading || !canAddMore}
           className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
         >
@@ -44,7 +77,7 @@ const PhotoUpload = ({
           ) : (
             <>
               <PlusIcon className="w-4 h-4" />
-              {t('upload.photos.addPhotos')}
+              {t('upload.photos.selectPhotos')}
             </>
           )}
         </button>

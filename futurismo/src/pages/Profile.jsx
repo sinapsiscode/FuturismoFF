@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import FreelanceAvailabilityView from '../components/common/FreelanceAvailabilityView';
-import { UserIcon, CalendarIcon, CogIcon, BuildingOfficeIcon, PhoneIcon, CreditCardIcon, ShieldCheckIcon, DocumentTextIcon, LockClosedIcon, PowerIcon, ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline';
+import { UserIcon, CalendarIcon, BuildingOfficeIcon, PhoneIcon, CreditCardIcon, ShieldCheckIcon, DocumentTextIcon, ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../stores/authStore';
 import CompanyDataSection from '../components/profile/CompanyDataSection';
@@ -36,7 +36,6 @@ const Profile = () => {
       tabsList.push({ id: 'guides', name: t('profile.guideAvailability'), icon: CalendarIcon });
     }
     
-    tabsList.push({ id: 'settings', name: t('profile.configuration'), icon: CogIcon });
     
     return tabsList;
   };
@@ -86,15 +85,6 @@ const Profile = () => {
     );
   };
 
-  const handlePasswordChange = () => {
-    alert('🔐 Funcionalidad de cambio de contraseña - Por implementar');
-  };
-
-  const handleLogout = () => {
-    if (window.confirm(t('profile.logoutConfirm'))) {
-      logout();
-    }
-  };
 
   return (
     <div>
@@ -146,42 +136,6 @@ const Profile = () => {
             <FeedbackSection userRole={user?.role} />
           )}
 
-          {/* Configuración de cuenta */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="p-2 bg-gray-100 rounded-lg">
-                <CogIcon className="w-5 h-5 text-gray-600" />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900">{t('profile.configuration')}</h3>
-                <p className="text-sm text-gray-500">{t('profile.securityOptions')}</p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <button
-                onClick={handlePasswordChange}
-                className="flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left"
-              >
-                <LockClosedIcon className="w-5 h-5 text-gray-500" />
-                <div>
-                  <p className="font-medium text-gray-900">{t('profile.changePassword')}</p>
-                  <p className="text-sm text-gray-500">{t('profile.updatePassword')}</p>
-                </div>
-              </button>
-
-              <button
-                onClick={handleLogout}
-                className="flex items-center gap-3 p-4 border border-red-200 rounded-lg hover:bg-red-50 transition-colors text-left"
-              >
-                <PowerIcon className="w-5 h-5 text-red-500" />
-                <div>
-                  <p className="font-medium text-red-900">{t('profile.logout')}</p>
-                  <p className="text-sm text-red-500">{t('profile.logoutCurrent')}</p>
-                </div>
-              </button>
-            </div>
-          </div>
         </div>
       )}
 
@@ -189,12 +143,6 @@ const Profile = () => {
         <FreelanceAvailabilityView />
       )}
 
-      {activeTab === 'settings' && (
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold mb-4">{t('profile.systemConfig')}</h2>
-          <p className="text-gray-600">{t('profile.generalConfig')}</p>
-        </div>
-      )}
     </div>
   );
 };

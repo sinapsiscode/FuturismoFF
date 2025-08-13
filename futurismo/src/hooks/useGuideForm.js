@@ -14,6 +14,7 @@ const useGuideForm = (guide, onSave) => {
     handleSubmit,
     control,
     watch,
+    setValue,
     formState: { errors }
   } = useForm({
     defaultValues: {
@@ -24,7 +25,7 @@ const useGuideForm = (guide, onSave) => {
       address: guide?.address || '',
       guideType: guide?.guideType || 'freelance',
       languages: guide?.specializations?.languages || [{ code: '', level: 'principiante' }],
-      museums: guide?.specializations?.museums || [{ name: '', expertise: 'principiante' }]
+      museums: guide?.specializations?.museums || [{ name: '', expertise: 'basico', years: 1, certificates: [] }]
     }
   });
 
@@ -122,7 +123,9 @@ const useGuideForm = (guide, onSave) => {
     onSubmit,
     validationRules,
     languages,
-    museums
+    museums,
+    watch,
+    setValue
   };
 };
 

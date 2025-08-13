@@ -24,7 +24,9 @@ const GuideForm = ({ guide, onSave, onCancel }) => {
     getAvailableLanguages,
     onSubmit,
     validationRules,
-    languages
+    languages,
+    watch,
+    setValue
   } = useGuideForm(guide, onSave);
 
   return (
@@ -67,6 +69,8 @@ const GuideForm = ({ guide, onSave, onCancel }) => {
                 museumFields={museumFields}
                 appendMuseum={appendMuseum}
                 removeMuseum={removeMuseum}
+                setValue={setValue}
+                watch={watch}
               />
             )}
           </form>

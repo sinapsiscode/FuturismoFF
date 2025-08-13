@@ -168,7 +168,7 @@ const LocationTree = () => {
             <div className="flex items-center justify-between text-sm">
               <span className="text-gray-600">Total de proveedores:</span>
               <span className="font-medium text-gray-900">
-                {actions.searchProviders('').length}
+                {actions.getTotalProvidersCount()}
               </span>
             </div>
           </div>

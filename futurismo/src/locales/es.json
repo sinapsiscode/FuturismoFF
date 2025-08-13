@@ -413,7 +413,22 @@
     "myToursInProgress": "Mis Tours en Progreso",
     "toursInProgress": "Tours en Progreso",
     "completedPercentage": "completado",
-    "selectTour": "Selecciona un tour para ver su progreso"
+    "selectTour": "Selecciona un tour para ver su progreso",
+    "tourPhotos": "Fotos de Tours",
+    "photos": {
+      "filters": "Filtros",
+      "clearFilters": "Limpiar filtros",
+      "searchPlaceholder": "Buscar por tour, parada, guía o agencia...",
+      "allGuides": "Todos los guías",
+      "allTours": "Todos los tours",
+      "showingResults": "Mostrando {{count}} fotos",
+      "view": "Ver",
+      "download": "Descargar",
+      "delete": "Eliminar",
+      "confirmDelete": "¿Estás seguro de eliminar esta foto?",
+      "noPhotos": "No hay fotos disponibles",
+      "noPhotosDescription": "Las fotos tomadas por los guías durante los tours aparecerán aquí"
+    }
   },
   "chat": {
     "welcome": "Bienvenido al Chat de Futurismo",
@@ -1014,6 +1029,13 @@
     "removePhoto": "Eliminar foto",
     "selectFile": "Seleccionar archivo de imagen",
     "photos": {
+      "addPhotos": "Agregar Fotos",
+      "takePhoto": "Tomar Foto",
+      "selectPhotos": "Seleccionar de Galería",
+      "uploading": "Subiendo...",
+      "counter": "{{current}} de {{max}} fotos"
+    },
+    "photos": {
       "uploading": "Subiendo...",
       "addPhotos": "Agregar fotos",
       "counter": "{{current}}/{{max}} fotos",
@@ -1047,7 +1069,35 @@
       "freeSlots": "{{count}} horarios libres"
     },
     "tours": "tours",
-    "defaultSpecialty": "Guía turístico"
+    "defaultSpecialty": "Guía turístico",
+    "form": {
+      "sections": {
+        "museumKnowledge": "Experiencia en Museos"
+      },
+      "buttons": {
+        "addMuseum": "Agregar Museo"
+      },
+      "museum": "Museo",
+      "fields": {
+        "museumName": "Nombre del Museo",
+        "yearsOfExperience": "Años de Experiencia",
+        "expertiseLevel": "Nivel de Expertise",
+        "certificates": "Certificados"
+      },
+      "placeholders": {
+        "museumName": "Ej: Museo de Arte de Lima"
+      },
+      "years": "años",
+      "uploading": "Subiendo...",
+      "uploadCertificate": "Subir Certificado",
+      "acceptedFormats": "PDF, JPG, PNG (máx. 5MB)"
+    },
+    "levels": {
+      "basic": "Básico",
+      "intermediate": "Intermedio",
+      "advanced": "Avanzado",
+      "expert": "Experto"
+    }
   },
   "emergency": {
     "materials": {
@@ -1630,6 +1680,74 @@
     },
     "errors": {
       "ratingRequired": "La calificación es requerida"
+    }
+  },
+  "providers": {
+    "title": "Proveedores",
+    "subtitle": "Gestiona proveedores de servicios turísticos",
+    "form": {
+      "createTitle": "Crear Nuevo Proveedor",
+      "editTitle": "Editar Proveedor",
+      "cancel": "Cancelar",
+      "save": "Guardar",
+      "sections": {
+        "basicInfo": "Información Básica",
+        "contactInfo": "Información de Contacto",
+        "services": "Servicios",
+        "pricing": "Precios"
+      },
+      "fields": {
+        "name": "Nombre del Proveedor",
+        "category": "Categoría",
+        "location": "Ubicación",
+        "rating": "Calificación",
+        "contactPerson": "Persona de Contacto",
+        "phone": "Teléfono",
+        "email": "Correo Electrónico",
+        "address": "Dirección",
+        "basePrice": "Precio Base",
+        "pricingType": "Tipo de Precio",
+        "currency": "Moneda",
+        "capacity": "Capacidad"
+      },
+      "placeholders": {
+        "selectLocation": "Seleccionar ubicación",
+        "contactPerson": "Nombre del contacto principal",
+        "phone": "Número de teléfono",
+        "email": "correo@ejemplo.com",
+        "address": "Dirección completa del proveedor",
+        "selectService": "Seleccionar servicio",
+        "capacity": "Número máximo de personas"
+      },
+      "actions": {
+        "addService": "Agregar Servicio"
+      }
+    },
+    "categories": {
+      "restaurant": "Restaurante",
+      "hotel": "Hotel",
+      "transport": "Transporte",
+      "guide": "Guía Turístico",
+      "activity": "Actividad",
+      "attraction": "Atracción"
+    },
+    "pricing": {
+      "types": {
+        "per_person": "Por Persona",
+        "per_group": "Por Grupo",
+        "fixed": "Precio Fijo",
+        "hourly": "Por Hora"
+      },
+      "currencies": {
+        "USD": "Dólar Americano",
+        "PEN": "Sol Peruano",
+        "EUR": "Euro"
+      }
+    },
+    "status": {
+      "active": "Activo",
+      "inactive": "Inactivo",
+      "pending": "Pendiente"
     }
   }
 }

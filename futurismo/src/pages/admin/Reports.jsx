@@ -15,6 +15,7 @@ import useStatisticsStore from '../../stores/statisticsStore';
 import useReservationsStore from '../../stores/reservationsStore';
 import useClientsStore from '../../stores/clientsStore';
 import useProvidersStore from '../../stores/providersStore';
+import exportService from '../../services/exportService';
 import toast from 'react-hot-toast';
 
 function Reports() {
@@ -92,8 +93,7 @@ function Reports() {
       completed: reservations.filter(r => r.status === 'completed').length,
       cancelled: reservations.filter(r => r.status === 'cancelled').length
     },
-    topDestinations: getTopDestinations(),
-    topProviders: getTopProviders()
+    topDestinations: getTopDestinations()
   };
 
   // Función para obtener top destinos
@@ -110,55 +110,43 @@ function Reports() {
       .slice(0, 5);
   }
 
-  // Función para obtener top proveedores
-  function getTopProviders() {
-    const providerStats = {};
-    
-    reservations.forEach(reservation => {
-      const providerId = reservation.providerId || 'unknown';
-      const provider = providers.find(p => p.id === providerId);
-      const providerName = provider?.name || 'Proveedor desconocido';
-      
-      if (!providerStats[providerId]) {
-        providerStats[providerId] = {
-          providerId,
-          providerName,
-          count: 0,
-          revenue: 0
-        };
-      }
-      
-      providerStats[providerId].count += 1;
-      providerStats[providerId].revenue += reservation.total || 0;
-    });
-    
-    return Object.values(providerStats)
-      .sort((a, b) => b.revenue - a.revenue)
-      .slice(0, 5);
-  }
 
   const exportToExcel = async () => {
     try {
-      // Usar el servicio de estadísticas para exportar solo Excel (sin CSV)
-      const blob = await useStatisticsStore.getState().exportToExcel({
-        startDate: format(startDate, 'yyyy-MM-dd'),
-        endDate: format(endDate, 'yyyy-MM-dd'),
-        includeDetails: true
-      });
-      
-      if (blob) {
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `reporte_${format(new Date(), 'yyyy-MM-dd')}.xlsx`;
-        a.click();
-        window.URL.revokeObjectURL(url);
-        
-        toast.success('Reporte exportado exitosamente');
-      } else {
-        // Solo Excel, no CSV fallback
-        toast.error('Error al generar el archivo Excel');
+      // Preparar datos para exportar
+      const exportData = reservations
+        .filter(reservation => {
+          const resDate = new Date(reservation.date);
+          return resDate >= startDate && resDate <= endDate;
+        })
+        .map(reservation => ({
+          id: reservation.id,
+          date: reservation.date,
+          tourName: reservation.tourName || 'Sin especificar',
+          clientName: reservation.agencyName || reservation.clientName || 'Cliente directo',
+          clientContact: reservation.contactPerson || reservation.clientContact || '',
+          clientEmail: reservation.email || reservation.clientEmail || '',
+          adults: reservation.adults || 0,
+          children: reservation.children || 0,
+          total: reservation.total || 0,
+          status: reservation.status || 'pendiente',
+          guideName: reservation.guideName || 'Por asignar',
+          paymentStatus: reservation.paymentStatus || 'pendiente'
+        }));
+
+      if (exportData.length === 0) {
+        toast.error('No hay datos para exportar en el período seleccionado');
+        return;
       }
+
+      // Usar el servicio de exportación correcto
+      exportService.exportToExcel(
+        exportData, 
+        `reporte_${format(startDate, 'yyyy-MM-dd')}_${format(endDate, 'yyyy-MM-dd')}`,
+        'Reporte de Reservas'
+      );
+      
+      toast.success('Reporte exportado exitosamente');
     } catch (error) {
       console.error('Error al exportar reporte:', error);
       toast.error('Error al exportar el reporte');
@@ -328,32 +316,6 @@ function Reports() {
               </div>
             </div>
 
-            {/* Top proveedores */}
-            <div className="bg-white rounded-lg shadow p-6 lg:col-span-2">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Top 5 Proveedores por Ingresos</h2>
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead>
-                    <tr>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Proveedor</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Reservas</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ingresos</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-200">
-                    {(reportData.topProviders || []).map((provider, index) => (
-                      <tr key={index}>
-                        <td className="px-4 py-3 text-gray-900">{provider.providerName}</td>
-                        <td className="px-4 py-3 text-gray-700">{provider.count}</td>
-                        <td className="px-4 py-3 text-gray-900 font-semibold">
-                          S/. {(provider.revenue || 0).toFixed(2)}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
           </div>
         </>
       )}

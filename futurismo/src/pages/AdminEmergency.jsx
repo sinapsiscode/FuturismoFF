@@ -8,7 +8,7 @@ import emergencyPDFService from '../services/emergencyPDFService';
 const AdminEmergency = () => {
   const { protocols, materials, categories, actions } = useEmergencyStore();
   
-  const [activeTab, setActiveTab] = useState('overview'); // 'overview', 'protocols', 'materials', 'analytics'
+  const [activeTab, setActiveTab] = useState('overview'); // 'overview', 'protocols', 'materials'
   const [selectedProtocol, setSelectedProtocol] = useState(null);
   const [isEditingProtocol, setIsEditingProtocol] = useState(false);
   const [showMaterials, setShowMaterials] = useState(false);
@@ -172,17 +172,6 @@ const AdminEmergency = () => {
             Materiales ({materials.length})
           </button>
           
-          <button
-            onClick={() => setActiveTab('analytics')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${
-              activeTab === 'analytics'
-                ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-            }`}
-          >
-            <ChartBarIcon className="w-4 h-4 inline mr-2" />
-            Analíticas
-          </button>
         </nav>
       </div>
 
@@ -496,67 +485,6 @@ const AdminEmergency = () => {
       {activeTab === 'materials' && (
         <div className="space-y-6">
           <MaterialsManager onClose={() => {}} isAdmin={true} />
-        </div>
-      )}
-
-      {activeTab === 'analytics' && (
-        <div className="space-y-6">
-          {/* Distribución por categorías */}
-          <div className="bg-white rounded-lg border border-gray-200 p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Distribución por Categorías</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {categories.map(category => {
-                const categoryProtocols = protocols.filter(p => p.category === category.id).length;
-                const categoryMaterials = materials.filter(m => m.category === category.id).length;
-                
-                return (
-                  <div key={category.id} className="p-4 bg-gray-50 rounded-lg">
-                    <div className="flex items-center space-x-3 mb-3">
-                      <span className="text-2xl">{category.icon}</span>
-                      <h4 className="font-medium text-gray-900">{category.name}</h4>
-                    </div>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Protocolos:</span>
-                        <span className="font-medium">{categoryProtocols}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Materiales:</span>
-                        <span className="font-medium">{categoryMaterials}</span>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Análisis de prioridades */}
-          <div className="bg-white rounded-lg border border-gray-200 p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Análisis de Prioridades</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {['alta', 'media', 'baja'].map(priority => {
-                const count = protocols.filter(p => p.priority === priority).length;
-                const percentage = ((count / protocols.length) * 100).toFixed(1);
-                
-                return (
-                  <div key={priority} className="p-4 bg-gray-50 rounded-lg">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="font-medium text-gray-900 capitalize">{priority}</span>
-                      <span 
-                        className={`px-2 py-1 text-xs font-medium rounded-full border ${getPriorityColor(priority)}`}
-                      >
-                        {count}
-                      </span>
-                    </div>
-                    <div className="text-sm text-gray-600">
-                      {percentage}% del total
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
         </div>
       )}
     </div>

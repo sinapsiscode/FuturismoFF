@@ -636,6 +636,41 @@ const useProvidersStore = create(
             ).filter(Boolean);
           },
           
+          getProvidersByLocationAndCategory: (locationId, categoryId = null) => {
+            const { providers } = get();
+            
+            if (!providers || providers.length === 0) {
+              return [];
+            }
+            
+            let filteredProviders = providers;
+            
+            // Filtrar por ubicación
+            if (locationId) {
+              filteredProviders = filteredProviders.filter(provider => 
+                provider.locationId === locationId || 
+                provider.location?.id === locationId ||
+                (provider.locations && provider.locations.some(loc => loc.id === locationId))
+              );
+            }
+            
+            // Filtrar por categoría si se especifica
+            if (categoryId) {
+              filteredProviders = filteredProviders.filter(provider => 
+                provider.categoryId === categoryId || 
+                provider.category?.id === categoryId ||
+                (provider.categories && provider.categories.some(cat => cat.id === categoryId))
+              );
+            }
+            
+            return filteredProviders;
+          },
+          
+          getTotalProvidersCount: () => {
+            const { providers } = get();
+            return providers ? providers.length : 0;
+          },
+          
           clearError: () => set({ error: null }),
           
           resetStore: () => {

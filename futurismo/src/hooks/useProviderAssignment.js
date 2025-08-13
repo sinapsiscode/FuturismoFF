@@ -35,21 +35,33 @@ const useProviderAssignment = (existingAssignment, onClose) => {
   }));
 
   useEffect(() => {
-    let providers = actions.searchProviders(searchQuery);
+    const loadProviders = async () => {
+      try {
+        // Get providers from store (use stored providers directly for filtering)
+        const storeProviders = actions.getProvidersByLocationAndCategory(selectedLocation, selectedCategory);
+        
+        let providers = storeProviders;
 
-    if (selectedLocation) {
-      providers = providers.filter(p => p.location === selectedLocation);
-    }
+        // Apply search filter if there's a search query
+        if (searchQuery && searchQuery.trim()) {
+          providers = providers.filter(p => 
+            p.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            p.description?.toLowerCase().includes(searchQuery.toLowerCase())
+          );
+        }
 
-    if (selectedCategory) {
-      providers = providers.filter(p => p.category === selectedCategory);
-    }
+        // Exclude already assigned providers
+        const assignedIds = assignedProviders.map(ap => ap.providerId);
+        providers = providers.filter(p => !assignedIds.includes(p.id));
 
-    // Exclude already assigned providers
-    const assignedIds = assignedProviders.map(ap => ap.providerId);
-    providers = providers.filter(p => !assignedIds.includes(p.id));
+        setAvailableProviders(providers);
+      } catch (error) {
+        console.error('Error loading providers:', error);
+        setAvailableProviders([]);
+      }
+    };
 
-    setAvailableProviders(providers);
+    loadProviders();
   }, [searchQuery, selectedLocation, selectedCategory, assignedProviders, actions]);
 
   const handleAddProvider = (provider) => {

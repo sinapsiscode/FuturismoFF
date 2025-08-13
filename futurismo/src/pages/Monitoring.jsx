@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { MapIcon, UserGroupIcon, ChartBarIcon, FunnelIcon } from '@heroicons/react/24/outline';
+import { MapIcon, UserGroupIcon, ChartBarIcon, FunnelIcon, CameraIcon } from '@heroicons/react/24/outline';
 import { useTranslation } from 'react-i18next';
 import LiveMapResponsive from '../components/monitoring/LiveMapResponsive';
 import TourProgress from '../components/monitoring/TourProgress';
+import TourPhotosGallery from '../components/monitoring/TourPhotosGallery';
 import useAuthStore from '../stores/authStore';
 
 const Monitoring = () => {
@@ -13,6 +14,7 @@ const Monitoring = () => {
   
   // Para guías, solo mostrar sus propios tours
   const isGuide = user?.role === 'guide';
+  const isAdmin = user?.role === 'admin';
 
   return (
     <div className="h-full flex flex-col">
@@ -46,6 +48,19 @@ const Monitoring = () => {
               <ChartBarIcon className="w-4 h-4 inline mr-2" />
               {isGuide ? t('monitoring.myActiveTours') : t('monitoring.activeTours')}
             </button>
+            {isAdmin && (
+              <button
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                  activeView === 'photos'
+                    ? 'bg-white text-gray-900 shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+                onClick={() => setActiveView('photos')}
+              >
+                <CameraIcon className="w-4 h-4 inline mr-2" />
+                {t('monitoring.tourPhotos')}
+              </button>
+            )}
           </div>
 
           <button className="btn btn-outline flex items-center gap-2">
@@ -96,7 +111,7 @@ const Monitoring = () => {
             {/* Progreso del tour seleccionado */}
             <div className="overflow-y-auto">
               {selectedTour ? (
-                <TourProgress tourId={String(selectedTour)} />
+                <TourProgress tourId={String(selectedTour)} isGuideView={isGuide} />
               ) : (
                 <div className="bg-white rounded-lg shadow-lg p-6 h-full flex items-center justify-center">
                   <p className="text-gray-500">{t('monitoring.selectTour')}</p>
@@ -104,6 +119,10 @@ const Monitoring = () => {
               )}
             </div>
           </div>
+        )}
+
+        {activeView === 'photos' && isAdmin && (
+          <TourPhotosGallery />
         )}
       </div>
     </div>
