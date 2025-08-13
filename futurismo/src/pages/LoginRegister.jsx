@@ -20,6 +20,10 @@ const LoginRegister = () => {
   const [selectedLanguages, setSelectedLanguages] = useState([]);
   const [selectedSpecialties, setSelectedSpecialties] = useState([]);
   const [selectedMuseums, setSelectedMuseums] = useState([]);
+  const [museumRatings, setMuseumRatings] = useState({});
+  const [museumExperiences, setMuseumExperiences] = useState({});
+  const [museumSearchTerm, setMuseumSearchTerm] = useState('');
+  const [showMuseumDropdown, setShowMuseumDropdown] = useState(false);
   const [profileImage, setProfileImage] = useState(null);
   const [imageError, setImageError] = useState(null);
   const { t } = useTranslation();
@@ -366,7 +370,7 @@ const LoginRegister = () => {
                 <div className="md:col-span-2">
                   <ImageUpload
                     onImageSelect={handleImageSelect}
-                    initialImage={profileImage}
+                    initialImage={null}
                     error={imageError || errors.profileImage?.message}
                   />
                 </div>

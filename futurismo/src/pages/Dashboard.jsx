@@ -7,6 +7,7 @@ import ExportPanel from '../components/dashboard/ExportPanel';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import { useAuthStore } from '../stores/authStore';
 import useDashboard from '../hooks/useDashboard';
+import { ResponsiveContainer, LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip } from 'recharts';
 
 const Dashboard = () => {
   const { user } = useAuthStore();
@@ -17,6 +18,7 @@ const Dashboard = () => {
     stats,
     loading,
     error,
+    monthlyData,
     roleSpecificStats,
     refresh
   } = useDashboard();
