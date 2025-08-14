@@ -238,11 +238,11 @@ const LiveMapResponsive = ({ filters, onServiceSelect }) => {
 
   return (
     <div className="relative w-full" style={{ height: getMapHeight() }}>
-      <div className="absolute inset-0 bg-gray-100 rounded-lg overflow-hidden shadow-inner">
-        <div ref={mapRef} className="w-full h-full" />
+      <div className="relative bg-gray-100 rounded-lg overflow-hidden shadow-inner h-full">
+        <div ref={mapRef} className="w-full h-full" style={{ position: 'relative', zIndex: 1 }} />
         
         {/* Controles personalizados para móvil */}
-        <div className="absolute top-4 right-4 z-10 flex flex-col gap-2">
+        <div className="absolute top-4 right-4 z-[10] flex flex-col gap-2">
           {/* Zoom */}
           <div className="bg-white rounded-lg shadow-md overflow-hidden">
             <button
@@ -274,7 +274,7 @@ const LiveMapResponsive = ({ filters, onServiceSelect }) => {
 
         {/* Info panel para móvil */}
         {viewport.isMobile && selectedService && (
-          <div className="absolute bottom-4 left-4 right-4 bg-white rounded-lg shadow-lg p-4 z-10">
+          <div className="absolute bottom-4 left-4 right-4 bg-white rounded-lg shadow-lg p-4 z-[10]">
             <div className="flex items-start justify-between">
               <div>
                 <h3 className="font-semibold text-gray-900">{selectedService.tourName}</h3>
@@ -302,7 +302,7 @@ const LiveMapResponsive = ({ filters, onServiceSelect }) => {
 
         {/* Loading indicator */}
         {activeServices.length === 0 && (
-          <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 z-20">
+          <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 z-[5]">
             <div className="text-center">
               <MapPinIcon className="w-12 h-12 text-gray-400 mx-auto mb-2 animate-bounce" />
               <p className="text-gray-500">Cargando servicios activos...</p>

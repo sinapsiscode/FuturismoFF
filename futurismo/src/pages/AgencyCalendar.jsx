@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { 
   CalendarIcon, 
   ChevronLeftIcon, 
@@ -19,6 +20,7 @@ import { es } from 'date-fns/locale';
 import useAgencyStore from '../stores/agencyStore';
 
 const AgencyCalendar = () => {
+  const { t } = useTranslation();
   const { actions } = useAgencyStore();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(null);

@@ -142,6 +142,45 @@
 .leaflet-container {
   @apply rounded-lg;
   font-family: inherit;
+  z-index: 1 !important;
+}
+
+/* Corregir z-index de elementos Leaflet */
+.leaflet-pane {
+  z-index: 1 !important;
+}
+
+.leaflet-tile-pane {
+  z-index: 1 !important;
+}
+
+.leaflet-overlay-pane {
+  z-index: 2 !important;
+}
+
+.leaflet-shadow-pane {
+  z-index: 3 !important;
+}
+
+.leaflet-marker-pane {
+  z-index: 4 !important;
+}
+
+.leaflet-tooltip-pane {
+  z-index: 5 !important;
+}
+
+.leaflet-popup-pane {
+  z-index: 6 !important;
+}
+
+.leaflet-control {
+  z-index: 7 !important;
+}
+
+/* Asegurar que los controles no se superpongan con el header */
+.leaflet-top {
+  top: 10px !important;
 }
 
 .leaflet-popup-content-wrapper {
